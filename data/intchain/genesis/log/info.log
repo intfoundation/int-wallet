@@ -1,0 +1,5 @@
+2018-08-28T09:10:23.516Z - info: create storage genesis storage_manager.js:49
+2018-08-28T09:10:23.550Z - info: begin execute block 0 block.js:48
+2018-08-28T09:10:23.556Z - info: creating snapshot 9adec604b4374961f1a1a8e6cb01e283c9b48e2df7e08382887a908dbbdf625d dump_snapshot_manager.js:31
+2018-08-28T09:10:23.561Z - debug: getting snapshot 9adec604b4374961f1a1a8e6cb01e283c9b48e2df7e08382887a908dbbdf625d log_snapshot_manager.js:102
+2018-08-28T09:10:23.561Z - debug: get snapshot 9adec604b4374961f1a1a8e6cb01e283c9b48e2df7e08382887a908dbbdf625d directly from dump log_snapshot_manager.js:107
