@@ -3,7 +3,7 @@
   "version": "1.0.1",
   "author": "like <likeaixi@gmail.com>",
   "description": "INT wallet build on electron and vue",
-  "license": null,
+  "license": "MIT",
   "main": "./dist/electron/main.js",
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder",
@@ -22,7 +22,7 @@
     "postinstall": "npm run lint:fix"
   },
   "build": {
-    "productName": "int-wallet",
+    "productName": "INT wallet",
     "appId": "com.example.yourapp",
     "directories": {
       "output": "build"
