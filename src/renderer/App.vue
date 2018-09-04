@@ -6,8 +6,8 @@
 
 <script>
   export default {
-    name: 'int-wallet'
-  }
+    name: 'int-wallet',
+  };
 </script>
 
 <style>
