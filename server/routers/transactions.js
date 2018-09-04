@@ -2,19 +2,15 @@
  *@file    transactions.js
  *@author  Like (likeaixi@gmail.com)
  *@date    2018/8/17
- *@disc    交易相关中间件
+ *@disc    transaction middleware
  */
 
 "use strict";
 const express = require('express');
 const router = express.Router();
-const Intjs = require('../index');
+const Intjs = require('intjs');
 const rpcConfig = require('../config/rpcconfig');
 
-/**
- * host为peer节点的ip, port为peer节点启动的rpc端口
- * 如果启动的为本地 peer, host 则为 localhost
- * */
 const intjs = new Intjs(rpcConfig.host, rpcConfig.port);
 
 /**
