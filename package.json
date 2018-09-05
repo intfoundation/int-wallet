@@ -11,6 +11,7 @@
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",
     "dev": "node .electron-vue/dev-runner.js",
+    "dev:wallet": "npm run dev && npm run app && npm run startPeer",
     "e2e": "npm run pack && mocha test/e2e",
     "lint": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter src test",
     "lint:fix": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter --fix src test",
@@ -19,7 +20,9 @@
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
     "test": "npm run unit && npm run e2e",
     "unit": "karma start test/unit/karma.conf.js",
-    "postinstall": "npm run lint:fix"
+    "postinstall": "npm run lint:fix",
+    "app": "node ./server/app.js",
+    "startPeer": "node ./int/tool/startPeer.js"
   },
   "build": {
     "productName": "INT wallet",
@@ -70,7 +73,7 @@
     "vue-electron": "^1.0.6",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1",
-    "winston": "^3.0.0",
+    "winston": "^2.4.3",
     "xmlhttprequest": "^1.8.0"
   },
   "devDependencies": {
@@ -103,7 +106,6 @@
     "eslint-loader": "^2.0.0",
     "eslint-plugin-html": "^4.0.3",
     "eslint-plugin-import": "^2.12.0",
-    "express": "^4.16.3",
     "file-loader": "^1.1.11",
     "html-webpack-plugin": "^3.2.0",
     "inject-loader": "^4.0.1",

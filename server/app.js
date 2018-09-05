@@ -2,7 +2,7 @@
  *@file    app.js
  *@author  Like (likeaixi@gmail.com)
  *@date    2018/8/17
- *@disc    web 服务器入口
+ *@disc    web server
  */
 "use strict";
 
