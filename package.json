@@ -60,6 +60,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "bdt-p2p": "^0.1.229",
     "bignumber.js": "^7.2.1",
     "express": "^4.16.3",
     "fs-extra": "^7.0.0",

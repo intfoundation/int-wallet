@@ -11,4 +11,5 @@ thumbs.db
 !.gitkeep
 .idea
 data/intchain/peer
+data/genesis/storage/*
 
