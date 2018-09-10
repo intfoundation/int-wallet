@@ -1,6 +1,8 @@
 <template>
   <div id="app">
-    <router-view></router-view>
+    <transition name="el-fade-in-linear">
+      <router-view></router-view>
+    </transition>
   </div>
 </template>
 
@@ -10,6 +12,18 @@
   };
 </script>
 
-<style>
-  /* CSS */
+<style lang="scss">
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    font-family: system, -apple-system, ".SFNSDisplay-Regular", "Helvetica Neue", Helvetica, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    color: #333;
+  }
+  .el-message-box {
+    width: 280px;
+  }
 </style>
