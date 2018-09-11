@@ -76,6 +76,11 @@
     },
     methods: {
       /* eslint-disable */
+      init () {
+        // let keyStorePath = `${__dirname}/data/keystore/`;
+        // let keyStores = fs.readFileSync(keyStorePath);
+        // console.log(keyStores);
+      },
       addAccount() {
         this.$prompt('请输入密码', '创建帐户', {
           confirmButtonText: '确定',
@@ -104,8 +109,9 @@
 
         let fileName = data.address + '.json';
         let fileData = JSON.stringify(data);
+        let rootDir = process.cwd();
 
-        fs.writeFileSync(`${__dirname}/data/keystore/` + fileName, fileData);
+        fs.writeFileSync(`${rootDir}/data/keystore/` + fileName, fileData);
 
         // let blob = new Blob([JSON.stringify(data)], {type: 'application/octet-stream'});
         // let url = URL.createObjectURL(blob);
@@ -129,7 +135,7 @@
 
     },
     mounted() {
-
+        this.init();
     },
   };
 </script>
