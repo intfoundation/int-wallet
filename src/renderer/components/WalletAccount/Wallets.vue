@@ -6,48 +6,12 @@
             <p>Accounts are password protected keys that can hold INT and INT-based tokens.</p>
             <el-row>
                 <ul class="account-list">
-                    <li>
+                    <li v-for="(item, index) in balance" :key="item.id">
                         <a href="">
                             <dl>
-                                <dt>Account 1</dt>
-                                <dd class="price"><span>0.00 </span>INT</dd>
-                                <dd class="address">0x464f07B20C2fe737...</dd>
-                            </dl>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="">
-                            <dl>
-                                <dt>Account 1</dt>
-                                <dd class="price"><span>0.00 </span>INT</dd>
-                                <dd class="address">0x464f07B20C2fe737...</dd>
-                            </dl>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="">
-                            <dl>
-                                <dt>Account 1</dt>
-                                <dd class="price"><span>0.00 </span>INT</dd>
-                                <dd class="address">0x464f07B20C2fe737...</dd>
-                            </dl>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="">
-                            <dl>
-                                <dt>Account 1</dt>
-                                <dd class="price"><span>0.00 </span>INT</dd>
-                                <dd class="address">0x464f07B20C2fe737...</dd>
-                            </dl>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="">
-                            <dl>
-                                <dt>Account 1</dt>
-                                <dd class="price"><span>0.00 </span>INT</dd>
-                                <dd class="address">0x464f07B20C2fe737...</dd>
+                                <dt>Account {{index + 1}}</dt>
+                                <dd class="price"><span>{{Number(item.balance).toFixed(2)}} </span>INT</dd>
+                                <dd class="address">{{item.address}}</dd>
                             </dl>
                         </a>
                     </li>
@@ -57,6 +21,53 @@
                 <el-button type="primary" @click="addAccount">Add Account</el-button>
             </el-row>
         </div>
+        <div class="content">
+            <el-tag>Wallet Contracts</el-tag>
+            <p>These contracts are stored on the blockchain and can hold and secure INT. They can have multiple accounts as owners and keep a full log of all transactions.</p>
+            <!--<el-row>-->
+                <!--<ul class="account-list">-->
+                    <!--<li v-for="(item, index) in balance" :key="item.id">-->
+                        <!--<a href="">-->
+                            <!--<dl>-->
+                                <!--<dt>Account {{index + 1}}</dt>-->
+                                <!--<dd class="price"><span>{{Number(item.balance).toFixed(2)}} </span>INT</dd>-->
+                                <!--<dd class="address">{{item.address}}</dd>-->
+                            <!--</dl>-->
+                        <!--</a>-->
+                    <!--</li>-->
+                <!--</ul>-->
+            <!--</el-row>-->
+            <el-row>
+                <el-button type="primary" @click="addWalletContract">Add Wallet Contract</el-button>
+            </el-row>
+        </div>
+        <div class="content">
+            <el-tag>Latest Transactions</el-tag>
+            <el-row>
+                <el-col :span="8">
+                    <el-input class="search-tx" v-model="searchTx" placeholder="Filter Transactions"></el-input>
+                </el-col>
+            </el-row>
+            <el-table
+                    :data="tableData"
+                    stripe
+                    style="width: 100%">
+                <el-table-column
+                        prop="date"
+                        label="Date"
+                        width="100">
+                </el-table-column>
+                <el-table-column
+                        prop="transaction"
+                        label="Transaction"
+                        width="500">
+                </el-table-column>
+                <el-table-column
+                        prop="amount"
+                        label="Amount">
+                </el-table-column>
+            </el-table>
+        </div>
     </div>
 </template>
 
@@ -64,11 +75,33 @@
   import Intjs from 'intjs';
   // import { ipcRenderer } from 'electron';
   import fs from 'fs';
+
+  const intjs = new Intjs('localhost', 18089);
+
   export default {
     name: 'wallets',
     data() {
       return {
-
+        fileName: [],
+        balance: [],
+        searchTx: '',
+        tableData: [{
+          date: '2016-05-02',
+          transaction: '张玉力',
+          amount: '0.00001 INT',
+        }, {
+          date: '2016-05-04',
+          transaction: '张玉力',
+          amount: '0.00002 INT',
+        }, {
+          date: '2016-05-01',
+          transaction: '张玉力',
+          amount: '0.00004 INT',
+        }, {
+          date: '2016-05-03',
+          transaction: '张玉力',
+          amount: '0.0000006 INT',
+        }],
       };
     },
     components: {
@@ -76,11 +109,37 @@
     },
     methods: {
       /* eslint-disable */
+      /**
+       * 初始化
+       * */
       init () {
-        // let keyStorePath = `${__dirname}/data/keystore/`;
-        // let keyStores = fs.readFileSync(keyStorePath);
-        // console.log(keyStores);
+        let rootDir = process.cwd();
+        let keystorePath = `${rootDir}/data/keystore/`;
+
+        if (!fs.existsSync(keystorePath)) {
+            fs.mkdir(keystorePath);
+        }
+        this.readDir(keystorePath).then(
+          (data) => {
+            this.fileName = data;
+            this.fileName.forEach(async (value) => {
+              let address = value.slice(0, -5);
+              let result = await intjs.getBalance(address);
+
+              this.balance.push({address: address, balance: result.balance});
+            });
+            this.balance.sort(function (a, b) {
+              console.log(b.balance - a.balance);
+              return (b.balance - a.balance);
+            });
+          },
+          (err) => {
+            console.log('readDir error;' + err);
+          });
       },
+      /**
+       * 创建帐户
+       * */
       addAccount() {
         this.$prompt('请输入密码', '创建帐户', {
           confirmButtonText: '确定',
@@ -93,6 +152,7 @@
             message: ' 创建成功 ',
           });
           this.createWallet(value);
+          this.init();
         }).catch(() => {
           this.$message({
             type: 'info',
@@ -100,10 +160,13 @@
           });
         });
       },
-      async createWallet(password) {
-        let intjs = new Intjs('localhost', 18089);
-        let account = await intjs.create();
-        let data = await intjs.encrypt(account.secret, password);
+
+      /**
+       * 生成 keystore
+       * */
+      createWallet(password) {
+        let account = intjs.create();
+        let data = intjs.encrypt(account.secret, password);
 
         data.address = account.address;
 
@@ -112,23 +175,42 @@
         let rootDir = process.cwd();
 
         fs.writeFileSync(`${rootDir}/data/keystore/` + fileName, fileData);
+      },
 
-        // let blob = new Blob([JSON.stringify(data)], {type: 'application/octet-stream'});
-        // let url = URL.createObjectURL(blob);
-        // console.log(url);
-        // let aLink = document.createElement('a');
-        // let evt = document.createEvent('HTMLEvents');
+      addWalletContract() {
+        this.$prompt('请输入密码', '创建帐户', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          inputPattern: /[\w]{9,}/,
+          inputErrorMessage: '密码格式不正确',
+        }).then(({ value }) => {
+          this.$message({
+            type: 'success',
+            message: ' 创建成功 ',
+          });
+          this.createWallet(value);
+          this.init();
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '取消输入',
+          });
+        });
+      },
 
-        // evt.initEvent("click", false, false);
-
-        // aLink.download = fileName;
-        // aLink.href = url;
-        // console.log(aLink);
-        // aLink.dispatchEvent(evt);
-
-        // let savePath = `${__dirname}/data/keystore/`;
-        // console.log(savePath);
-        // ipcRenderer.send('download', url + "+" + savePath);
+      /**
+       * 读取目录下所有文件
+       */
+      readDir (path) {
+        return new Promise((resolve, reject) => {
+          fs.readdir(path, (err, files) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(files);
+            }
+          });
+        });
       },
     },
     computed: {
@@ -149,7 +231,8 @@
         margin-bottom: 10px;
     }
     .content {
-        margin-bottom: 10px;
+        margin-top: 30px;
+        margin-bottom: 50px;
         p {
             margin: 20px 0;
             font-size: 12px;
@@ -180,6 +263,9 @@
                 font-size: 12px;
             }
 
+        }
+        .search-tx {
+            margin: 20px 0;
         }
     }
 </style>

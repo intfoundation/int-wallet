@@ -16,7 +16,7 @@ class PowMiner extends value_chain_1.ValueMiner {
         this.workpool = new workpool_1.Workpool(filename, 1);
     }
     _chainInstance() {
-        return new chain_1.PowChain({ logger: this.m_logger });
+        return new chain_1.PowChain(this.m_constructOptions);
     }
     get chain() {
         return this.m_chain;

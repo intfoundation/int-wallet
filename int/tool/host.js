@@ -14,7 +14,7 @@ async function run(argv) {
     }
     if (command.options.has('dataDir')) {
         client_1.initUnhandledRejection(client_1.initLogger({
-            loggerOptions: { console: true, file: { root: path.join(process.cwd(), command.options.get('dataDir')), filename: 'exception.log' } }
+            loggerOptions: { console: true, file: { root: path.join(process.cwd(), command.options.get('dataDir'), 'log'), filename: 'exception.log' } }
         }));
     }
     let exit = false;

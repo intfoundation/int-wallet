@@ -8,11 +8,14 @@ class StorageDumpSnapshotManager {
     constructor(options) {
         this.m_path = path.join(options.path, 'dump');
         this.m_logger = options.logger;
+        this.m_readonly = !!(options && options.readonly);
     }
     recycle() {
     }
     async init() {
-        fs.ensureDirSync(this.m_path);
+        if (!this.m_readonly) {
+            fs.ensureDirSync(this.m_path);
+        }
         return error_code_1.ErrorCode.RESULT_OK;
     }
     uninit() {

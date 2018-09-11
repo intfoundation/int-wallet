@@ -22,7 +22,7 @@ class DbftChain extends value_chain_1.ValueChain {
         externalContext.transferTo = async (address, amount) => {
             return await ve.transferTo(value_chain_1.ValueChain.sysAddress, address, amount);
         };
-        let context = new context_1.DbftContext(storage, this.globalOptions, this.logger);
+        let context = new context_1.DbftContext(storage, this.m_globalOptions, this.logger);
         externalContext.register = async (address) => {
             return await context.registerToCandidate(block.number, address);
         };
@@ -43,13 +43,13 @@ class DbftChain extends value_chain_1.ValueChain {
             }
             return im.isminer;
         };
-        let executor = new executor_1.DbftBlockExecutor({ logger: this.logger, block, storage, handler: this.handler, externContext: externalContext, globalOptions: this.globalOptions });
+        let executor = new executor_1.DbftBlockExecutor({ logger: this.logger, block, storage, handler: this.m_handler, externContext: externalContext, globalOptions: this.m_globalOptions });
         return { err: error_code_1.ErrorCode.RESULT_OK, executor: executor };
     }
     async newViewExecutor(header, storage, method, param) {
         let nvex = await super.newViewExecutor(header, storage, method, param);
         let externalContext = nvex.executor.externContext;
-        let dbftProxy = new context_1.DbftContext(storage, this.globalOptions, this.logger);
+        let dbftProxy = new context_1.DbftContext(storage, this.m_globalOptions, this.logger);
         externalContext.getMiners = async () => {
             let gm = await dbftProxy.getMiners();
             if (gm.err) {
@@ -66,6 +66,24 @@ class DbftChain extends value_chain_1.ValueChain {
         };
         return nvex;
     }
+    async initComponents(options) {
+        let err = await super.initComponents(options);
+        if (err) {
+            return err;
+        }
+        this.m_dbftHeaderStorage = new header_storage_1.DbftHeaderStorage({
+            db: this.m_db,
+            headerStorage: this.m_headerStorage,
+            globalOptions: this.globalOptions,
+            logger: this.logger,
+            readonly: this.m_readonly
+        });
+        err = await this.m_dbftHeaderStorage.init();
+        if (err) {
+            this.logger.error(`dbft header storage init err `, err);
+        }
+        return err;
+    }
     async uninitComponents() {
         if (this.m_dbftHeaderStorage) {
             this.m_dbftHeaderStorage.uninit();
@@ -78,19 +96,6 @@ class DbftChain extends value_chain_1.ValueChain {
     }
     async _onVerifiedBlock(block) {
         return this.m_dbftHeaderStorage.addHeader(block.header, this.m_storageManager);
-    }
-    async _onLoadGlobalOptions() {
-        this.m_dbftHeaderStorage = new header_storage_1.DbftHeaderStorage({
-            db: this.m_db,
-            headerStorage: this.m_headerStorage,
-            globalOptions: this.globalOptions,
-            logger: this.logger
-        });
-        const err = await this.m_dbftHeaderStorage.init();
-        if (err) {
-            this.logger.error(`dbft header storage init err `, err);
-        }
-        return err;
     }
     _onCheckGlobalOptions(globalOptions) {
         if (!super._onCheckGlobalOptions(globalOptions)) {

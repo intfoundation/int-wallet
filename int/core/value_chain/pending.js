@@ -86,8 +86,8 @@ class ValuePendingTransactions extends chain_1.PendingTransactions {
         }
         return error_code_1.ErrorCode.RESULT_OK;
     }
-    addToQueue(txTime) {
-        let pos = 0;
+    addToQueue(txTime, pos) {
+        pos = 0;
         for (let i = 0; i < this.m_transactions.length; i++) {
             if (this.m_transactions[i].tx.address === txTime.tx.address) {
                 pos = this.m_transactions[i].tx.nonce < txTime.tx.nonce ? i + 1 : i;
@@ -97,7 +97,6 @@ class ValuePendingTransactions extends chain_1.PendingTransactions {
             }
         }
         this.m_transactions.splice(pos, 0, txTime);
-        this.m_mapNonce.set(txTime.tx.address, txTime.tx.nonce);
     }
     async onReplaceTx(txNew, txOld) {
         let br = await this.getBalance(txNew.address);

@@ -32,6 +32,7 @@ class DposBlockHeader extends value_chain_1.BlockWithSign(value_chain_1.ValueBlo
         let src = Math.trunc(offset / chain.globalOptions.blockInterval);
         let min = Math.trunc((offset - chain.globalOptions.maxBlockIntervalOffset) / chain.globalOptions.blockInterval);
         let max = Math.trunc((offset + chain.globalOptions.maxBlockIntervalOffset) / chain.globalOptions.blockInterval);
+        chain.logger.info(`getTimeIndex,src=${src},min=${min},max=${max}`);
         if (src === min && src === max) {
             return { err: error_code_1.ErrorCode.RESULT_OK, index: src };
         }

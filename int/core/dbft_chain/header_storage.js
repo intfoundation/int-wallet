@@ -9,19 +9,22 @@ const getHeaderSql = 'SELECT miners, totalView FROM miners WHERE hash=$hash';
 class DbftHeaderStorage {
     constructor(options) {
         this.m_cache = new LRUCache_1.LRUCache(12);
+        this.m_readonly = !!(options && options.readonly);
         this.m_db = options.db;
         this.m_logger = options.logger;
         this.m_headerStorage = options.headerStorage;
     }
     async init() {
-        try {
-            await this.m_db.run(initHeadersSql);
-            return error_code_1.ErrorCode.RESULT_OK;
+        if (!this.m_readonly) {
+            try {
+                await this.m_db.run(initHeadersSql);
+            }
+            catch (e) {
+                this.m_logger.error(e);
+                return error_code_1.ErrorCode.RESULT_EXCEPTION;
+            }
         }
-        catch (e) {
-            this.m_logger.error(e);
-            return error_code_1.ErrorCode.RESULT_EXCEPTION;
-        }
+        return error_code_1.ErrorCode.RESULT_OK;
     }
     uninit() {
         // do nothing

@@ -6,7 +6,7 @@
  */
 
 "use strict";
-const client = require('../client');
+const client = require('../client/index');
 
 let peerConfig = new Map();
 peerConfig.set('genesis', './data/intchain/genesis');

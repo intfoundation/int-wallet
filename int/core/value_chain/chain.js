@@ -24,7 +24,7 @@ class ValueChain extends chain_1.Chain {
         externContext.transferTo = (address, amount) => {
             return ve.transferTo(ValueChain.sysAddress, address, amount);
         };
-        let executor = new executor_1.ValueBlockExecutor({ logger: this.logger, block, storage, handler: this.handler, externContext, globalOptions: this.m_globalOptions });
+        let executor = new executor_1.ValueBlockExecutor({ logger: this.logger, block, storage, handler: this.m_handler, externContext, globalOptions: this.m_globalOptions });
         return { err: error_code_1.ErrorCode.RESULT_OK, executor };
     }
     async newViewExecutor(header, storage, method, param) {
@@ -35,7 +35,7 @@ class ValueChain extends chain_1.Chain {
         externContext.getBalance = (address) => {
             return ve.getBalance(address);
         };
-        let executor = new chain_1.ViewExecutor({ logger: this.logger, header, storage, method, param, handler: this.handler, externContext });
+        let executor = new chain_1.ViewExecutor({ logger: this.logger, header, storage, method, param, handler: this.m_handler, externContext });
         return { err: error_code_1.ErrorCode.RESULT_OK, executor };
     }
     _getBlockHeaderType() {
@@ -48,7 +48,14 @@ class ValueChain extends chain_1.Chain {
         return transaction_1.ValueReceipt;
     }
     _createPending() {
-        return new pending_1.ValuePendingTransactions({ storageManager: this.m_storageManager, logger: this.logger, txlivetime: this.m_globalOptions.txlivetime, handler: this.m_handler });
+        return new pending_1.ValuePendingTransactions({
+            storageManager: this.m_storageManager,
+            logger: this.logger,
+            txlivetime: this.m_globalOptions.txlivetime,
+            handler: this.m_handler,
+            maxPengdingCount: this.m_globalOptions.maxPengdingCount,
+            warnPendingCount: this.m_globalOptions.warnPengdingCount
+        });
     }
     async onCreateGenesisBlock(block, storage, genesisOptions) {
         let err = await super.onCreateGenesisBlock(block, storage, genesisOptions);

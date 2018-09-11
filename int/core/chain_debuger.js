@@ -157,50 +157,41 @@ class ValueIndependDebugSession {
             chain.logger.error(`onCreateGenesisBlock failed for `, error_code_1.stringifyErrorCode(err));
             return err;
         }
-        gh.updateHash();
-        await this.debuger.debugBlock(this.m_storage, block);
+        block.header.updateHash();
+        const dber = await this.debuger.debugBlockEvent(this.m_storage, block.header, { preBlock: true });
+        if (dber.err) {
+            return err;
+        }
+        this.m_curHeader = block.header;
         if (options.height > 0) {
-            const _err = this.updateHeightTo(options.height, options.coinbase);
+            const _err = this.updateHeightTo(options.height, options.coinbase, true);
             if (_err) {
                 return _err;
             }
         }
-        else {
-            this.m_curHeader = block.header;
-        }
         return error_code_1.ErrorCode.RESULT_OK;
     }
-    async updateHeightTo(height, coinbase, isExecuteBlockEvent = false) {
+    async updateHeightTo(height, coinbase, events) {
         if (height <= this.m_curHeader.number) {
             this.debuger.chain.logger.error(`updateHeightTo ${height} failed for current height ${this.m_curHeader.number} is larger`);
             return error_code_1.ErrorCode.RESULT_INVALID_PARAM;
         }
         let curHeader = this.m_curHeader;
-        const offset = height - curHeader.number;
-        for (let i = 0; i <= offset; ++i) {
-            if (isExecuteBlockEvent) {
-                // execute curBlock PostBlockEvent
-                const { err, executor } = await this.debuger.chain.newBlockExecutor(this.debuger.chain.newBlock(curHeader), this.m_storage);
-                let listeners = await this.debuger.chain.handler.getPostBlockListeners(curHeader.number);
-                for (let l of listeners) {
-                    const err1 = await executor.executeBlockEvent(l);
-                    this.debuger.chain.logger.info(`debugger run post event at ${curHeader.number}, ret ${err1}`);
-                }
+        if (events) {
+            const { err } = await this.debuger.debugBlockEvent(this.m_storage, curHeader, { postBlock: true });
+            if (err) {
+                return err;
             }
+        }
+        const offset = height - curHeader.number;
+        for (let i = 0; i < offset; ++i) {
             let header = this.debuger.chain.newBlockHeader();
             header.timestamp = curHeader.timestamp + this.m_interval;
             header.coinbase = address_1.addressFromSecretKey(this.m_accounts[coinbase]);
             header.setPreBlock(curHeader);
             curHeader = header;
-            if (isExecuteBlockEvent) {
-                // execute curBlock PostBlockEvent
-                const { err, executor } = await this.debuger.chain.newBlockExecutor(this.debuger.chain.newBlock(curHeader), this.m_storage);
-                let listeners = await this.debuger.chain.handler.getPreBlockListeners(curHeader.number);
-                for (let l of listeners) {
-                    const err1 = await executor.executeBlockEvent(l);
-                    this.debuger.chain.logger.error(`debugger run pre event at ${curHeader.number}, ret ${err1}`);
-                }
-            }
+            const { err } = await this.debuger.debugBlockEvent(this.m_storage, curHeader, { preBlock: true, postBlock: curHeader.number !== height });
+            return err;
         }
         this.m_curHeader = curHeader;
         return error_code_1.ErrorCode.RESULT_OK;
@@ -211,6 +202,7 @@ class ValueIndependDebugSession {
         tx.value = new bignumber_js_1.BigNumber(options.value);
         tx.method = options.method;
         tx.input = options.input;
+        tx.fee = options.fee;
         tx.sign(this.m_accounts[options.caller]);
         return this.debuger.debugTransaction(this.m_storage, this.m_curHeader, tx);
     }
@@ -255,14 +247,31 @@ class MemoryDebuger {
         }
         return { err: error_code_1.ErrorCode.RESULT_OK, receipt: etr.receipt };
     }
-    async debugBlockEvent(storage, header, listener) {
+    async debugBlockEvent(storage, header, options) {
         const block = this.chain.newBlock(header);
         const nber = await this.chain.newBlockExecutor(block, storage);
         if (nber.err) {
             return { err: nber.err };
         }
-        const err = await nber.executor.executeBlockEvent(listener);
-        return { err };
+        if (options.listener) {
+            const err = await nber.executor.executeBlockEvent(options.listener);
+            return { err };
+        }
+        else {
+            if (options.preBlock) {
+                const err = await nber.executor.executePreBlockEvent();
+                if (err) {
+                    return { err };
+                }
+            }
+            if (options.postBlock) {
+                const err = await nber.executor.executePostBlockEvent();
+                if (err) {
+                    return { err };
+                }
+            }
+            return { err: error_code_1.ErrorCode.RESULT_OK };
+        }
     }
     async debugView(storage, header, method, params) {
         const nver = await this.chain.newViewExecutor(header, storage, method, params);
@@ -294,8 +303,12 @@ class ValueMemoryDebuger extends MemoryDebuger {
         return new ValueIndependDebugSession(this);
     }
     async createChainSession(storageDir) {
+        let err = await this.chain.initComponents();
+        if (err) {
+            return { err };
+        }
         const session = new ValueChainDebugSession(this);
-        const err = await session.init(storageDir);
+        err = await session.init(storageDir);
         if (err) {
             return { err };
         }
@@ -304,15 +317,10 @@ class ValueMemoryDebuger extends MemoryDebuger {
 }
 exports.ValueMemoryDebuger = ValueMemoryDebuger;
 async function createValueDebuger(chainCreator, dataDir) {
-    const ccir = await chainCreator.createChainInstance(dataDir, { readonly: true });
+    const ccir = await chainCreator.createChainInstance(dataDir, { readonly: true, initComponents: false });
     if (ccir.err) {
         chainCreator.logger.error(`create chain instance from ${dataDir} failed `, error_code_1.stringifyErrorCode(ccir.err));
         return { err: ccir.err };
-    }
-    const err = await ccir.chain.setGlobalOptions(ccir.globalOptions);
-    if (err) {
-        chainCreator.logger.error(`setGlobalOptions failed `, error_code_1.stringifyErrorCode(err));
-        return { err };
     }
     return { err: error_code_1.ErrorCode.RESULT_OK, debuger: new ValueMemoryDebuger(ccir.chain, chainCreator.logger) };
 }

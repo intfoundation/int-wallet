@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const assert = require("assert");
 const error_code_1 = require("../error_code");
-const chain_1 = require("../chain");
 const transaction_1 = require("./transaction");
 class BlockExecutor {
     constructor(options) {
@@ -29,18 +29,16 @@ class BlockExecutor {
         return await this._execute(this.m_block);
     }
     async verify(logger) {
-        for (let tx of this.m_block.content.transactions) {
-            const checker = this.m_handler.getTxPendingChecker(tx.method);
-            if (!checker || !checker(tx)) {
-                this.m_logger.error(`verfiy block failed for tx ${tx.hash} ${tx.method} checker failed`);
-                return { err: error_code_1.ErrorCode.RESULT_OK, valid: false };
-            }
-        }
         let oldBlock = this.m_block;
         this.m_block = this.m_block.clone();
         let err = await this.execute();
         if (err) {
-            return { err };
+            if (err === error_code_1.ErrorCode.RESULT_TX_CHECKER_ERROR) {
+                return { err: error_code_1.ErrorCode.RESULT_OK, valid: false };
+            }
+            else {
+                return { err };
+            }
         }
         if (this.m_block.hash !== oldBlock.hash) {
             logger.error(`block ${oldBlock.number} hash mismatch!! 
@@ -54,7 +52,7 @@ class BlockExecutor {
     async _execute(block) {
         this.m_logger.info(`begin execute block ${block.number}`);
         this.m_storage.createLogger();
-        let err = await this._executePreBlockEvent();
+        let err = await this.executePreBlockEvent();
         if (err) {
             this.m_logger.error(`blockexecutor execute begin_event failed,errcode=${err},blockhash=${block.hash}`);
             return err;
@@ -64,7 +62,7 @@ class BlockExecutor {
             this.m_logger.error(`blockexecutor execute method failed,errcode=${ret.err},blockhash=${block.hash}`);
             return ret.err;
         }
-        err = await this._executePostBlockEvent();
+        err = await this.executePostBlockEvent();
         if (err) {
             this.m_logger.error(`blockexecutor execute end_event failed,errcode=${err},blockhash=${block.hash}`);
             return err;
@@ -84,7 +82,7 @@ class BlockExecutor {
         }
         return error_code_1.ErrorCode.RESULT_OK;
     }
-    async _executePreBlockEvent() {
+    async executePreBlockEvent() {
         if (this.m_block.number === 0) {
             // call initialize
             if (this.m_handler.genesisListener) {
@@ -104,7 +102,7 @@ class BlockExecutor {
         }
         return error_code_1.ErrorCode.RESULT_OK;
     }
-    async _executePostBlockEvent() {
+    async executePostBlockEvent() {
         let listeners = await this.m_handler.getPostBlockListeners(this.m_block.number);
         for (let l of listeners) {
             const err = this.executeBlockEvent(l);
@@ -127,13 +125,15 @@ class BlockExecutor {
         return { err: error_code_1.ErrorCode.RESULT_OK, value: receipts };
     }
     async executeTransaction(tx, flag) {
+        const checker = this.m_handler.getTxPendingChecker(tx.method);
+        if (!checker || checker(tx)) {
+            this.m_logger.error(`verfiy block failed for tx ${tx.hash} ${tx.method} checker failed`);
+            return { err: error_code_1.ErrorCode.RESULT_TX_CHECKER_ERROR };
+        }
         let listener = this.m_handler.getTxListener(tx.method);
+        assert(listener, `no listener for ${tx.method}`);
         if (!listener) {
-            this.m_logger.error(`not find listener,method name=${tx.method}`);
-            let receipt = new chain_1.Receipt();
-            receipt.returnCode = error_code_1.ErrorCode.RESULT_NOT_SUPPORT;
-            receipt.transactionHash = tx.hash;
-            return { err: error_code_1.ErrorCode.RESULT_OK, receipt };
+            return { err: error_code_1.ErrorCode.RESULT_NOT_SUPPORT };
         }
         let exec = this._newTransactionExecutor(listener, tx);
         let ret = await exec.execute(this.m_block.header, this.m_storage, this.m_externContext, flag);

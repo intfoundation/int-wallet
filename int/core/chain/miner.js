@@ -16,6 +16,7 @@ var MinerState;
 class Miner extends events_1.EventEmitter {
     constructor(options) {
         super();
+        this.m_constructOptions = options;
         this.m_logger = options.logger;
         this.m_state = MinerState.none;
     }
@@ -25,13 +26,13 @@ class Miner extends events_1.EventEmitter {
     get peerid() {
         return this.m_chain.peerid;
     }
-    async initComponents(dataDir, handler) {
+    async initComponents() {
         // 上层保证await调用别重入了, 不加入中间状态了
         if (this.m_state > MinerState.none) {
             return error_code_1.ErrorCode.RESULT_OK;
         }
         this.m_chain = this._chainInstance();
-        let err = await this.m_chain.initComponents(dataDir, handler);
+        let err = await this.m_chain.initComponents();
         if (err) {
             this.m_logger.error(`miner initComponent failed for chain initComponent failed`, err);
             return err;
@@ -49,7 +50,7 @@ class Miner extends events_1.EventEmitter {
         this.m_state = MinerState.none;
     }
     _chainInstance() {
-        return new chain_1.Chain({ logger: this.m_logger });
+        return new chain_1.Chain(this.m_constructOptions);
     }
     parseInstanceOptions(node, instanceOptions) {
         let value = Object.create(null);
@@ -86,14 +87,10 @@ class Miner extends events_1.EventEmitter {
         await this.m_chain.uninitialize();
         this.m_state = MinerState.init;
     }
-    async create(globalOptions, genesisOptions) {
+    async create(genesisOptions) {
         if (this.m_state !== MinerState.init) {
             this.m_logger.error(`miner create failed hasn't initComponent`);
             return error_code_1.ErrorCode.RESULT_INVALID_STATE;
-        }
-        let err = await this.chain.onPreCreateGenesis(globalOptions, genesisOptions);
-        if (err) {
-            return err;
         }
         let genesis = this.m_chain.newBlock();
         genesis.header.timestamp = Date.now() / 1000;
@@ -101,6 +98,7 @@ class Miner extends events_1.EventEmitter {
         if (sr.err) {
             return sr.err;
         }
+        let err = error_code_1.ErrorCode.RESULT_OK;
         do {
             err = await this._decorateBlock(genesis);
             if (err) {
@@ -133,10 +131,10 @@ class Miner extends events_1.EventEmitter {
     async _createBlock(header) {
         let block = this.chain.newBlock(header);
         this.m_state = MinerState.executing;
-        let tx = this.chain.pending.popTransaction();
-        while (tx) {
-            block.content.addTransaction(tx);
-            tx = this.chain.pending.popTransaction();
+        let txs = this.chain.pending.popTransaction(1);
+        while (txs.length > 0) {
+            block.content.addTransaction(txs[0]);
+            txs = this.chain.pending.popTransaction(1);
         }
         await this._decorateBlock(block);
         let sr = await this.chain.storageManager.createStorage(header.preBlockHash, block.header.preBlockHash);

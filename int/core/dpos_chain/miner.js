@@ -14,7 +14,7 @@ class DposMiner extends value_chain_1.ValueMiner {
         return this.m_address;
     }
     _chainInstance() {
-        return new chain_1.DposChain({ logger: this.m_logger });
+        return new chain_1.DposChain(this.m_constructOptions);
     }
     parseInstanceOptions(node, instanceOptions) {
         let { err, value } = super.parseInstanceOptions(node, instanceOptions);

@@ -41,6 +41,10 @@ class Chain extends events_1.EventEmitter {
         };
         this.m_connSyncMap = new Map();
         this.m_logger = logger_util_1.initLogger(options);
+        this.m_dataDir = options.dataDir;
+        this.m_handler = options.handler;
+        this.m_globalOptions = Object.create(null);
+        Object.assign(this.m_globalOptions, options.globalOptions);
     }
     static dataDirValid(dataDir) {
         if (!fs.pathExistsSync(dataDir)) {
@@ -110,27 +114,7 @@ class Chain extends events_1.EventEmitter {
     get headerStorage() {
         return this.m_headerStorage;
     }
-    async _onLoadGlobalOptions() {
-        return error_code_1.ErrorCode.RESULT_OK;
-    }
-    async setGlobalOptions(globalOptions) {
-        if (this.m_globalOptions) {
-            return error_code_1.ErrorCode.RESULT_OK;
-        }
-        this.m_globalOptions = Object.create(null);
-        Object.assign(this.m_globalOptions, globalOptions);
-        if (!this._onCheckGlobalOptions(globalOptions)) {
-            this.m_logger.error(`chain initialize failed for check global options failed`);
-            return error_code_1.ErrorCode.RESULT_INVALID_BLOCK;
-        }
-        this.m_globalOptions = globalOptions;
-        const err = await this._onLoadGlobalOptions();
-        return error_code_1.ErrorCode.RESULT_OK;
-    }
     async _loadGenesis() {
-        if (this.m_globalOptions) {
-            return error_code_1.ErrorCode.RESULT_OK;
-        }
         let genesis = await this.m_headerStorage.getHeader(0);
         if (genesis.err) {
             return genesis.err;
@@ -186,20 +170,22 @@ class Chain extends events_1.EventEmitter {
                 return obj;
             }, {});
         }
-        const err = await this.setGlobalOptions(kvgr.value);
-        return err;
+        // TODO: compare with globalOptions
+        return error_code_1.ErrorCode.RESULT_OK;
     }
-    async initComponents(dataDir, handler, options) {
+    async initComponents(options) {
         // 上层保证await调用别重入了, 不加入中间状态了
         if (this.m_state >= ChainState.init) {
             return error_code_1.ErrorCode.RESULT_OK;
         }
-        this.m_dataDir = dataDir;
-        this.m_handler = handler;
+        if (!await this._onCheckGlobalOptions(this.m_globalOptions)) {
+            return error_code_1.ErrorCode.RESULT_INVALID_PARAM;
+        }
         const readonly = options && options.readonly;
+        this.m_readonly = readonly;
         this.m_blockStorage = new block_1.BlockStorage({
             logger: this.m_logger,
-            path: dataDir,
+            path: this.m_dataDir,
             blockHeaderType: this._getBlockHeaderType(),
             transactionType: this._getTransactionType(),
             receiptType: this._getReceiptType(),
@@ -213,12 +199,19 @@ class Chain extends events_1.EventEmitter {
         else {
             sqliteOptions.mode = sqlite3.OPEN_READONLY;
         }
-        this.m_db = await sqlite.open(dataDir + '/' + Chain.s_dbFile, sqliteOptions);
+        try {
+            this.m_db = await sqlite.open(this.m_dataDir + '/' + Chain.s_dbFile, sqliteOptions);
+        }
+        catch (e) {
+            this.m_logger.error(`open database failed`, e);
+            return error_code_1.ErrorCode.RESULT_EXCEPTION;
+        }
         this.m_headerStorage = new block_1.HeaderStorage({
             logger: this.m_logger,
             blockHeaderType: this._getBlockHeaderType(),
             db: this.m_db,
-            blockStorage: this.m_blockStorage
+            blockStorage: this.m_blockStorage,
+            readonly
         });
         let err;
         err = await this.m_headerStorage.init();
@@ -226,10 +219,11 @@ class Chain extends events_1.EventEmitter {
             return err;
         }
         this.m_storageManager = new storage_1.StorageManager({
-            path: path.join(dataDir, 'storage'),
+            path: path.join(this.m_dataDir, 'storage'),
             storageType: storage_2.SqliteStorage,
             logger: this.m_logger,
-            headerStorage: this.m_headerStorage
+            headerStorage: this.m_headerStorage,
+            readonly
         });
         err = await this.m_storageManager.init();
         if (err) {
@@ -261,6 +255,12 @@ class Chain extends events_1.EventEmitter {
     _onCheckGlobalOptions(globalOptions) {
         if (util_2.isNullOrUndefined(globalOptions.txlivetime)) {
             globalOptions.txlivetime = 60 * 60;
+        }
+        if (util_2.isNullOrUndefined(globalOptions.maxPengdingCount)) {
+            globalOptions.maxPengdingCount = 10000;
+        }
+        if (util_2.isNullOrUndefined(globalOptions.warnPengdingCount)) {
+            globalOptions.warnPengdingCount = 5000;
         }
         return true;
     }
@@ -354,7 +354,6 @@ class Chain extends events_1.EventEmitter {
         delete this.m_node;
         this.m_pending.uninit();
         delete this.m_pending;
-        delete this.m_globalOptions;
         delete this.m_instanceOptions;
         for (let s of this.m_constSnapshots) {
             this.m_storageManager.releaseSnapshotView(s);
@@ -362,7 +361,14 @@ class Chain extends events_1.EventEmitter {
         this.m_state = ChainState.init;
     }
     _createPending() {
-        return new pending_1.PendingTransactions({ storageManager: this.m_storageManager, logger: this.logger, txlivetime: this.m_globalOptions.txlivetime, handler: this.m_handler });
+        return new pending_1.PendingTransactions({
+            storageManager: this.m_storageManager,
+            logger: this.logger,
+            txlivetime: this.m_globalOptions.txlivetime,
+            handler: this.m_handler,
+            maxPengdingCount: this.m_globalOptions.maxPengdingCount,
+            warnPendingCount: this.m_globalOptions.warnPengdingCount
+        });
     }
     _createChainNode() {
         return new block_1.RandomOutNode({
@@ -1067,10 +1073,6 @@ class Chain extends events_1.EventEmitter {
         if (!err) {
             this._addPendingBlocks({ block, storage });
         }
-    }
-    async onPreCreateGenesis(globalOptions, genesisOptions) {
-        const err = await this.setGlobalOptions(globalOptions);
-        return err;
     }
     /**
      * virtual

@@ -25,12 +25,12 @@ class ValueBlockExecutor extends chain_1.BlockExecutor {
         }
         return await ve.issue(coinbase, wage);
     }
-    async _executePreBlockEvent() {
+    async executePreBlockEvent() {
         const err = await this.executeMinerWageEvent();
         if (err) {
             return err;
         }
-        return await super._executePreBlockEvent();
+        return await super.executePreBlockEvent();
     }
 }
 exports.ValueBlockExecutor = ValueBlockExecutor;

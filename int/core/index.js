@@ -33,33 +33,33 @@ function initChainCreator(options) {
         newHandler(creator, typeOptions) {
             return new value_chain_1.ValueHandler();
         },
-        newChain(creator, typeOptions) {
-            return new pow_chain_1.PowChain({ logger: creator.logger });
+        newChain(creator, dataDir, config) {
+            return new pow_chain_1.PowChain({ logger: creator.logger, handler: config.handler, dataDir, globalOptions: config.globalOptions });
         },
-        newMiner(creator, typeOptions) {
-            return new pow_chain_1.PowMiner({ logger: creator.logger });
+        newMiner(creator, dataDir, config) {
+            return new pow_chain_1.PowMiner({ logger: creator.logger, handler: config.handler, dataDir, globalOptions: config.globalOptions });
         }
     });
     _creator.registerChainType('dpos', {
         newHandler(creator, typeOptions) {
             return new value_chain_1.ValueHandler();
         },
-        newChain(creator, typeOptions) {
-            return new dpos_chain_1.DposChain({ logger: creator.logger });
+        newChain(creator, dataDir, config) {
+            return new dpos_chain_1.DposChain({ logger: creator.logger, handler: config.handler, dataDir, globalOptions: config.globalOptions });
         },
-        newMiner(creator, typeOptions) {
-            return new dpos_chain_1.DposMiner({ logger: creator.logger });
+        newMiner(creator, dataDir, config) {
+            return new dpos_chain_1.DposMiner({ logger: creator.logger, handler: config.handler, dataDir, globalOptions: config.globalOptions });
         }
     });
     _creator.registerChainType('dbft', {
         newHandler(creator, typeOptions) {
             return new value_chain_1.ValueHandler();
         },
-        newChain(creator, typeOptions) {
-            return new dbft_chain_1.DbftChain({ logger: creator.logger });
+        newChain(creator, dataDir, config) {
+            return new dbft_chain_1.DbftChain({ logger: creator.logger, handler: config.handler, dataDir, globalOptions: config.globalOptions });
         },
-        newMiner(creator, typeOptions) {
-            return new dbft_chain_1.DbftMiner({ logger: creator.logger });
+        newMiner(creator, dataDir, config) {
+            return new dbft_chain_1.DbftMiner({ logger: creator.logger, handler: config.handler, dataDir, globalOptions: config.globalOptions });
         }
     });
     return _creator;

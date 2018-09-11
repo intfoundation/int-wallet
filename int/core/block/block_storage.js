@@ -15,7 +15,9 @@ class BlockStorage {
         this.m_readonly = !!options.readonly;
     }
     init() {
-        fs.mkdirsSync(this.m_path);
+        if (!this.m_readonly) {
+            fs.mkdirsSync(this.m_path);
+        }
         return client_1.ErrorCode.RESULT_OK;
     }
     uninit() {

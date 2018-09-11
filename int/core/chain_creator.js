@@ -54,7 +54,7 @@ class ChainCreator {
         if (lcr.err) {
             return { err: lcr.err };
         }
-        let err = await cmir.miner.create(lcr.config.globalOptions, genesisOptions);
+        let err = await cmir.miner.create(genesisOptions);
         if (err) {
             return { err };
         }
@@ -139,8 +139,8 @@ class ChainCreator {
         if (!instance) {
             return { err: error_code_1.ErrorCode.RESULT_INVALID_TYPE };
         }
-        let miner = instance.newMiner(this, lcr.config.typeOptions);
-        let err = await miner.initComponents(dataDir, lcr.config.handler);
+        let miner = instance.newMiner(this, dataDir, lcr.config);
+        let err = await miner.initComponents();
         if (err) {
             return { err };
         }
@@ -158,12 +158,14 @@ class ChainCreator {
         if (!instance) {
             return { err: error_code_1.ErrorCode.RESULT_INVALID_TYPE };
         }
-        let chain = instance.newChain(this, lcr.config.typeOptions);
-        let err = await chain.initComponents(dataDir, lcr.config.handler, options);
-        if (err) {
-            return { err };
+        let chain = instance.newChain(this, dataDir, lcr.config);
+        if (options.initComponents) {
+            let err = await chain.initComponents({ readonly: options.readonly });
+            if (err) {
+                return { err };
+            }
         }
-        return { err: error_code_1.ErrorCode.RESULT_OK, chain, globalOptions: lcr.config.globalOptions };
+        return { err: error_code_1.ErrorCode.RESULT_OK, chain };
     }
 }
 exports.ChainCreator = ChainCreator;

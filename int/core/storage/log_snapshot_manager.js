@@ -22,6 +22,7 @@ class StorageLogSnapshotManager {
         this.m_headerStorage = options.headerStorage;
         this.m_storageType = options.storageType;
         this.m_logger = options.logger;
+        this.m_readonly = !!(options && options.readonly);
     }
     recycle() {
         this.m_logger.info(`begin recycle snanshot`);
@@ -38,7 +39,9 @@ class StorageLogSnapshotManager {
         this.m_recycling = false;
     }
     async init() {
-        fs.ensureDirSync(this.m_logPath);
+        if (!this.m_readonly) {
+            fs.ensureDirSync(this.m_logPath);
+        }
         let err = await this.m_dumpManager.init();
         if (err) {
             return err;

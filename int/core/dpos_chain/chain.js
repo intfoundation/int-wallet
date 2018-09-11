@@ -17,8 +17,8 @@ class DposChain extends value_chain_1.ValueChain {
     get _broadcastDepth() {
         return 0;
     }
-    async initComponents(dataDir, handler, options) {
-        let err = await super.initComponents(dataDir, handler, options);
+    async initComponents(options) {
+        let err = await super.initComponents(options);
         if (err) {
             return err;
         }
@@ -48,7 +48,7 @@ class DposChain extends value_chain_1.ValueChain {
         if (dbr.err) {
             return { err: dbr.err };
         }
-        let de = new consensus.Context(dbr.value, this.globalOptions, this.logger);
+        let de = new consensus.Context(dbr.value, this.m_globalOptions, this.logger);
         externalContext.vote = async (from, candiates) => {
             let vr = await de.vote(from, candiates);
             if (vr.err) {
@@ -105,7 +105,7 @@ class DposChain extends value_chain_1.ValueChain {
             }
             return gm.creators;
         };
-        let executor = new executor_1.DposBlockExecutor({ logger: this.logger, block, storage, handler: this.handler, externContext: externalContext, globalOptions: this.globalOptions });
+        let executor = new executor_1.DposBlockExecutor({ logger: this.logger, block, storage, handler: this.m_handler, externContext: externalContext, globalOptions: this.m_globalOptions });
         return { err: error_code_1.ErrorCode.RESULT_OK, executor: executor };
     }
     async newViewExecutor(header, storage, method, param) {
@@ -115,7 +115,7 @@ class DposChain extends value_chain_1.ValueChain {
         if (dbr.err) {
             return { err: dbr.err };
         }
-        let de = new consensus.Context(dbr.value, this.globalOptions, this.logger);
+        let de = new consensus.Context(dbr.value, this.m_globalOptions, this.logger);
         externalContext.getVote = async () => {
             let gvr = await de.getVote();
             if (gvr.err) {

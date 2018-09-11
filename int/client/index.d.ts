@@ -52,7 +52,7 @@ export enum ErrorCode {
 export function stringifyErrorCode(err: ErrorCode): string;
 export function stringify(v: any, parsable?:boolean): any;
 export function parseJSON(v: any): any;
-export function rejectifyValue<T>(func: (...args: any[]) => Promise<{err: ErrorCode, value?: T}>, _this: any): (...args: any[]) => Promise<T>;
+export function rejectifyValue<T>(func: (...args: any[]) => Promise<{err: ErrorCode}&any>, _this: any, _name?: string): (...args: any[]) => Promise<T>;
 export function rejectifyErrorCode(func: (...args: any[]) => Promise<ErrorCode>, _this: any): (...args: any[]) => Promise<void>;
 
 export class Transaction {
@@ -288,12 +288,12 @@ export class ValueIndependDebugSession {
         accounts: Buffer[] | number, 
         coinbase: number,
         interval: number,
-        preBalance?: number
+        preBalance?: BigNumber
     }): Promise<ErrorCode>;
 
-    updateHeightTo(height: number, coinbase: number): ErrorCode;
+    updateHeightTo(height: number, coinbase: number, events?: boolean): ErrorCode;
 
-    transaction(options: {caller: number, method: string, input: any, value: BigNumber}): Promise<{err: ErrorCode, receipt?: Receipt}>;
+    transaction(options: {caller: number, method: string, input: any, value: BigNumber, fee: BigNumber}): Promise<{err: ErrorCode, receipt?: Receipt}>;
     wage(): Promise<{err: ErrorCode}>;
     view(options: {method: string, params: any}): Promise<{err: ErrorCode, value?: any}>;
     getAccount(index: number): string;

@@ -15,7 +15,7 @@ class ValueMiner extends chain_1.Miner {
         return this.m_coinbase;
     }
     _chainInstance() {
-        return new chain_2.ValueChain({ logger: this.m_logger });
+        return new chain_2.ValueChain(this.m_constructOptions);
     }
     get chain() {
         return this.m_chain;

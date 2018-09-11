@@ -4,8 +4,8 @@ const error_code_1 = require("../error_code");
 const value_chain_1 = require("../value_chain");
 const consensus = require("./consensus");
 class DposBlockExecutor extends value_chain_1.ValueBlockExecutor {
-    async _executePostBlockEvent() {
-        let err = await super._executePostBlockEvent();
+    async executePostBlockEvent() {
+        let err = await super.executePostBlockEvent();
         if (err) {
             return err;
         }

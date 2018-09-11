@@ -47,7 +47,7 @@ class ChainHost {
         }
         let logger = this._parseLogger(dataDir, commandOptions);
         let creator = core_1.initChainCreator({ logger });
-        let cr = await creator.createChainInstance(dataDir);
+        let cr = await creator.createChainInstance(dataDir, { initComponents: true });
         if (cr.err) {
             return false;
         }
@@ -88,13 +88,7 @@ class ChainHost {
             fs.ensureDirSync(dataDir);
         }
         else {
-            if (commandOptions.get('forceClean')) {
-                fs.removeSync(dataDir);
-            }
-            else {
-                console.error(`dataDir already exsits`);
-                return false;
-            }
+            fs.removeSync(dataDir);
         }
         let logger = this._parseLogger(dataDir, commandOptions);
         let creator = core_1.initChainCreator({ logger });
@@ -169,5 +163,5 @@ class ChainHost {
         this.m_net.set(net, instance);
     }
 }
-ChainHost.CREATE_TIP = `command: createGenesis --package [packageDir] --dataDir [dataDir] --[genesisConfig] [genesisConfig] --[externalHandler]`;
+ChainHost.CREATE_TIP = `command: create --package [packageDir] --dataDir [dataDir] --[genesisConfig] [genesisConfig] --[externalHandler]`;
 exports.ChainHost = ChainHost;
