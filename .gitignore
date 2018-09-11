@@ -12,4 +12,4 @@ thumbs.db
 .idea
 data/intchain/peer
 data/genesis/storage/*
-
+src/renderer/components/WalletAccount/data/*

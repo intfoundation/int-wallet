@@ -62,7 +62,8 @@
 
 <script>
   import Intjs from 'intjs';
-  import { ipcRenderer } from 'electron';
+  // import { ipcRenderer } from 'electron';
+  import fs from 'fs';
   export default {
     name: 'wallets',
     data() {
@@ -84,7 +85,7 @@
         }).then(({ value }) => {
           this.$message({
             type: 'success',
-            message: ' 你的密码是: ' + value,
+            message: ' 创建成功 ',
           });
           this.createWallet(value);
         }).catch(() => {
@@ -101,9 +102,13 @@
 
         data.address = account.address;
 
-        // let fileName = data.address + '.json';
-        let blob = new Blob([JSON.stringify(data)], {type: 'application/octet-stream'});
-        let url = URL.createObjectURL(blob);
+        let fileName = data.address + '.json';
+        let fileData = JSON.stringify(data);
+
+        fs.writeFileSync(`${__dirname}/data/keystore/` + fileName, fileData);
+
+        // let blob = new Blob([JSON.stringify(data)], {type: 'application/octet-stream'});
+        // let url = URL.createObjectURL(blob);
         // console.log(url);
         // let aLink = document.createElement('a');
         // let evt = document.createEvent('HTMLEvents');
@@ -115,8 +120,9 @@
         // console.log(aLink);
         // aLink.dispatchEvent(evt);
 
-        let savePath = `${__dirname}/data/keystore`;
-        ipcRenderer.send('download', url + "+" + savePath);
+        // let savePath = `${__dirname}/data/keystore/`;
+        // console.log(savePath);
+        // ipcRenderer.send('download', url + "+" + savePath);
       },
     },
     computed: {
