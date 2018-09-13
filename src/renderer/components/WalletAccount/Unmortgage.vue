@@ -1,29 +1,29 @@
 <template>
-    <div class="send">
-        <h3 class="title">Send</h3>
+    <div class="unmortgage">
+        <h3 class="title">Unmortgage</h3>
         <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
-            <el-form-item label="FROM">
-                <el-select class="select-from" v-model="formLabelAlign.from" placeholder="" @change="selectFrom">
+            <el-form-item label="Account">
+                <el-select class="select-from" v-model="formLabelAlign.account" placeholder="" @change="selectAccount">
                     <el-option v-for="(item, index) in balance" :key="item.id" :label="'Account-' + ++index" :value="item.address"></el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="TO">
-                <el-input v-model="formLabelAlign.to"></el-input>
+            <el-form-item label="Votes">
+                <el-input v-model="formLabelAlign.votes" readonly></el-input>
             </el-form-item>
             <el-form-item label="AMOUNT">
-                <el-input v-model="formLabelAlign.amount">{{checked ? formLabelAlign.balance : formLabelAlign.amount}}</el-input>
+                <el-input v-model="formLabelAlign.amount">{{formLabelAlign.amount}}</el-input>
             </el-form-item>
             <el-form-item label="BALANCE">
                 <el-input class="balance" v-model="formLabelAlign.balance" readonly>{{formLabelAlign.balance}}</el-input>
             </el-form-item>
             <template>
                 <!-- `checked` 为 true 或 false -->
-                <el-checkbox v-model="checked">Send everything</el-checkbox>
+                <el-checkbox v-model="checked">Unmortgage all</el-checkbox>
             </template>
         </el-form>
         <el-row class="want-to-send">
             <el-col :span="6">
-                You want to send <b>{{formLabelAlign.amount}} INT.</b>
+                You want to unmortgage <b>{{formLabelAlign.amount}} votes.</b>
             </el-col>
         </el-row>
         <el-row>
@@ -46,12 +46,12 @@
             </el-col>
         </el-row>
         <el-dialog
-                title="Transaction"
+                title="Unmortgage"
                 :visible.sync="centerDialogVisible"
                 width="40%"
                 center>
-            <p>From: <span>{{formLabelAlign.from}}</span></p>
-            <p>To: <span>{{formLabelAlign.to}}</span></p>
+            <p>Account: <span>{{formLabelAlign.account}}</span></p>
+            <p>Votes: <span>{{formLabelAlign.votes}}</span></p>
             <p>Amount: <span>{{formLabelAlign.amount}}</span></p>
             <p>Fee: <span>{{formLabelAlign.fee/20}}</span></p>
             <p>Password: <input type="password" placeholder="Enter password" v-model="password"></p>
@@ -71,7 +71,7 @@
 
   const intjs = new Intjs('localhost', 18089);
   export default {
-    name: 'send',
+    name: 'unmortgage',
     data() {
       return {
         fileName: [],
@@ -83,8 +83,8 @@
         centerDialogVisible: false,
         password: '',
         formLabelAlign: {
-          from: '',
-          to: '',
+          account: '',
+          votes: 0.00,
           amount: 0.00,
           balance: 0.00,
           fee: 20,
@@ -136,11 +136,19 @@
       },
 
 
-      selectFrom () {
-        if (this.formLabelAlign.from) {
+      selectAccount() {
+        if (this.formLabelAlign.account) {
           this.balance.forEach((value) => {
-            if (value.address === this.formLabelAlign.from) {
+            if (value.address === this.formLabelAlign.account) {
               this.formLabelAlign.balance = value.balance;
+            }
+          });
+          setImmediate(async () => {
+            let result = await intjs.getStoke(this.formLabelAlign.account);
+            if (result.err) {
+              this.$message.error(result.err);
+            } else {
+              this.formLabelAlign.votes = result.stoke;
             }
           });
         } else {
@@ -152,24 +160,26 @@
       },
 
       sendTransaction() {
-        if (this.formLabelAlign.from === '') {
-          this.$message.error('请选择 From 地址');
-        } else if (this.formLabelAlign.to === '') {
-          this.$message.error('请输入 To 地址');
+        if (this.formLabelAlign.account === '') {
+          this.$message.error('请选择 account');
         } else if (Number(this.formLabelAlign.amount) === 0) {
-          this.$message.error('转账金额不能为 0');
+          this.$message.error('换回的票数不能为 0');
         } else if (this.formLabelAlign.fee < 0.005) {
           this.$message.error('交易费用必须大于等于0.005 INT');
-        } else if ((this.formLabelAlign.balance < (Number(this.formLabelAlign.amount) + this.formLabelAlign.fee/20)) || this.formLabelAlign.balance === 0) {
-          this.$message.error('余额不足');
+        } else if ((this.formLabelAlign.votes < Number(this.formLabelAlign.amount) )) {
+          this.$message.error('余票不足');
+        } else if (this.formLabelAlign.balance < 0.005) {
+          this.$message.error('费用不足');
         } else {
-            this.centerDialogVisible = true;
+          this.centerDialogVisible = true;
         }
       },
+
       cancelTransaction() {
         this.centerDialogVisible = false;
-        this.$message.error('取消交易');
+        this.$message.error('取消退票');
       },
+
       submitTransaction() {
         if (this.password === '') {
           this.$message.error('请输入密码');
@@ -177,7 +187,7 @@
           this.$message.error('密码长度必须大于等于9');
         } else {
           let rootDir = process.cwd();
-          let keystorePath = `${rootDir}/data/keystore/${this.formLabelAlign.from}.json`;
+          let keystorePath = `${rootDir}/data/keystore/${this.formLabelAlign.account}.json`;
           fs.readFile(keystorePath, 'utf8', async (err, data) => {
             if (err) {
               this.centerDialogVisible = false;
@@ -188,13 +198,13 @@
               // console.log(this.password);
               let account = intjs.decrypt(keystore, this.password);
               // console.log(account);
-              let result = await intjs.transferTo(this.formLabelAlign.to, this.formLabelAlign.amount.toString(), (this.formLabelAlign.fee/20*10^18).toString(), account.privateKey.toString());
+              let result = await intjs.mortgage(this.formLabelAlign.amount.toString(), (this.formLabelAlign.fee/20*10^18).toString(), account.privateKey.toString());
               if (result.err) {
                 this.$message.error(result.err);
               } else {
                 this.centerDialogVisible = false;
                 this.$message({
-                  message: `交易成功，hash:${result.hash}`,
+                  message: `退票成功，hash:${result.hash}`,
                   type: 'success'
                 });
               }
@@ -207,13 +217,13 @@
 
     },
     mounted() {
-        this.init();
+      this.init();
     },
   };
 </script>
 
 <style scoped lang="scss">
-    .send {
+    .unmortgage {
         padding: 20px 40px;
         .el-form {
             margin-top: 30px;

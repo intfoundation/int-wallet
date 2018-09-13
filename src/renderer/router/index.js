@@ -26,12 +26,27 @@ export default new Router({
           name: 'send',
           component: require('@/components/WalletAccount/Send').default,
         },
+        {
+          path: '/mortgage',
+          name: 'mortgage',
+          component: require('@/components/WalletAccount/Mortgage').default,
+        },
+        {
+          path: '/unmortgage',
+          name: 'unmortgage',
+          component: require('@/components/WalletAccount/Unmortgage').default,
+        },
+        {
+          path: '/vote',
+          name: 'vote',
+          component: require('@/components/WalletAccount/Vote').default,
+        },
       ],
       redirect: '/wallets',
     },
-    // {
-    //   path: '*',
-    //   redirect: '/',
-    // },
+    {
+      path: '*',
+      redirect: '/',
+    },
   ],
 });

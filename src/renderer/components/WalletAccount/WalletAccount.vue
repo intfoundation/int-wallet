@@ -5,6 +5,9 @@
                 <el-menu :default-active="activeIndex" class="el-menu-nav" mode="horizontal" @select="">
                     <el-menu-item index="1" @click="walletInfor">Wallets</el-menu-item>
                     <el-menu-item index="2" @click="sendTx">Send</el-menu-item>
+                    <el-menu-item index="3" @click="mortgage">Mortgage</el-menu-item>
+                    <el-menu-item index="4" @click="unmortgage">Unmortgage</el-menu-item>
+                    <el-menu-item index="5" @click="vote">Vote</el-menu-item>
                 </el-menu>
             </el-col>
         </el-row>
@@ -36,6 +39,15 @@
       },
       sendTx() {
         this.$router.push('/send');
+      },
+      mortgage() {
+        this.$router.push('/mortgage');
+      },
+      unmortgage() {
+        this.$router.push('/unmortgage');
+      },
+      vote() {
+        this.$router.push('/vote');
       },
     },
     computed: {
