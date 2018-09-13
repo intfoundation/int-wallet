@@ -23,6 +23,7 @@ class BaseNode extends events_1.EventEmitter {
         this.m_receiptType = options.receiptType;
         this.m_node = options.node;
         this.m_logger = new LogShim(options.logger).bind(`[peerid: ${this.peerid}]`, true).log;
+        this.m_node.logger = options.logger;
         this.m_headerStorage = options.headerStorage;
         this.m_node.on('error', (conn, err) => {
             this.emit('error', conn.getRemote());
@@ -162,6 +163,9 @@ class BaseNode extends events_1.EventEmitter {
             return false;
         }
         if (this.m_connecting.has(peerid)) {
+            return false;
+        }
+        if (this.m_node.peerid === peerid) {
             return false;
         }
         return true;

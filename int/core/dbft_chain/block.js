@@ -36,7 +36,7 @@ class DbftBlockHeader extends value_chain_1.BlockWithSign(value_chain_1.ValueBlo
             return err;
         }
         try {
-            reader.readU32();
+            this.m_view = reader.readU32();
         }
         catch (e) {
             return error_code_1.ErrorCode.RESULT_EXCEPTION;

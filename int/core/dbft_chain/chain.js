@@ -22,12 +22,12 @@ class DbftChain extends value_chain_1.ValueChain {
         externalContext.transferTo = async (address, amount) => {
             return await ve.transferTo(value_chain_1.ValueChain.sysAddress, address, amount);
         };
-        let context = new context_1.DbftContext(storage, this.m_globalOptions, this.logger);
-        externalContext.register = async (address) => {
-            return await context.registerToCandidate(block.number, address);
+        let context = new context_1.DbftContext(storage, this.globalOptions, this.logger);
+        externalContext.register = async (caller, address, sign) => {
+            return await context.registerToCandidate(caller, block.number, address, sign);
         };
-        externalContext.unregister = async (address) => {
-            return await context.unRegisterFromCandidate(address);
+        externalContext.unregister = async (caller, address, sign) => {
+            return await context.unRegisterFromCandidate(caller, address, sign);
         };
         externalContext.getMiners = async () => {
             let gm = await context.getMiners();
@@ -125,12 +125,12 @@ class DbftChain extends value_chain_1.ValueChain {
             this.m_logger.error(`globalOptions should has superAdmin`);
             return false;
         }
-        if (util_1.isNullOrUndefined(globalOptions.agreeRate)) {
-            this.m_logger.error(`globalOptions should has superAdmin`);
+        if (util_1.isNullOrUndefined(globalOptions.agreeRateNumerator)) {
+            this.m_logger.error(`globalOptions should has agreeRateNumerator`);
             return false;
         }
-        if (util_1.isNullOrUndefined(globalOptions.systemAddress)) {
-            this.m_logger.error(`globalOptions should has systemAddress`);
+        if (util_1.isNullOrUndefined(globalOptions.agreeRateDenominator)) {
+            this.m_logger.error(`globalOptions should has agreeRateDenominator`);
             return false;
         }
         return true;
@@ -140,6 +140,11 @@ class DbftChain extends value_chain_1.ValueChain {
     }
     get dbftHeaderStorage() {
         return this.m_dbftHeaderStorage;
+    }
+    async _calcuteReqLimit(fromHeader, limit) {
+        let hr = await this.getHeader(fromHeader);
+        let reSelectionBlocks = this.globalOptions.reSelectionBlocks;
+        return reSelectionBlocks - (hr.header.number % reSelectionBlocks);
     }
     async onCreateGenesisBlock(block, storage, genesisOptions) {
         let err = await super.onCreateGenesisBlock(block, storage, genesisOptions);

@@ -22,6 +22,7 @@ var node_2 = require("./net_bdt/node");
 exports.BdtNode = node_2.BdtNode;
 var chain_creator_1 = require("./chain_creator");
 exports.ChainCreator = chain_creator_1.ChainCreator;
+__export(require("./lib/digest"));
 const chain_creator_2 = require("./chain_creator");
 const value_chain_1 = require("./value_chain");
 const pow_chain_1 = require("./pow_chain");

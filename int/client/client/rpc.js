@@ -63,5 +63,9 @@ class HostClient {
         }
         return core_1.fromStringifiable(JSON.parse(cr.resp));
     }
+    async getPeers() {
+        let cr = await this.m_client.callAsync('getPeers', {});
+        return JSON.parse(cr.resp);
+    }
 }
 exports.HostClient = HostClient;

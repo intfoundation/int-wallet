@@ -31,10 +31,23 @@ class INode extends events_1.EventEmitter {
     set genesisHash(genesis_hash) {
         this.m_genesis = genesis_hash;
     }
+    set logger(logger) {
+        this.m_logger = logger;
+    }
     get peerid() {
         return this.m_peerid;
     }
     async init() {
+    }
+    dumpConns() {
+        let ret = [];
+        this.m_inConn.forEach((element) => {
+            ret.push(` <= ${element.getRemote()}`);
+        });
+        this.m_outConn.forEach((element) => {
+            ret.push(` => ${element.getRemote()}`);
+        });
+        return ret;
     }
     uninit() {
         this.removeAllListeners('inbound');

@@ -47,6 +47,7 @@ class ChainServer {
                 await promisify(resp.write.bind(resp)(JSON.stringify(err)));
             }
             else {
+                this.m_logger.debug(`rpc server txhash=${tx.hash}, nonce=${tx.nonce}, address=${tx.address}`);
                 err = await this.m_chain.addTransaction(tx);
                 await promisify(resp.write.bind(resp)(JSON.stringify(err)));
             }
@@ -98,35 +99,26 @@ class ChainServer {
                 await promisify(resp.write.bind(resp)(JSON.stringify({ err: hr.err })));
             }
             else {
-                let l = new core_1.ValueHandler().getMinerWageListener();
-                let wage = await l(hr.header.number);
-                let header = hr.header.stringify();
-                header.reward = wage;
                 // 是否返回 block的transactions内容
                 if (params.transactions) {
                     let block = await this.m_chain.getBlock(hr.header.hash);
                     if (block) {
                         // 处理block content 中的transaction, 然后再响应请求
                         let transactions = block.content.transactions.map((tr) => tr.stringify());
-                        if (transactions && transactions.length !== 0) {
-                            let totalFee = 0;
-                            transactions.forEach(function (value, index) {
-                                totalFee += value.fee;
-                            });
-                            header.fee = totalFee;
-                        }
-                        else {
-                            header.fee = 0;
-                        }
-                        let res = { err: core_1.ErrorCode.RESULT_OK, block: header, transactions };
+                        let res = { err: core_1.ErrorCode.RESULT_OK, block: hr.header.stringify(), transactions };
                         await promisify(resp.write.bind(resp)(JSON.stringify(res)));
                     }
                 }
                 else {
-                    await promisify(resp.write.bind(resp)(JSON.stringify({ err: core_1.ErrorCode.RESULT_OK, block: header })));
+                    await promisify(resp.write.bind(resp)(JSON.stringify({ err: core_1.ErrorCode.RESULT_OK, block: hr.header.stringify() })));
                 }
             }
             await promisify(resp.end.bind(resp))();
+        });
+        this.m_server.on('getPeers', async (args, resp) => {
+            let peers = this.m_chain.node.base.node.dumpConns();
+            await promisify(resp.write.bind(resp)(JSON.stringify(peers)));
+            await promisify(resp.end.bind(resp)());
         });
     }
 }

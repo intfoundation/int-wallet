@@ -13,6 +13,7 @@ class DbftHeaderStorage {
         this.m_db = options.db;
         this.m_logger = options.logger;
         this.m_headerStorage = options.headerStorage;
+        this.m_globalOptions = options.globalOptions;
     }
     async init() {
         if (!this.m_readonly) {
@@ -29,10 +30,13 @@ class DbftHeaderStorage {
     uninit() {
         // do nothing
     }
+    updateGlobalOptions(globalOptions) {
+        this.m_globalOptions = globalOptions;
+    }
     async _getHeader(hash) {
         let c = this.m_cache.get(hash);
         if (c) {
-            return { err: error_code_1.ErrorCode.RESULT_OK, miners: c.m };
+            return { err: error_code_1.ErrorCode.RESULT_OK, miners: c.m, totalView: c.v };
         }
         try {
             const gm = await this.m_db.get(getHeaderSql, { $hash: hash });
@@ -42,7 +46,7 @@ class DbftHeaderStorage {
             }
             let miners = JSON.parse(gm.miners);
             this.m_cache.set(hash, { m: miners, v: gm.totalView });
-            return { err: error_code_1.ErrorCode.RESULT_OK, miners: miners };
+            return { err: error_code_1.ErrorCode.RESULT_OK, miners: miners, totalView: gm.totalView };
         }
         catch (e) {
             this.m_logger.error(e);
@@ -50,8 +54,8 @@ class DbftHeaderStorage {
         }
     }
     async addHeader(header, storageManager) {
-        let miners;
-        if (!context_1.DbftContext.isElectionBlockNumber(this.m_globalOptions, header.number)) {
+        let miners = [];
+        if (context_1.DbftContext.isElectionBlockNumber(this.m_globalOptions, header.number)) {
             const gs = await storageManager.getSnapshotView(header.hash);
             if (gs.err) {
                 return gs.err;
@@ -72,7 +76,7 @@ class DbftHeaderStorage {
             }
             totalView = ghr.totalView;
         }
-        totalView += Math.pow(2, header.view);
+        totalView += Math.pow(2, header.view + 1) - 1;
         try {
             await this.m_db.run(addHeaderSql, { $hash: header.hash, $miners: JSON.stringify(miners), $totalView: totalView });
             return error_code_1.ErrorCode.RESULT_OK;
@@ -83,6 +87,7 @@ class DbftHeaderStorage {
         }
     }
     async getTotalView(header) {
+        this.m_logger.debug(`getTotalView, hash=${header.hash}`);
         return this._getHeader(header.hash);
     }
     async getMiners(header) {

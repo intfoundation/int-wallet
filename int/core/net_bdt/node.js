@@ -74,8 +74,6 @@ class BdtNode extends net_1.INode {
     _ready() {
         this.m_dht.updateLocalPeerAdditionalInfo('ready', 1);
     }
-    // 通过发现自身， 来找到一些peers, 然后尝试每个握手一下
-    // 在测试阶段这种方法实现比较及时, 后面可能考虑用会dht中的randomPeers
     async randomPeers(count, excludes) {
         let res = await this.m_dht.getRandomPeers(count, false);
         this.m_logger.info(`first find ${res.peerlist.length} peers, ${JSON.stringify(res.peerlist.map((value) => value.peerid))}`);
@@ -101,6 +99,30 @@ class BdtNode extends net_1.INode {
             }
             return true;
         });
+        if (peers.length === 0) {
+            peers = this.m_dht.getAllOnlinePeers();
+            this.m_logger.info(`get none from randomPeers, get ${peers.length} from AllOnlinePeers`);
+            peers = peers.filter((val) => {
+                if (!val.peerid) {
+                    this.m_logger.debug(`exclude undefined peerid, ${JSON.stringify(val)}`);
+                    return false;
+                }
+                if (this.m_skipList.includes(val.peerid)) {
+                    this.m_logger.debug(`exclude ${val.peerid} from skipList`);
+                    return false;
+                }
+                if (excludes.includes(val.peerid)) {
+                    this.m_logger.debug(`exclude ${val.peerid} from excludesList`);
+                    return false;
+                }
+                let ready = val.getAdditionalInfo('ready');
+                if (ready !== 1) {
+                    this.m_logger.debug(`exclude ${val.peerid} not ready`);
+                    return false;
+                }
+                return true;
+            });
+        }
         let peerids = peers.map((value) => value.peerid);
         this.m_logger.info(`find ${peerids.length} peers after filter, count ${count}, ${JSON.stringify(peerids)}`);
         // 如果peer数量比传入的count多， 需要随机截取

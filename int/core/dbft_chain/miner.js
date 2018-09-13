@@ -12,7 +12,7 @@ class DbftMinerChain extends chain_1.DbftChain {
     _createChainNode() {
         let node = new validators_node_1.ValidatorsNode({
             node: this.m_instanceOptions.node,
-            minConnectionRate: this.globalOptions.agreeRate,
+            minConnectionRate: this.globalOptions.agreeRateNumerator / this.globalOptions.agreeRateDenominator,
             dataDir: this.m_dataDir,
             logger: this.m_logger,
             headerStorage: this.m_headerStorage,
@@ -27,6 +27,11 @@ class DbftMinerChain extends chain_1.DbftChain {
     }
     get headerStorage() {
         return this.m_headerStorage;
+    }
+    async _calcuteReqLimit(fromHeader, limit) {
+        let hr = await this.getHeader(fromHeader);
+        let reSelectionBlocks = this.globalOptions.reSelectionBlocks;
+        return reSelectionBlocks - (hr.header.number % reSelectionBlocks);
     }
 }
 class DbftMiner extends value_chain_1.ValueMiner {
@@ -43,7 +48,7 @@ class DbftMiner extends value_chain_1.ValueMiner {
         return this.m_address;
     }
     _chainInstance() {
-        return new chain_1.DbftChain(this.m_constructOptions);
+        return new DbftMinerChain(this.m_constructOptions);
     }
     parseInstanceOptions(node, instanceOptions) {
         let { err, value } = super.parseInstanceOptions(node, instanceOptions);
@@ -73,6 +78,11 @@ class DbftMiner extends value_chain_1.ValueMiner {
             globalOptions: this.m_chain.globalOptions,
             secret: this.m_secret
         });
+        err = await this.m_consensusNode.init();
+        if (err) {
+            this.m_logger.error(`dbft miner consensus node init failed, errcode ${err}`);
+            return err;
+        }
         let tip = this.chain.tipBlockHeader;
         err = await this._updateTip(tip);
         if (err) {
@@ -123,11 +133,12 @@ class DbftMiner extends value_chain_1.ValueMiner {
             }
         });
         this.m_consensusNode.on('mineBlock', async (block, signs) => {
+            block.header.setSigns(signs);
             assert(this.m_miningBlocks.has(block.hash));
             const resolve = this.m_miningBlocks.get(block.hash);
             resolve(error_code_1.ErrorCode.RESULT_OK);
         });
-        return this.m_consensusNode.init();
+        return err;
     }
     async _updateTip(tip) {
         let gnmr = await this.chain.dbftHeaderStorage.getNextMiners(tip);

@@ -178,24 +178,24 @@
       },
 
       addWalletContract() {
-        this.$prompt('请输入密码', '创建帐户', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          inputPattern: /[\w]{9,}/,
-          inputErrorMessage: '密码格式不正确',
-        }).then(({ value }) => {
-          this.$message({
-            type: 'success',
-            message: ' 创建成功 ',
-          });
-          this.createWallet(value);
-          this.init();
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '取消输入',
-          });
-        });
+        // this.$prompt('请输入密码', '创建帐户', {
+        //   confirmButtonText: '确定',
+        //   cancelButtonText: '取消',
+        //   inputPattern: /[\w]{9,}/,
+        //   inputErrorMessage: '密码格式不正确',
+        // }).then(({ value }) => {
+        //   this.$message({
+        //     type: 'success',
+        //     message: ' 创建成功 ',
+        //   });
+        //   // this.createWallet(value);
+        //   // this.init();
+        // }).catch(() => {
+        //   this.$message({
+        //     type: 'info',
+        //     message: '取消输入',
+        //   });
+        // });
       },
 
       /**

@@ -24,6 +24,16 @@ class ValidatorsNode extends chain_1.BaseNode {
         this.m_checkOutboundTimer = setInterval(() => {
             this._checkConnections();
         }, 1000);
+        let bSelf = false;
+        for (let v of this.m_validators) {
+            if (v === this.node.peerid) {
+                bSelf = true;
+                break;
+            }
+        }
+        if (this.m_validators.length === 0 || (bSelf && this.m_validators.length === 1)) {
+            return error_code_1.ErrorCode.RESULT_SKIPPED;
+        }
         return error_code_1.ErrorCode.RESULT_OK;
     }
     uninit() {
