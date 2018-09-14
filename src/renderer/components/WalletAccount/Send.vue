@@ -115,6 +115,10 @@
 
               this.balance.push({address: address, balance: result.balance});
             });
+            this.balance.sort(function (a, b) {
+              console.log(b.balance - a.balance);
+              return (b.balance - a.balance);
+            });
           },
           (err) => {
             console.log('readDir error;' + err);

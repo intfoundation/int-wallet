@@ -2,12 +2,12 @@
     <div class="mortgage">
         <h3 class="title">Mortgage</h3>
         <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
-            <el-form-item label="Account">
+            <el-form-item label="ACCOUNT">
                 <el-select class="select-from" v-model="formLabelAlign.account" placeholder="" @change="selectAccount">
-                    <el-option v-for="(item, index) in balance" :key="item.id" :label="'Account-' + ++index" :value="item.address"></el-option>
+                    <el-option v-for="(item, index) in balance" :key="item.address" :label="'Account-' + ++index" :value="item.address"></el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="Votes">
+            <el-form-item label="VOTES">
                 <el-input v-model="formLabelAlign.votes" readonly></el-input>
             </el-form-item>
             <el-form-item label="AMOUNT">
@@ -161,7 +161,7 @@
 
       sendTransaction() {
         if (this.formLabelAlign.account === '') {
-          this.$message.error('请选择 account');
+          this.$message.error('请选择 Account 地址');
         } else if (Number(this.formLabelAlign.amount) === 0) {
           this.$message.error('换票数不能为 0');
         } else if (this.formLabelAlign.fee < 0.005) {

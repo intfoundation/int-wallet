@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron' // eslint-disable-line
-import path from 'path';
+// import path from 'path';
 
 /**
  * Set `__static` path to static files in production
@@ -31,9 +31,9 @@ function createWindow() {
     mainWindow = null;
   });
 
-  /**
-   * will download
-   **/
+  // /**
+  //  * will download
+  //  * */
   // mainWindow.webContents.session.on('will-download', (event, item, webContents) => {
   //   // 设置保存路径,使Electron不提示保存对话框。
   //   // item.setSavePath(savePath + item.getFilename());
@@ -59,10 +59,10 @@ function createWindow() {
   //   })
   // });
 
-  /**
-   * main process and renderer process communication
-   * download file
-   * */
+  // /**
+  //  * main process and renderer process communication
+  //  * download file
+  //  * */
   // let downloadPath;//下载路径
   // let savePath; //保存路径
   // ipcMain.on('download', (event, args) => {

@@ -7,7 +7,7 @@
                     <el-option v-for="(item, index) in balance" :key="item.id" :label="'Account-' + ++index" :value="item.address"></el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="Votes">
+            <el-form-item label="VOTES">
                 <el-input v-model="formLabelAlign.votes"></el-input>
             </el-form-item>
             <!--<el-form-item label="AMOUNT">-->

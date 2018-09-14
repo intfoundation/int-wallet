@@ -121,17 +121,23 @@
         }
         this.readDir(keystorePath).then(
           (data) => {
+            let balanceArray = [];
             this.fileName = data;
             this.fileName.forEach(async (value) => {
               let address = value.slice(0, -5);
               let result = await intjs.getBalance(address);
+              balanceArray.push({address: address, balance: result.balance});
+            });
 
-              this.balance.push({address: address, balance: result.balance});
-            });
-            this.balance.sort(function (a, b) {
-              console.log(b.balance - a.balance);
-              return (b.balance - a.balance);
-            });
+            // TODO 异步拿到的数据怎么排序？
+            if (balanceArray.length !== 0) {
+              balanceArray.sort(function (a, b) {
+                console.log(b.balance - a.balance);
+                return (b.balance - a.balance);
+              });
+            }
+            this.balance = balanceArray;
+
           },
           (err) => {
             console.log('readDir error;' + err);

@@ -44,9 +44,9 @@ export default new Router({
       ],
       redirect: '/wallets',
     },
-    {
-      path: '*',
-      redirect: '/',
-    },
+    // {
+    //   path: '*',
+    //   redirect: '/',
+    // },
   ],
 });
