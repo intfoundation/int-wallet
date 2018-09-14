@@ -4,7 +4,7 @@
         <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
             <el-form-item label="ACCOUNT">
                 <el-select class="select-from" v-model="formLabelAlign.account" placeholder="" @change="selectAccount">
-                    <el-option v-for="(item, index) in balance" :key="item.id" :label="'Account-' + ++index" :value="item.address"></el-option>
+                    <el-option v-for="(item, index) in balance" :key="item.address" :label="'Account-' + ++index" :value="item.address"></el-option>
                 </el-select>
             </el-form-item>
             <el-form-item label="VOTES">
