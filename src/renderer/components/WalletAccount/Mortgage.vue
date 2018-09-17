@@ -196,7 +196,7 @@
               // console.log(this.password);
               let account = intjs.decrypt(keystore, this.password);
               // console.log(account);
-              let result = await intjs.mortgage(this.formLabelAlign.amount.toString(), (this.formLabelAlign.fee/20*10^18).toString(), account.privateKey.toString());
+              let result = await intjs.mortgage((this.formLabelAlign.amount*10^18).toString(), (this.formLabelAlign.fee/20*10^18).toString(), account.privateKey.toString());
               if (result.err) {
                 this.$message.error(result.err);
               } else {

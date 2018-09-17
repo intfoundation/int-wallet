@@ -176,6 +176,16 @@ if (process.env.NODE_ENV === 'production') {
         from: path.join(__dirname, '../static'),
         to: path.join(__dirname, '../dist/electron/static'),
         ignore: ['.*']
+      },
+      {
+        from: path.join(__dirname, '../data'),
+        to: path.join(__dirname, '../dist/electron/data'),
+        ignore: ['.*']
+      },
+      {
+        from: path.join(__dirname, '../int'),
+        to: path.join(__dirname, '../dist/electron/int'),
+        ignore: ['.*']
       }
     ]),
     new webpack.DefinePlugin({
