@@ -10,7 +10,5 @@ npm-debug.log.*
 thumbs.db
 !.gitkeep
 .idea
-data/intchain/peer
-data/genesis/storage/*
-data/keystore/*
-src/renderer/components/WalletAccount/data/*
+data/*
+int/*

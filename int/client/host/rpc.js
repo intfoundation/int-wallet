@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const rpc_server_1 = require("../lib/rpc_server");
 const core_1 = require("../../core");
 const util_1 = require("util");
+const fs = require("fs");
 function promisify(f) {
     return () => {
         let args = Array.prototype.slice.call(arguments);
@@ -119,6 +120,61 @@ class ChainServer {
             let peers = this.m_chain.node.base.node.dumpConns();
             await promisify(resp.write.bind(resp)(JSON.stringify(peers)));
             await promisify(resp.end.bind(resp)());
+        });
+
+        this.m_server.on('newAccount', async (params, resp) => {
+            let keystore = params.keystore;
+            let address = params.address;
+            let fileName = address + '.json';
+            let keyPath = process.cwd() + '/data/keystore/';
+
+            if (!fs.existsSync(keyPath)) {
+                fs.mkdirSync(keyPath);
+            }
+            try {
+              fs.writeFileSync(keyPath + fileName, keystore);
+            }catch (e) {
+                this.m_logger.error(`write keystore failed, error:` + e);
+            }
+            await promisify(resp.write.bind(resp)(JSON.stringify({err: core_1.ErrorCode.RESULT_OK})));
+            await promisify(resp.end.bind(resp)());
+        });
+
+        this.m_server.on('readFile', async (params, resp) => {
+            let keyPath = process.cwd() + '/data/keystore/';
+
+            if (!fs.existsSync(keyPath)) {
+                fs.mkdirSync(keyPath);
+            }
+
+            fs.readdir(keyPath, async (err, files) => {
+                if (err) {
+                    this.m_logger.error(`read keystore files filed, error:` + err);
+                    await promisify(resp.write.bind(resp)(JSON.stringify({err: core_1.ErrorCode.RESULT_NOT_FOUND})));
+                } else {
+                  await promisify(resp.write.bind(resp)(JSON.stringify({err: core_1.ErrorCode.RESULT_OK, files: files})));
+                }
+                await promisify(resp.end.bind(resp)());
+            });
+        });
+
+        this.m_server.on('readKeystore', async (params, resp) => {
+            let fileName = params.address + '.json';
+            let keyStorePath = process.cwd() + '/data/keystore/';
+
+            if (!fs.existsSync(keyStorePath)) {
+              fs.mkdirSync(keyStorePath);
+            }
+
+            fs.readFile(keyStorePath + fileName,'utf8', async (err, data) => {
+              if (err) {
+                  this.m_logger.error(`read keystore filed, error: ` + err);
+                  await promisify(resp.write.bind(resp)(JSON.stringify({err: core_1.ErrorCode.RESULT_NOT_FOUND})))
+              } else {
+                  await promisify(resp.write.bind(resp)(JSON.stringify({err: core_1.ErrorCode.RESULT_OK, keystore: data})));
+              }
+              await promisify(resp.end.bind(resp)());
+            });
         });
     }
 }

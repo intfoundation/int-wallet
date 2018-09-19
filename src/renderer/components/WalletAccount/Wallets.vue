@@ -74,7 +74,6 @@
 <script>
   import Intjs from 'intjs';
   // import { ipcRenderer } from 'electron';
-  import fs from 'fs';
 
   const intjs = new Intjs('localhost', 18089);
 
@@ -112,36 +111,27 @@
       /**
        * 初始化
        * */
-      init () {
-        let rootDir = process.cwd();
-        let keystorePath = `${rootDir}/data/keystore/`;
-
-        if (!fs.existsSync(keystorePath)) {
-            fs.mkdir(keystorePath);
-        }
-        this.readDir(keystorePath).then(
-          (data) => {
-            let balanceArray = [];
-            this.fileName = data;
-            this.fileName.forEach(async (value) => {
-              let address = value.slice(0, -5);
-              let result = await intjs.getBalance(address);
-              balanceArray.push({address: address, balance: result.balance});
-            });
-
-            // TODO 异步拿到的数据怎么排序？
-            if (balanceArray.length !== 0) {
-              balanceArray.sort(function (a, b) {
-                console.log(b.balance - a.balance);
-                return (b.balance - a.balance);
-              });
-            }
-            this.balance = balanceArray;
-
-          },
-          (err) => {
-            console.log('readDir error;' + err);
+      async init () {
+        let files = await intjs.readFile();
+        if (files.err) {
+          this.$message.error('读取 keystore 文件名出错');
+        } else {
+          this.fileName = files;
+          let balanceArray = [];
+          this.fileName.forEach(async (value) => {
+            let address = value.slice(0, -5);
+            let result = await intjs.getBalance(address);
+            balanceArray.push({address: address, balance: result.balance});
           });
+          // TODO 异步拿到的数据怎么排序？
+          if (balanceArray.length !== 0) {
+            balanceArray.sort(function (a, b) {
+              console.log(b.balance - a.balance);
+              return (b.balance - a.balance);
+            });
+          }
+          this.balance = balanceArray;
+        }
       },
       /**
        * 创建帐户
@@ -152,13 +142,10 @@
           cancelButtonText: '取消',
           inputPattern: /[\w]{9,}/,
           inputErrorMessage: '密码格式不正确',
-        }).then(({ value }) => {
-          this.$message({
-            type: 'success',
-            message: ' 创建成功 ',
-          });
-          this.createWallet(value);
-          this.init();
+        }).then(async ({ value }) => {
+          await this.createWallet(value);
+          await this.init();
+
         }).catch(() => {
           this.$message({
             type: 'info',
@@ -170,17 +157,17 @@
       /**
        * 生成 keystore
        * */
-      createWallet(password) {
-        let account = intjs.create();
-        let data = intjs.encrypt(account.secret, password);
-
-        data.address = account.address;
-
-        let fileName = data.address + '.json';
-        let fileData = JSON.stringify(data);
-        let rootDir = process.cwd();
-
-        fs.writeFileSync(`${rootDir}/data/keystore/` + fileName, fileData);
+      async createWallet(password) {
+         // console.log(password);
+         let result = await intjs.newAccount(password);
+         if (result.err) {
+            this.$message.err('帐户创建失败');
+         } else {
+           this.$message({
+             type: 'success',
+             message: ' 帐户创建成功，地址： ' + result,
+           });
+         }
       },
 
       addWalletContract() {
@@ -202,21 +189,6 @@
         //     message: '取消输入',
         //   });
         // });
-      },
-
-      /**
-       * 读取目录下所有文件
-       */
-      readDir (path) {
-        return new Promise((resolve, reject) => {
-          fs.readdir(path, (err, files) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(files);
-            }
-          });
-        });
       },
     },
     computed: {
