@@ -2,6 +2,7 @@
   <div id="app">
     <transition name="el-fade-in-linear">
       <router-view></router-view>
+      <!--这是项目中第一个<router-view>，它对应最外层的路由-->
     </transition>
   </div>
 </template>
@@ -25,5 +26,8 @@
   }
   .el-message-box {
     width: 280px;
+  }
+  #app {
+    min-width: 950px;
   }
 </style>

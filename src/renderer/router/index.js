@@ -14,7 +14,7 @@ export default new Router({
     {
       path: '/wallet-account',
       name: 'wallet-account',
-      component: require('@/components/WalletAccount/WalletAccount').default,
+      component: require('@/components/WalletAccount/Layout').default,
       children: [
         {
           path: '/wallets',
