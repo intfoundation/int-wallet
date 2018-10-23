@@ -19,9 +19,9 @@ function createWindow() {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 563,
+    height: 663,
     useContentSize: true,
-    width: 1100,
+    width: 1200,
     title: 'INT Wallet',
   });
 

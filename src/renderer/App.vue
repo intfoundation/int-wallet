@@ -14,6 +14,7 @@
 </script>
 
 <style lang="scss">
+  @import './style/common';
   * {
     box-sizing: border-box;
     margin: 0;
@@ -28,6 +29,6 @@
     width: 280px;
   }
   #app {
-    min-width: 950px;
+    min-width: 1200px;
   }
 </style>

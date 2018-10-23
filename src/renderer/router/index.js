@@ -22,6 +22,11 @@ export default new Router({
           component: require('@/components/WalletAccount/Wallets').default,
         },
         {
+          path: '/accounts/detail',
+          name: 'AccountsDetail',
+          component: require('@/components/WalletAccount/AccountsDetail').default,
+        },
+        {
           path: '/send',
           name: 'send',
           component: require('@/components/WalletAccount/Send').default,

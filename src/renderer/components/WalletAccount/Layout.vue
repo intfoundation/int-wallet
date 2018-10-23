@@ -1,24 +1,4 @@
 <template>
-    <!--<div id="wrapper">-->
-        <!--<el-row>-->
-            <!--<el-col :span="24" class="header">-->
-                <!--<el-menu :default-active="activeIndex" class="el-menu-nav" mode="horizontal" @select="">-->
-                    <!--<el-menu-item index="1" @click="walletInfor">Wallets</el-menu-item>-->
-                    <!--<el-menu-item index="2" @click="sendTx">Send</el-menu-item>-->
-                    <!--<el-menu-item index="3" @click="mortgage">Mortgage</el-menu-item>-->
-                    <!--<el-menu-item index="4" @click="unmortgage">Unmortgage</el-menu-item>-->
-                    <!--<el-menu-item index="5" @click="vote">Vote</el-menu-item>-->
-                <!--</el-menu>-->
-            <!--</el-col>-->
-        <!--</el-row>-->
-        <!--<el-row>-->
-            <!--<el-col :span="24" class="main">-->
-                <!--<transition name="el-fade-in-linear">-->
-                    <!--<router-view></router-view>-->
-                <!--</transition>-->
-            <!--</el-col>-->
-        <!--</el-row>-->
-    <!--</div>-->
     <el-container>
         <el-header>
           <div class="wrapper">
@@ -44,42 +24,42 @@
         </el-header>
         <el-container>
             <el-aside width="200px">
-              <div class="aside-item">
+              <router-link class="aside-item" to="/wallets" tag="div">
                 <div class="aside-item-inner">
                   <i class="wallet icon-common"></i>
                   <span>Wallets</span>
                 </div>
-              </div>
-              <div class="aside-item">
+              </router-link>
+              <router-link class="aside-item" to="/send" tag="div">
                 <div class="aside-item-inner">
                   <i class="send icon-common"></i>
                   <span>Send</span>
                 </div>
-              </div>
-              <div class="aside-item">
+              </router-link>
+              <router-link class="aside-item" to="/" tag="div">
                 <div class="aside-item-inner">
                   <i class="tokens icon-common"></i>
                   <span>Custom Tokens</span>
                 </div>
-              </div>
-              <div class="aside-item">
+              </router-link>
+              <router-link class="aside-item" to="/mortgage" tag="div">
                 <div class="aside-item-inner">
                   <i class="mortgage icon-common"></i>
                   <span>Mortgage</span>
                 </div>
-              </div>
-              <div class="aside-item">
+              </router-link>
+              <router-link class="aside-item" to="/unmortgage" tag="div">
                 <div class="aside-item-inner">
                   <i class="unmortgage icon-common"></i>
                   <span>Unmortgage</span>
                 </div>
-              </div>
-              <div class="aside-item">
+              </router-link>
+              <router-link class="aside-item" to="/vote" tag="div">
                 <div class="aside-item-inner">
                   <i class="vote icon-common"></i>
                   <span>Vote</span>
                 </div>
-              </div>
+              </router-link>
             </el-aside>
             <el-main>
                 <router-view></router-view>
@@ -125,7 +105,6 @@
 
     },
   };
-
 </script>
 
 <style scoped lang="scss">
@@ -176,6 +155,7 @@
     .aside-item {
       height: 60px;
       border: 1px solid #e5edff;
+        cursor: pointer;
       .aside-item-inner {
         line-height: 60px;
         margin-left: 25px;
@@ -225,11 +205,5 @@
   .el-main {
     background-color: #f5f5f5;
     padding: 70px 50px;
-  }
-  .icon-common {
-      display: inline-block;
-      vertical-align: middle;
-      background-size: cover;
-      background-size: cover;
   }
 </style>

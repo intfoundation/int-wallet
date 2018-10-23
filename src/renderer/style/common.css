@@ -1,0 +1,42 @@
+.icon-common {
+    display: inline-block;
+    vertical-align: middle;
+    background-size: cover;
+}
+.item-title {
+    padding: 28px 32px;
+    border-bottom: 1px solid #ccc;
+}
+.item-content {
+    padding: 40px 85px;
+}
+.first-text {
+    color: #3C31D7;
+    font-size: 28px;
+}
+.small-text {
+    color: #999;
+    margin: 10px 0;
+}
+
+.two-btn {
+    padding: 15px;
+}
+.two-btn .el-col:first-of-type {
+    border-right: 1px solid #ccc;
+}
+.two-btn .el-button {
+    border: none;
+}
+.two-btn .el-button:hover {
+    background: none;
+}
+.two-btn .btn1:hover {
+    color: #333;
+}
+.two-btn .btn2 {
+    color: #3C31D7;
+}
+.two-btn .btn2:hover {
+    color: #3C31D7;
+}
