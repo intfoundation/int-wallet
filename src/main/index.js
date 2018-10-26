@@ -1,5 +1,4 @@
 import { app, BrowserWindow, ipcMain } from 'electron' // eslint-disable-line
-// import fs from 'fs';
 
 /**
  * Set `__static` path to static files in production
