@@ -88,7 +88,7 @@
         <span slot="footer" class="dialog-footer">
           <el-row>
             <el-col :span="12"><el-button @click="visible = false" class="btn1">Cancel</el-button></el-col>
-            <el-col :span="12"><el-button @click="addAccount" class="btn2">Confirm</el-button></el-col>
+            <el-col :span="12"><el-button @click="addAccount()" class="btn2">Confirm</el-button></el-col>
           </el-row>
         </span>
       </el-dialog>
@@ -145,15 +145,15 @@
   // import { ipcRenderer } from 'electron';
 
   const intjs = new Intjs('localhost', 18089);
-  const cardList = [];
-  for (let i = 0; i < 4; i += 1) {
-    cardList.push({
-      account: 'Accounts1',
-      value: '2.99',
-      address: '0xaf09dec48FDd83D2ac…',
-      url: '/accounts/detail',
-    });
-  }
+  // const cardList = [];
+  // for (let i = 0; i < 4; i += 1) {
+  //   cardList.push({
+  //     account: 'Accounts1',
+  //     value: '2.99',
+  //     address: '0xaf09dec48FDd83D2ac…',
+  //     url: '/accounts/detail',
+  //   });
+  // }
   export default {
     name: 'wallets',
     data() {
@@ -161,11 +161,11 @@
         fileName: [],
         balance: [],
         searchTx: '',
-        visible: true,
+        visible: false,
         showPassword: false,
         carefulVisible: false,
         transactionVisible: false,
-        card: cardList,
+        card: [],
       };
     },
     methods: {
@@ -177,9 +177,14 @@
        * 初始化
        * */
       async init () {
-        let files = await intjs.readFile();
-        if (files.err) {
-          this.$message.error('读取 keystore 文件名出错');
+        let files = await intjs.accounts();
+        if (!files) {
+            // console.log(files);
+            this.$message({
+                message: '请先创建帐户',
+                type: 'warning'
+            });
+
         } else {
           this.fileName = files;
           let balanceArray = [];
@@ -189,12 +194,12 @@
             balanceArray.push({address: address, balance: result.balance});
           });
           // TODO 异步拿到的数据怎么排序？
-          if (balanceArray.length !== 0) {
-            balanceArray.sort(function (a, b) {
-              console.log(b.balance - a.balance);
-              return (b.balance - a.balance);
-            });
-          }
+          // if (balanceArray.length !== 0) {
+          //   balanceArray.sort(function (a, b) {
+          //     console.log(b.balance - a.balance);
+          //     return (b.balance - a.balance);
+          //   });
+          // }
           this.balance = balanceArray;
         }
       },
@@ -205,21 +210,24 @@
       /**
        * 创建帐户
        * */
-      addAccount() {
-        this.$prompt('请输入密码', '创建帐户', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          inputPattern: /[\w]{9,}/,
-          inputErrorMessage: '密码格式不正确',
-        }).then(async ({ value }) => {
-          await this.createWallet(value);
-          await this.init();
-
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '取消输入',
-          });
+      addAccount(password) {
+        // this.$prompt('请输入密码', '创建帐户', {
+        //   confirmButtonText: '确定',
+        //   cancelButtonText: '取消',
+        //   inputPattern: /[\w]{9,}/,
+        //   inputErrorMessage: '密码格式不正确',
+        // }).then(async ({ value }) => {
+        //   await this.createWallet(value);
+        //   await this.init();
+        //
+        // }).catch(() => {
+        //   this.$message({
+        //     type: 'info',
+        //     message: '取消输入',
+        //   });
+        // });
+        setImmediate(async () => {
+            await this.createWallet(password);
         });
       },
 

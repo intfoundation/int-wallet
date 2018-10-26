@@ -61,7 +61,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "element-ui": "^2.4.6",
-    "intjs": "^1.6.34",
+    "intjs": "^1.6.36",
     "msgpack-lite": "^0.1.26",
     "scrypt": "^6.0.3",
     "vue": "^2.5.16",
