@@ -36,7 +36,7 @@
                   <span>Send</span>
                 </div>
               </router-link>
-              <router-link class="aside-item" to="/" tag="div">
+              <router-link class="aside-item" to="/token" tag="div">
                 <div class="aside-item-inner">
                   <i class="tokens icon-common"></i>
                   <span>Custom Tokens</span>

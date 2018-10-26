@@ -1,8 +1,8 @@
 <template>
     <div class="accounts-detail">
-        <div class="item-title">
+        <div class="item-title" style="font-weight: 500;">
             <i class="wallet icon-common"></i>
-            <router-link to="/wallets">Wallets</router-link>
+            <router-link to="/wallets" class="crumb-wallet">Wallets</router-link>
             <span class="trangle"></span>
             <span>Accounts Details</span>
         </div>
@@ -53,16 +53,13 @@
             </div>
         </div>
         <el-dialog
-                title="Create an account"
-                :visible="aaa"
-                center>
-            <div class="notice-item">
-                <i class="notice icon-common"></i>
-                <span>Password entry error</span>
-            </div>
+            title="Show QR-Code"
+            :visible.sync="aaa"
+            center>
+           <div>Point a compatible mobile app to this code</div>
             <span slot="footer" class="dialog-footer">
           <el-row>
-            <el-col :span="12"><el-button @click="visible = false" class="btn1">Cancel</el-button></el-col>
+            <el-col :span="12"><el-button @click="aaa = false" class="btn1">Cancel</el-button></el-col>
             <el-col :span="12"><el-button  class="btn2">Confirm</el-button></el-col>
           </el-row>
         </span>
@@ -74,7 +71,7 @@
     export default {
       data() {
         return {
-          aaa: false,
+          aaa: true,
         };
       },
     };
@@ -89,6 +86,13 @@
             height: 15px;
             background-image: url('../../assets/images/wallet.png');
             margin-right: 10px;
+        }
+        .crumb-wallet {
+            text-decoration: none;
+            color: #333;
+        }
+        .crumb-wallet:hover {
+            color: #3C31D7;
         }
         .trangle {
             display: inline-block;

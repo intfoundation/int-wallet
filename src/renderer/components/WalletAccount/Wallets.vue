@@ -61,6 +61,7 @@
       <el-dialog
         title="Create an account"
         :visible.sync="visible"
+        class="two-btn"
         center>
         <div class="input-entire">
           <input
@@ -160,7 +161,7 @@
         fileName: [],
         balance: [],
         searchTx: '',
-        visible: false,
+        visible: true,
         showPassword: false,
         carefulVisible: false,
         transactionVisible: false,
@@ -283,10 +284,7 @@
           color: #666;
           margin-bottom: 28px;
         }
-        .have-account-first {
-          color: #999;
-          margin: 10px 0;
-        }
+
         .blue {
           background-color: #2B68FD;
         }
@@ -485,27 +483,6 @@
               color: #D7316F;
               font-size: 12px;
             }
-          }
-        }
-        .el-dialog__footer {
-          padding: 15px;
-          .el-col:first-of-type {
-            border-right: 1px solid #ccc;
-          }
-          .el-button {
-            border: none;
-          }
-          .el-button:hover {
-            background: none;
-          }
-          .btn1:hover {
-            color: #333;
-          }
-          .btn2 {
-            color: #3C31D7;
-          }
-          .btn2:hover {
-            color: #3C31D7;
           }
         }
         .openEye {

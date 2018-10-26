@@ -7,6 +7,12 @@
     padding: 28px 32px;
     border-bottom: 1px solid #ccc;
 }
+.item-title .item-text {
+    font-size: 16px;
+    display: inline-block;
+    margin-left: 10px;
+    vertical-align: middle;
+}
 .item-content {
     padding: 40px 85px;
 }
@@ -19,24 +25,133 @@
     margin: 10px 0;
 }
 
-.two-btn {
+.second-detail {
+    padding-top: 24px;
+    text-align: left;
+    padding-left: 40px;
+}
+.second-detail > div > span:nth-of-type(1) {
+    display: inline-block;
+    text-align: right;
+    width: 100px;
+    margin-right: 10px;
+    color: #999;
+}
+.second-detail > div > span:nth-of-type(2) {
+    color: #666;
+}
+.second-detail > div:not(first-of-type) {
+    margin-bottom: 15px;
+}
+
+.dark-blue-header .el-dialog__header {
+    background-color: #F4F8FF;
+    text-align: left;
+    border-bottom: 1px solid #ccc;
+    padding: 20px;
+}
+
+.have-account-first {
+    color: #999;
+    margin: 10px 0;
+}
+
+.el-dialog {
+    min-height: 100px !important;
+    min-width: 500px;
+    max-width: 600px;
+}
+.el-dialog .el-dialog__body {
+    border-bottom: 1px solid #ccc;
+}
+
+.two-btn .el-dialog__footer {
     padding: 15px;
 }
+
 .two-btn .el-col:first-of-type {
     border-right: 1px solid #ccc;
 }
+
+.two-btn .el-row {
+    margin: 0;
+}
+
 .two-btn .el-button {
     border: none;
 }
-.two-btn .el-button:hover {
+
+.two-btn  .el-button:hover {
     background: none;
 }
-.two-btn .btn1:hover {
+.two-btn  .btn1:hover {
     color: #333;
 }
 .two-btn .btn2 {
     color: #3C31D7;
 }
-.two-btn .btn2:hover {
+.two-btn  .btn2:hover {
     color: #3C31D7;
 }
+
+.transactionForm .el-form-item {
+    float: left;
+    width: 45%;
+    margin-right: 20px;
+    margin-bottom: 24px;
+}
+
+.transactionForm .el-form-item__label {
+    padding: 0;
+}
+
+.transactionForm .el-input__inner {
+    height: 38px;
+    line-height: 38px;
+}
+
+.transactionForm .send-btn {
+    background-color: #3C31D7;
+    width: 192px;
+    color: #fff;
+    height: 40px;
+    border-radius: 4px;
+    margin-top: 36px;
+}
+
+.transactionForm .fee {
+    width: 330px;
+}
+
+.transactionForm .send-btn > span {
+    opacity: 0.85;
+}
+
+.transactionForm .declare1 {
+    color: #999;
+    line-height: 24px;
+    margin-bottom: 5px;
+}
+.transactionForm .declare2 {
+    font-weight: 500;
+}
+
+.transactionForm .total-value {
+    color: #3c31d7;
+    font-size: 22px;
+}
+
+.transactionForm .el-slider__bar {
+    background-color: #3C31D7;
+}
+.transactionForm .el-slider__runway {
+    background-color: #D1E0FB;
+}
+.transactionForm .el-slider__button {
+    width: 18px;
+    height: 18px;
+    background-image: url("../../static/slide.png"); // 该文件引用位置相对于图片的路径
+    background-size: cover;
+    border: none;
+}
+

@@ -32,6 +32,11 @@ export default new Router({
           component: require('@/components/WalletAccount/Send').default,
         },
         {
+          path: '/token',
+          name: 'token',
+          component: require('@/components/WalletAccount/Token').default,
+        },
+        {
           path: '/mortgage',
           name: 'mortgage',
           component: require('@/components/WalletAccount/Mortgage').default,

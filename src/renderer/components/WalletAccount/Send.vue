@@ -1,64 +1,116 @@
 <template>
     <div class="send">
-        <h3 class="title">Send</h3>
-        <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
-            <el-form-item label="FROM">
-                <el-select class="select-from" v-model="formLabelAlign.from" placeholder="" @change="selectFrom">
-                    <el-option v-for="(item, index) in balance" :key="item.address" :label="'Account-' + ++index" :value="item.address"></el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="TO">
-                <el-input v-model="formLabelAlign.to"></el-input>
-            </el-form-item>
-            <el-form-item label="AMOUNT">
-                <el-input v-model="formLabelAlign.amount">{{checked ? formLabelAlign.balance : formLabelAlign.amount}}</el-input>
-            </el-form-item>
-            <el-form-item label="BALANCE">
-                <el-input class="balance" v-model="formLabelAlign.balance" readonly>{{formLabelAlign.balance}}</el-input>
-            </el-form-item>
-            <template>
-                <!-- `checked` 为 true 或 false -->
-                <el-checkbox v-model="checked">Send everything</el-checkbox>
-            </template>
-        </el-form>
-        <el-row class="want-to-send">
-            <el-col :span="6">
-                You want to send <b>{{formLabelAlign.amount}} INT.</b>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span="8" class="fee">
-                <span class="title">SELECT FEE</span>
-                <p><b>{{formLabelAlign.fee/20}}</b> INT</p>
-                <el-slider v-model="formLabelAlign.fee"></el-slider>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span="8" class="total">
-                <span class="title">TOTAL</span>
-                <p><b>{{Number(formLabelAlign.amount) + formLabelAlign.fee/20}}</b> INT</p>
-            </el-col>
-        </el-row>
-        <hr>
-        <el-row>
-            <el-col :span="4">
-                <el-button type="primary" @click="sendTransaction">SEND</el-button>
-            </el-col>
-        </el-row>
+        <div class="item-title">
+            <i class="send-icon icon-common"></i>
+            <span class="item-text">Send</span>
+        </div>
+        <div class="item-content">
+            <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign" class="transactionForm">
+                <div class="first-text" style="margin-bottom: 16px;">Send founds</div>
+                <el-form-item label="FROM">
+                    <el-select class="select-from" v-model="formLabelAlign.from" placeholder="" @change="selectFrom">
+                        <el-option v-for="(item, index) in balance" :key="item.address" :label="'Account-' + ++index" :value="item.address"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="TO">
+                    <el-input v-model="formLabelAlign.to" placeholder="0x000000…"></el-input>
+                </el-form-item>
+                <el-form-item label="AMOUNT">
+                    <el-input v-model="formLabelAlign.amount" placeholder="0.0">
+                        {{checked ? formLabelAlign.balance : formLabelAlign.amount}}</el-input>
+                </el-form-item>
+                <!--这里数据没有就暂时没有写select框-->
+                <el-form-item label="BALANCE">
+                    <el-input class="balance" v-model="formLabelAlign.balance" readonly>{{formLabelAlign.balance}}</el-input>
+                </el-form-item>
+                <template>
+                    <!-- `checked` 为 true 或 false -->
+                    <el-checkbox v-model="checked">Send everything</el-checkbox>
+                </template>
+
+                <el-row class="want-to-send">
+                    <el-col :span="6">
+                        You want to send <span style="font-size: 16px;color: #3c31d7;">{{formLabelAlign.amount}}</span> INT.
+                    </el-col>
+                </el-row>
+                <el-row style="margin-top: 40px;">
+                    <el-col  class="fee">
+                        <span class="title">SELECT FEE</span>
+                        <p><b>{{formLabelAlign.fee/20}}</b> INT</p>
+                        <el-slider v-model="formLabelAlign.fee"></el-slider>
+                        <div>
+                            <span>CHEAPER</span>
+                            <span style="float: right;">FASTER</span>
+                        </div>
+                    </el-col>
+                    <el-col :span="11" style="float: right;">
+                        <div class="declare1">This is the most amount of money that might be used to process this transaction. Your transaction will be mined</div>
+                        <div class="declare2">probably within 30 seconds.</div>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8" style="margin-top: 40px;">
+                        <span class="title" style="font-size: 16px;">TOTAL</span>
+                        <p><span class="total-value">{{Number(formLabelAlign.amount) + formLabelAlign.fee/20}}</span> INT</p>
+                    </el-col>
+                </el-row>
+                <el-button @click="sendTransaction" class="send-btn"><span>SEND</span></el-button>
+            </el-form>
+
+        </div>
+
+        <!--点击send之后的弹框-->
         <el-dialog
-                title="Transaction"
-                :visible.sync="centerDialogVisible"
-                width="40%"
-                center>
-            <p>From: <span>{{formLabelAlign.from}}</span></p>
-            <p>To: <span>{{formLabelAlign.to}}</span></p>
-            <p>Amount: <span>{{formLabelAlign.amount}}</span></p>
-            <p>Fee: <span>{{formLabelAlign.fee/20}}</span></p>
-            <p>Password: <input type="password" placeholder="Enter password" v-model="password"></p>
+            title="Transaction"
+            :visible.sync="centerDialogVisible"
+            width="40%"
+            center
+            class="dark-blue-header two-btn">
+            <div class="second-detail" style="padding-bottom: 15px;border-bottom: 1px solid #ccc;">
+                <div>
+                    <span>Amount:</span>
+                    <span>{{formLabelAlign.amount}}</span>
+                </div>
+                <div>
+                    <span>From:</span>
+                    <span>{{formLabelAlign.from}}</span>
+                </div>
+                <div>
+                    <span>To:</span>
+                    <span>{{formLabelAlign.to}}</span>
+                </div>
+                <div>
+                    You are about to execute a function on a contract. This mightinvolve transfer
+                    of value.
+                </div>
+            </div>
+
+            <div class="stripe">
+                <div class="stripe-item">
+                    <span>Estimated fee consumption</span>
+                    <span>00007512 INT (37.559 gas)</span>
+                </div>
+
+                <div class="stripe-item">
+                    <span>00007512 INT (37.559 gas)</span>
+                    <span>0.00027512 INT (137.559 gas)</span>
+                </div>
+
+                <div class="stripe-item">
+                    <span>Gas price</span>
+                    <span>0.002 INT per mllin gas</span>
+                </div>
+
+                <div style="text-align: center">
+                    <el-input type="password" placeholder="Enter password to confim the transaction" v-model="password"></el-input>
+                </div>
+            </div>
             <span slot="footer" class="dialog-footer">
-            <el-button @click="cancelTransaction">Cancel</el-button>
-            <el-button type="primary" @click="submitTransaction">Send Transaction</el-button>
-          </span>
+              <el-row>
+                <el-col :span="12"><el-button @click="visible = false" class="btn1">Cancel</el-button></el-col>
+                <el-col :span="12"><el-button class="btn2">Confirm</el-button></el-col>
+              </el-row>
+            </span>
         </el-dialog>
 
     </div>
@@ -79,12 +131,12 @@
         checked: false,
         isSelected: true,
         labelPosition: 'top',
-        centerDialogVisible: false,
+        centerDialogVisible: true,
         password: '',
         formLabelAlign: {
           from: '',
           to: '',
-          amount: 0.00,
+          amount: '',
           balance: 0.00,
           fee: 20,
         },
@@ -197,53 +249,67 @@
   };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
     .send {
-        padding: 20px 40px;
-        .el-form {
-            margin-top: 30px;
+        background-color: #fff;
+        border-radius: 5px;
+        .send-icon {
+            width: 18px;
+            height: 18px;
+            background-image: url("../../assets/images/send.png");
         }
         .want-to-send {
-            margin-top: 20px!important;
+            margin-top: 20px !important;
         }
-        .el-form-item {
-            float: left;
-            width: 45%;
-            margin-right: 20px;
-            .el-select {
-                width: 100%;
-            }
-        }
+        /*.el-form-item {*/
+            /*float: left;*/
+            /*width: 45%;*/
+            /*margin-right: 20px;*/
+            /*margin-bottom: 24px;*/
+            /*.el-select {*/
+                /*width: 100%;*/
+            /*}*/
+            /*.el-form-item__label {*/
+                /*padding: 0;*/
+            /*}*/
+            /*.el-input__inner {*/
+                /*height: 38px;*/
+                /*line-height: 38px;*/
+            /*}*/
+
+        /*}*/
+
+
         .el-row {
-            margin: 50px 0;
             .title {
                 display: inline-block;
                 font-weight: 500;
                 margin-bottom: 20px;
             }
             .fee {
-
+                width: 330px;
             }
         }
         .el-dialog {
-            min-height: 100px!important;
-            .el-dialog__header {
+            min-height: 100px !important;
+            min-width: 500px;
+            max-width: 600px;
 
-            }
-            .el-dialog__body {
-                min-height: 100px;
-                .el-from {
-                    min-height: 80px;
+            .stripe {
+                padding: 20px 10px 0px;
+                .stripe-item {
+                    background-color: #F4F8FF;
+                    border-radius: 4px;
+                    padding: 9px 14px;
+                    margin-bottom: 10px;
+                    font-size: 13px;
+                    & > span:nth-of-type(2) {
+                        float: right;
+                    }
                 }
-                p {
-                    width: 100%;
-                    margin: 10px auto;
-                    span {
-                        font-size: 12px;
-                    }
-                    input {
-                        padding: 5px 10px;
-                    }
+                .el-input {
+                    margin-top: 20px;
+                    width: 300px;
                 }
             }
         }

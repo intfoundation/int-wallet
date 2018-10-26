@@ -1,55 +1,70 @@
 <template>
     <div class="mortgage">
-        <h3 class="title">Mortgage</h3>
-        <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
-            <el-form-item label="ACCOUNT">
-                <el-select class="select-from" v-model="formLabelAlign.account" placeholder="" @change="selectAccount">
-                    <el-option v-for="(item, index) in balance" :key="item.address" :label="'Account-' + ++index" :value="item.address"></el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="VOTES">
-                <el-input v-model="formLabelAlign.votes" readonly></el-input>
-            </el-form-item>
-            <el-form-item label="AMOUNT">
-                <el-input v-model="formLabelAlign.amount">{{formLabelAlign.amount}}</el-input>
-            </el-form-item>
-            <el-form-item label="BALANCE">
-                <el-input class="balance" v-model="formLabelAlign.balance" readonly>{{formLabelAlign.balance}}</el-input>
-            </el-form-item>
-            <template>
-                <!-- `checked` 为 true 或 false -->
-                <el-checkbox v-model="checked">Mortgage all</el-checkbox>
-            </template>
-        </el-form>
-        <el-row class="want-to-send">
-            <el-col :span="6">
-                You want to mortgage <b>{{formLabelAlign.amount}} votes.</b>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span="8" class="fee">
-                <span class="title">SELECT FEE</span>
-                <p><b>{{formLabelAlign.fee/20}}</b> INT</p>
-                <el-slider v-model="formLabelAlign.fee"></el-slider>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span="8" class="total">
-                <span class="title">TOTAL</span>
-                <p><b>{{Number(formLabelAlign.amount) + formLabelAlign.fee/20}}</b> INT</p>
-            </el-col>
-        </el-row>
-        <hr>
-        <el-row>
-            <el-col :span="4">
-                <el-button type="primary" @click="sendTransaction">SEND</el-button>
-            </el-col>
-        </el-row>
+        <div class="item-title">
+            <i class="mortgage-icon icon-common"></i>
+            <span class="item-text">Mortgage</span>
+        </div>
+
+        <div class="item-content">
+            <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign" class="transactionForm">
+                <el-form-item label="ACCOUNT">
+                    <el-select class="select-from" v-model="formLabelAlign.account" placeholder="" @change="selectAccount">
+                        <el-option v-for="(item, index) in balance" :key="item.address" :label="'Account-' + ++index" :value="item.address"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="VOTES">
+                    <el-input v-model="formLabelAlign.votes" readonly></el-input>
+                </el-form-item>
+                <el-form-item label="AMOUNT">
+                    <el-input v-model="formLabelAlign.amount">{{formLabelAlign.amount}}</el-input>
+                </el-form-item>
+                <el-form-item label="BALANCE">
+                    <el-input class="balance" v-model="formLabelAlign.balance" readonly>{{formLabelAlign.balance}}</el-input>
+                </el-form-item>
+                <template>
+                    <!-- `checked` 为 true 或 false -->
+                    <el-checkbox v-model="checked">Mortgage all</el-checkbox>
+                </template>
+
+                <el-row class="want-to-send">
+                    <el-col :span="7">
+                        You want to mortgage <span style="font-size: 16px;color: #3c31d7;">{{formLabelAlign.amount}}</span> votes.
+                    </el-col>
+                </el-row>
+
+                <el-row style="margin-top: 40px;">
+                    <el-col  class="fee">
+                        <span class="title">SELECT FEE</span>
+                        <p><b>{{formLabelAlign.fee/20}}</b> INT</p>
+                        <el-slider v-model="formLabelAlign.fee"></el-slider>
+                        <div>
+                            <span>CHEAPER</span>
+                            <span style="float: right;">FASTER</span>
+                        </div>
+                    </el-col>
+                    <el-col :span="11" style="float: right;">
+                        <div class="declare1">This is the most amount of money that might be used to process this transaction. Your transaction will be mined</div>
+                        <div class="declare2">probably within 30 seconds.</div>
+                    </el-col>
+                </el-row>
+
+                <el-row>
+                    <el-col :span="8" style="margin-top: 40px;">
+                        <span class="title">TOTAL</span>
+                        <p><span class="total-value">{{Number(formLabelAlign.amount) + formLabelAlign.fee/20}}</span> INT</p>
+                    </el-col>
+                </el-row>
+
+                <el-button  class="send-btn"><span>SEND</span></el-button>
+            </el-form>
+
+
+        </div>
         <el-dialog
-                title="Mortgage"
-                :visible.sync="centerDialogVisible"
-                width="40%"
-                center>
+            title="Mortgage"
+            :visible.sync="centerDialogVisible"
+            width="40%"
+            center>
             <p>Account: <span>{{formLabelAlign.account}}</span></p>
             <p>Votes: <span>{{formLabelAlign.votes}}</span></p>
             <p>Amount: <span>{{formLabelAlign.amount}}</span></p>
@@ -203,14 +218,17 @@
   };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
     .mortgage {
-        padding: 20px 40px;
-        .el-form {
-            margin-top: 30px;
+        border-radius: 5px;
+        background-color: #fff;
+        .mortgage-icon {
+            width: 18px;
+            height: 18px;
+            background-image: url("../../assets/images/mortgage.png");
         }
         .want-to-send {
-            margin-top: 20px!important;
+            margin-top: 20px !important;
         }
         .el-form-item {
             float: left;
@@ -221,37 +239,15 @@
             }
         }
         .el-row {
-            margin: 50px 0;
             .title {
                 display: inline-block;
                 font-weight: 500;
                 margin-bottom: 20px;
             }
-            .fee {
-
-            }
         }
         .el-dialog {
-            min-height: 100px!important;
-            .el-dialog__header {
+            min-height: 100px !important;
 
-            }
-            .el-dialog__body {
-                min-height: 100px;
-                .el-from {
-                    min-height: 80px;
-                }
-                p {
-                    width: 100%;
-                    margin: 10px auto;
-                    span {
-                        font-size: 12px;
-                    }
-                    input {
-                        padding: 5px 10px;
-                    }
-                }
-            }
         }
     }
 </style>

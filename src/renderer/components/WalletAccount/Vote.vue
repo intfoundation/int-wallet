@@ -1,72 +1,72 @@
 <template>
     <div class="vote">
-        <h3 class="title">Vote</h3>
-        <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
-            <el-form-item label="FROM">
-                <el-select class="select-from" v-model="formLabelAlign.from" placeholder="" @change="selectFrom">
-                    <el-option v-for="(item, index) in balance" :key="item.address" :label="'Account-' + ++index" :value="item.address"></el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="VOTES">
-                <el-input v-model="formLabelAlign.votes"></el-input>
-            </el-form-item>
-            <!--<el-form-item label="AMOUNT">-->
-                <!--<el-input v-model="formLabelAlign.amount">{{formLabelAlign.amount}}</el-input>-->
-            <!--</el-form-item>-->
-            <el-form-item label="BALANCE">
-                <el-input class="balance" v-model="formLabelAlign.balance" readonly>{{formLabelAlign.balance}}</el-input>
-            </el-form-item>
-        </el-form>
-        <template>
-            <el-row class="candidates">
-                <el-col :span="8">
-                    <span class="title">Candidates</span>
-                </el-col>
-            </el-row>
-            <el-table
-                    :data="candidates"
-                    tooltip-effect="dark"
-                    style="width: 100%"
-                    @selection-change="handleSelectionChange">
-                <el-table-column
-                        type="selection"
-                        width="55">
-                </el-table-column>
-                <el-table-column
-                        label="Address"
-                        width="500">
-                    <template slot-scope="scope">{{ scope.row.address }}</template>
-                </el-table-column>
-                <el-table-column
-                        prop="votes"
-                        label="Votes"
-                        show-overflow-tooltip>
-                </el-table-column>
-            </el-table>
-            <!--<div style="margin-top: 20px">-->
-                <!--<el-button @click="toggleSelection([tableData3[1], tableData3[2]])">切换第二、第三行的选中状态</el-button>-->
-                <!--<el-button @click="toggleSelection()">取消选择</el-button>-->
-            <!--</div>-->
-        </template>
-        <el-row>
-            <el-col :span="8" class="fee">
-                <span class="title">SELECT FEE</span>
-                <p><b>{{formLabelAlign.fee/20}}</b> INT</p>
-                <el-slider v-model="formLabelAlign.fee"></el-slider>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span="8" class="total">
-                <span class="title">TOTAL</span>
-                <p><b>{{formLabelAlign.fee/20}}</b> INT</p>
-            </el-col>
-        </el-row>
-        <hr>
-        <el-row>
-            <el-col :span="4">
-                <el-button type="primary" @click="sendTransaction">SEND</el-button>
-            </el-col>
-        </el-row>
+        <div class="item-title">
+            <i class="vote-icon icon-common"></i>
+            <span class="item-text">Vote</span>
+        </div>
+
+        <div class="item-content">
+            <div class="transactionForm">
+                <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign" style="overflow: hidden">
+                    <el-form-item label="FROM">
+                        <el-select class="select-from" v-model="formLabelAlign.from" placeholder="" @change="selectFrom">
+                            <el-option v-for="(item, index) in balance" :key="item.address" :label="'Account-' + ++index" :value="item.address"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="VOTES">
+                        <el-input v-model="formLabelAlign.votes"></el-input>
+                    </el-form-item>
+                    <el-form-item label="BALANCE">
+                        <el-input class="balance" v-model="formLabelAlign.balance" readonly>{{formLabelAlign.balance}}</el-input>
+                    </el-form-item>
+
+
+                </el-form>
+                <template>
+                    <div class="title" style="margin-top: 25px;">Candidates</div>
+                </template>
+                <el-table
+                        :data="candidates"
+                        tooltip-effect="dark"
+                        style="width: 100%"
+                        @selection-change="handleSelectionChange">
+                    <el-table-column
+                            type="selection"
+                            width="55">
+                    </el-table-column>
+                    <el-table-column
+                            label="Address"
+                            width="500">
+                        <template slot-scope="scope">{{ scope.row.address }}</template>
+                    </el-table-column>
+                    <el-table-column
+                            prop="votes"
+                            label="Votes"
+                            show-overflow-tooltip>
+                    </el-table-column>
+                </el-table>
+                <el-row style="margin-top: 40px;">
+                    <el-col  class="fee">
+                        <span class="title">SELECT FEE</span>
+                        <p><b>{{formLabelAlign.fee/20}}</b> INT</p>
+                        <el-slider v-model="formLabelAlign.fee"></el-slider>
+                        <div>
+                            <span>CHEAPER</span>
+                            <span style="float: right;">FASTER</span>
+                        </div>
+                    </el-col>
+                    <el-col :span="11" style="float: right;">
+                        <div class="declare1">This is the most amount of money that might be used to process this transaction. Your transaction will be mined</div>
+                        <div class="declare2">probably within 30 seconds.</div>
+                    </el-col>
+                </el-row>
+                <el-button  class="send-btn"><span>SEND</span></el-button>
+            </div>
+
+
+        </div>
+
+
         <el-dialog
                 title="Transaction"
                 :visible.sync="centerDialogVisible"
@@ -81,7 +81,6 @@
             <el-button type="primary" @click="submitTransaction">Send Transaction</el-button>
           </span>
         </el-dialog>
-
     </div>
 </template>
 
@@ -272,13 +271,17 @@
   };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
     .vote {
-        padding: 20px 40px;
-        .el-form {
-            min-height: 200px;
-            margin-top: 30px;
-            margin-bottom: 30px;
+        background-color: #fff;
+        border-radius: 5px;
+        .vote-icon {
+            width: 18px;
+            height: 18px;
+            background-image: url("../../assets/images/vote.png");
+            & > span {
+
+            }
         }
         .want-to-send {
             margin-top: 20px!important;
@@ -292,36 +295,10 @@
             }
         }
         .el-row {
-            margin: 50px 0;
             .title {
                 display: inline-block;
                 font-weight: 500;
                 margin-bottom: 20px;
-            }
-            .fee {
-
-            }
-        }
-        .el-dialog {
-            min-height: 100px!important;
-            .el-dialog__header {
-
-            }
-            .el-dialog__body {
-                min-height: 100px;
-                .el-from {
-                    min-height: 80px;
-                }
-                p {
-                    width: 100%;
-                    margin: 10px auto;
-                    span {
-                        font-size: 12px;
-                    }
-                    input {
-                        padding: 5px 10px;
-                    }
-                }
             }
         }
         .candidates {
