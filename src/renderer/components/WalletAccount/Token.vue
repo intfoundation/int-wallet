@@ -99,14 +99,14 @@
        * 初始化
        * */
       async init () {
-        let files = await intjs.readFile();
+        let files = await intjs.accounts();
         if (files.err) {
           this.$message.error('读取 keystore 文件出错');
         } else {
           this.fileName = files;
           let balanceArray = [];
           this.fileName.forEach(async (value) => {
-            let address = value.slice(0, -5);
+            let address = value;
             let result = await intjs.getBalance(address);
             balanceArray.push({address: address, balance: result.balance});
           });

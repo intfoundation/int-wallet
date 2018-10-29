@@ -19,7 +19,6 @@
                     <el-input v-model="formLabelAlign.amount" placeholder="0.0">
                         {{checked ? formLabelAlign.balance : formLabelAlign.amount}}</el-input>
                 </el-form-item>
-                <!--这里数据没有就暂时没有写select框-->
                 <el-form-item label="BALANCE">
                     <el-input class="balance" v-model="formLabelAlign.balance" readonly>{{formLabelAlign.balance}}</el-input>
                 </el-form-item>
@@ -107,7 +106,7 @@
             </div>
             <span slot="footer" class="dialog-footer">
               <el-row>
-                <el-col :span="12"><el-button @click="visible = false" class="btn1">Cancel</el-button></el-col>
+                <el-col :span="12"><el-button @click="cancelTransaction" class="btn1">Cancel</el-button></el-col>
                 <el-col :span="12"><el-button class="btn2">Confirm</el-button></el-col>
               </el-row>
             </span>
@@ -131,7 +130,7 @@
         checked: false,
         isSelected: true,
         labelPosition: 'top',
-        centerDialogVisible: true,
+        centerDialogVisible: false,
         password: '',
         formLabelAlign: {
           from: '',
@@ -142,23 +141,25 @@
         },
       };
     },
-    components: {
-
-    },
     methods: {
       /* eslint-disable */
       /**
        * 初始化
        * */
       async init () {
-        let files = await intjs.readFile();
+        let files = await intjs.accounts();
         if (files.err) {
           this.$message.error('读取 keystore 文件出错');
+        } else if (files.err) {
+          this.$message({
+            message: '获取账户失败',
+            type: 'error'
+          });
         } else {
           this.fileName = files;
           let balanceArray = [];
           this.fileName.forEach(async (value) => {
-            let address = value.slice(0, -5);
+            let address = value;
             let result = await intjs.getBalance(address);
             balanceArray.push({address: address, balance: result.balance});
           });
@@ -240,11 +241,8 @@
         }
       },
     },
-    computed: {
-
-    },
     mounted() {
-        this.init();
+      this.init();
     },
   };
 </script>

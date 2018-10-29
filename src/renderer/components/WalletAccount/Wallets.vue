@@ -9,17 +9,17 @@
 
       <div class="item-content">
         <div class="first-text">Accounts</div>
-        <div v-if="false" class="no-account-first">YOU HAVE NO ACCOUNTS YET</div>
-        <div v-if="false" class="no-account-second">You need to create at least one account with a strong password</div>
-        <div class="have-account-first">Accounts are password protected keys that can hold Ether and Ethereum-based tokens. They can control contracts, but can't display
+        <div v-if="isHaveAccount" class="no-account-first">YOU HAVE NO ACCOUNTS YET</div>
+        <div v-if="isHaveAccount" class="no-account-second">You need to create at least one account with a strong password</div>
+        <div v-else class="have-account-first">Accounts are password protected keys that can hold Ether and Ethereum-based tokens. They can control contracts, but can't display
           incoming transactions.
         </div>
-        <div style="margin: 30px 0 20px;">
-          <router-link :to="item.url" tag="div" class="accounts" v-for="(item, index) in card"
-                       :class="{'blue': index == 0, 'light-blue': index == 1, 'yellow': index == 2, 'purple': index == 3}">
-            <div>{{item.account}}</div>
-            <div>{{item.value}}<span style="font-size: 14px;">INT</span></div>
-            <div>{{item.address}}</div>
+        <div style="margin: 30px 0 20px;max-width: 700px;">
+          <router-link to="" tag="div" class="accounts" v-for="(item, index) in balance"
+                       :class="{'blue': index%3 == 0, 'light-blue': index%3 == 1, 'yellow': index%3== 2}">
+            <div>Accounts {{index + 1}}</div>
+            <div>{{item.balance / Math.pow(10, 18)}}<span style="font-size: 14px;"> INT</span></div>
+            <div class="account-address">{{item.address}}</div>
           </router-link>
         </div>
         <div>
@@ -27,7 +27,7 @@
           <span class="add-text" @click="pop">ADD ACCOUNT</span>
         </div>
         <div class="transaction">
-          <div v-if="false">Transaction record</div>
+          <div>Transaction record</div>
           <div class="no-transaction">No transaction record.</div>
 
           <!--交易记录-->
@@ -62,49 +62,56 @@
         title="Create an account"
         :visible.sync="visible"
         class="two-btn"
+        @close="some"
         center>
-        <div class="input-entire">
-          <input
-          :type="!showPassword ? 'password' : 'text' "
-          placeholder="Please enter a password of at least 9 characters">
-          <i
-          class="icon-common"
-          :class="!showPassword ? 'openEye' : 'closeEye'"
-          @click="switchEye"></i>
-        </div>
-        <div class="input-entire">
-          <input
-          :type="!showPassword ? 'password' : 'text' "
-          placeholder="Enter the wallet password again">
-          <i
-          class="icon-common"
-          :class="!showPassword ? 'openEye' : 'closeEye'"
-          @click="switchEye"></i>
-        </div>
-        <div class="notice-item">
-          <i class="notice icon-common"></i>
-          <span>Password entry error</span>
-        </div>
-        <span slot="footer" class="dialog-footer">
-          <el-row>
-            <el-col :span="12"><el-button @click="visible = false" class="btn1">Cancel</el-button></el-col>
-            <el-col :span="12"><el-button @click="addAccount()" class="btn2">Confirm</el-button></el-col>
-          </el-row>
-        </span>
-      </el-dialog>
+          <el-dialog
+                  class="hijk"
+                  title="Be careful"
+                  :visible.sync="carefulVisible"
+                  :show-close="showClose"
+                  center
+                  append-to-body>
+              <div class="ttt">Make sure you backup your keyfiles AND password!</div>
+              <div class="fff">You can find your keyfiles folder using the main menu-> File -> Backup
+                  -> Accounts.Keep a copy of the "keystore" folder where you can't lose it!</div>
+              <span slot="footer" class="dialog-footer">
+                  <el-button class="btnConfirm" @click="carefulConfirm" style="font-size: 18px;">Confirm</el-button>
+              </span>
+          </el-dialog>
 
-      <el-dialog
-        class="hijk"
-        title="Be careful"
-        :visible.sync="carefulVisible"
-        center>
-        <div class="ttt">Make sure you backup your keyfiles AND password!</div>
-        <div class="fff">You can find your keyfiles folder using the main menu-> File -> Backup
-        -> Accounts.Keep a copy of the "keystore" folder where you can't lose it!</div>
-        <span slot="footer" class="dialog-footer">
-          <el-button class="btn2" @click="carefulVisible = false" style="font-size: 18px;">Confirm</el-button>
-        </span>
-      </el-dialog>
+
+          <div class="input-entire">
+              <input
+              :type="!showPassword1 ? 'password' : 'text' "
+              v-model="firstPassword"
+              placeholder="Please enter a password of at least 9 characters">
+              <i
+              class="icon-common"
+              :class="!showPassword1 ? 'openEye' : 'closeEye'"
+              @click="switchEye1"></i>
+            </div>
+            <div class="input-entire">
+              <input
+              :type="!showPassword2 ? 'password' : 'text' "
+              v-model="secondPassword"
+              placeholder="Enter the wallet password again">
+              <i
+              class="icon-common"
+              :class="!showPassword2 ? 'openEye' : 'closeEye'"
+              @click="switchEye2"></i>
+            </div>
+            <div class="notice-item" v-if="passwordError">
+              <i class="notice icon-common"></i>
+              <span>Password entry error</span>
+            </div>
+            <span slot="footer" class="dialog-footer">
+              <el-row>
+                <el-col :span="12"><el-button @click="close" class="btn1">Cancel</el-button></el-col>
+                <el-col :span="12"><el-button @click="addAccount" class="btn2" :disabled="passwordError || !firstPassword || !secondPassword">Confirm</el-button></el-col>
+              </el-row>
+            </span>
+        </el-dialog>
+
 
       <el-dialog
         class="txDetail"
@@ -145,15 +152,7 @@
   // import { ipcRenderer } from 'electron';
 
   const intjs = new Intjs('localhost', 18089);
-  // const cardList = [];
-  // for (let i = 0; i < 4; i += 1) {
-  //   cardList.push({
-  //     account: 'Accounts1',
-  //     value: '2.99',
-  //     address: '0xaf09dec48FDd83D2ac…',
-  //     url: '/accounts/detail',
-  //   });
-  // }
+
   export default {
     name: 'wallets',
     data() {
@@ -162,15 +161,49 @@
         balance: [],
         searchTx: '',
         visible: false,
-        showPassword: false,
+        showPassword1: false,
+        showPassword2: false,
         carefulVisible: false,
         transactionVisible: false,
         card: [],
+        firstPassword: '',
+        secondPassword: '',
+        passwordError: false,
+        isHaveAccount: false,
+        showClose: false,
       };
     },
+    watch: {
+      firstPassword(val) {
+        if (val === this.secondPassword) {
+          this.passwordError = false;
+        } else {
+          this.passwordError = true;
+        }
+      },
+      secondPassword(val) {
+        if (val === this.firstPassword) {
+          this.passwordError = false;
+        } else {
+          this.passwordError = true;
+        }
+      },
+    },
     methods: {
-      switchEye() {
-        this.showPassword = !this.showPassword;
+      some() {
+        this.firstPassword = '';
+        this.secondPassword = '';
+      },
+      switchEye1() {
+        this.showPassword1 = !this.showPassword1;
+      },
+      switchEye2() {
+        this.showPassword2 = !this.showPassword2;
+      },
+      close() {
+        this.visible = false;
+        this.firstPassword = '';
+        this.secondPassword = '';
       },
       /* eslint-disable */
       /**
@@ -178,18 +211,23 @@
        * */
       async init () {
         let files = await intjs.accounts();
+        console.log('@@@@@@', files)
         if (!files) {
-            // console.log(files);
+          this.isHaveAccount = true;
             this.$message({
                 message: '请先创建帐户',
                 type: 'warning'
             });
-
+        } else if (files.err) {
+          this.$message({
+            message: '获取账户失败',
+            type: 'error'
+          });
         } else {
           this.fileName = files;
           let balanceArray = [];
           this.fileName.forEach(async (value) => {
-            let address = value.slice(0, -5);
+            let address = value;
             let result = await intjs.getBalance(address);
             balanceArray.push({address: address, balance: result.balance});
           });
@@ -210,7 +248,17 @@
       /**
        * 创建帐户
        * */
-      addAccount(password) {
+      addAccount() {
+        let reg = /[\w]{1,}/;
+        if (!this.firstPassword || !this.secondPassword) return;
+
+        if (this.firstPassword != this.secondPassword) {
+            this.passwordError = true;
+            return;
+        }
+        if (!reg.test(this.firstPassword)) return
+          this.carefulVisible = true;
+
         // this.$prompt('请输入密码', '创建帐户', {
         //   confirmButtonText: '确定',
         //   cancelButtonText: '取消',
@@ -226,10 +274,17 @@
         //     message: '取消输入',
         //   });
         // });
-        setImmediate(async () => {
-            await this.createWallet(password);
-        });
+        // setImmediate(async () => {
+        //     await this.createWallet(password);
+        // });
       },
+      async carefulConfirm() {
+        await this.createWallet(this.firstPassword);
+        await this.init();
+        this.carefulVisible = false;
+        this.visible = false
+      },
+
 
       /**
        * 生成 keystore
@@ -238,7 +293,10 @@
          // console.log(password);
          let result = await intjs.newAccount(password);
          if (result.err) {
-            this.$message.err('帐户创建失败');
+            this.$message({
+              type: 'error',
+              message: '帐户创建失败'
+            });
          } else {
            this.$message({
              type: 'success',
@@ -306,7 +364,6 @@
           background-color: #A72BFD;
         }
         .accounts {
-          /*background-color: #2B68FD;*/
           color: #fff;
           width: 180px;
           border-radius: 4px;
@@ -325,6 +382,12 @@
           & > div:nth-of-type(3) {
             opacity: 0.85;
             font-size: 12px;
+          }
+          .account-address {
+              width: 150px;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
           }
         }
         .add {
@@ -430,26 +493,7 @@
           }
         }
       }
-      .hijk {
-        .el-dialog__header {
-          background-color: #F4F8FF;
-          text-align: left;
-        }
-        .el-dialog__title {
-          padding-left: 20px;
-          color: #3C31D7;
-        }
-        .ttt {
-          font-size: 18px;
-          margin-bottom: 25px;
-        }
-        .fff {
-          padding-left: 15px;
-          text-align: left;
-          line-height: 20px;
-          margin-bottom: 16px;
-        }
-      }
+
       .el-dialog {
         min-width: 500px;
         max-width: 600px;
@@ -523,6 +567,36 @@
     color: #666;
     font-size: 20px;
     margin-bottom: 5px;
+  }
+  .hijk {
+      .el-dialog__header {
+          padding: 15px;
+          background-color: #F4F8FF;
+          text-align: left;
+          border-bottom: 1px solid #ccc;
+      }
+      .el-dialog__title {
+          padding-left: 20px;
+          color: #3C31D7;
+      }
+      .ttt {
+          font-size: 18px;
+          margin-bottom: 25px;
+      }
+      .fff {
+          padding-left: 15px;
+          text-align: left;
+          line-height: 20px;
+          margin-bottom: 16px;
+      }
+      .el-dialog__footer {
+          padding: 15px 20px;
+          .btnConfirm {
+              border: none;
+              background: #fff;
+              color: #3C31D7;
+          }
+      }
   }
 
 </style>
