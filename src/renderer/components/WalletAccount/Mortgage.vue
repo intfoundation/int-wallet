@@ -8,8 +8,13 @@
         <div class="item-content">
             <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign" class="transactionForm">
                 <el-form-item label="ACCOUNT">
-                    <el-select class="select-from" v-model="formLabelAlign.account" placeholder="" @change="selectAccount">
-                        <el-option v-for="(item, index) in balance" :key="item.address" :label="'Account-' + ++index" :value="item.address"></el-option>
+                    <el-select v-model="formLabelAlign.account" placeholder="" @change="selectAccount" style="display: block;">
+                        <el-option
+                            v-for="(item, index) in balance"
+                            :key="index"
+                            :label="'Account-' + ++index + '-balance-' + item.balance"
+                            :value="item.address">
+                        </el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="VOTES">
@@ -83,6 +88,7 @@
   import Intjs from 'intjs';
 
   const intjs = new Intjs('localhost', 18089);
+  /* eslint-disable */
   export default {
     name: 'mortgage',
     data() {
@@ -95,6 +101,7 @@
         labelPosition: 'top',
         centerDialogVisible: false,
         password: '',
+        balanceValue: '',
         formLabelAlign: {
           account: '',
           votes: 0.00,
@@ -104,16 +111,24 @@
         },
       };
     },
-    components: {
-
+    computed: {
+      txfee () {
+        let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
+        if (this.checked) {
+          this.balanceSubTx = this.balanceValue - x;
+        } else {
+          // this.balanceSubTx = this.formLabelAlign.amount;
+        }
+        return x;
+      }
     },
     methods: {
-      /* eslint-disable */
       /**
        * 初始化
        * */
       async init () {
-        let files = await intjs.accounts();
+        let files = await intjs.getAccounts();
+        this.formLabelAlign.fee = await intjs.getPrice();
         if (files.err) {
           this.$message.error('读取 keystore 文件名出错');
         } else {
@@ -123,6 +138,7 @@
             let address = value;
             let result = await intjs.getBalance(address);
             balanceArray.push({address: address, balance: result.balance});
+            this.balanceValue = result.balance;
           });
           // TODO 异步拿到的数据怎么排序？
           if (balanceArray.length !== 0) {
@@ -134,6 +150,27 @@
           this.balance = balanceArray;
         }
       },
+      // selectFrom () {
+      //   if (this.formLabelAlign.from) {
+      //     this.balance.forEach((value) => {
+      //       if (value.address === this.formLabelAlign.from) {
+      //         this.balanceAndToken = [];
+      //         this.balanceAndToken.push({
+      //           name: 'INT',
+      //           balance: value.balance
+      //         });
+      //         this.getTokenAccount();
+      //         this.balanceValue = value.balance;
+      //         this.from_address = value.address;
+      //       }
+      //     });
+      //   } else {
+      //     this.$message({
+      //       message: '请选择一个地址',
+      //       type: 'warning'
+      //     });
+      //   }
+      // },
 
       selectAccount() {
         if (this.formLabelAlign.account) {
@@ -143,11 +180,11 @@
             }
           });
           setImmediate(async () => {
-            let result = await intjs.getStoke(this.formLabelAlign.account);
+            let result = await intjs.getStake(this.formLabelAlign.account);
             if (result.err) {
               this.$message.error(result.err);
             } else {
-              this.formLabelAlign.votes = result.stoke;
+              this.formLabelAlign.votes = result.stake;
             }
           });
         } else {
@@ -208,9 +245,6 @@
           });
         }
       },
-    },
-    computed: {
-
     },
     mounted() {
       this.init();

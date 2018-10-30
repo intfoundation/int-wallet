@@ -8,8 +8,13 @@
         <div class="item-content">
             <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign" class="transactionForm">
                 <el-form-item label="ACCOUNT">
-                    <el-select class="select-from" v-model="formLabelAlign.account" placeholder="" @change="selectAccount">
-                        <el-option v-for="(item, index) in balance" :key="item.address" :label="'Account-' + ++index" :value="item.address"></el-option>
+                    <el-select v-model="formLabelAlign.from" placeholder="" @change="selectFrom" style="display: block;">
+                        <el-option
+                            v-for="(item, index) in balance"
+                            :key="index"
+                            :label="'Account-' + ++index + '-balance-' + item.balance"
+                            :value="item.address">
+                        </el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="VOTES">
@@ -113,7 +118,7 @@
        * 初始化
        * */
       async init () {
-        let files = await intjs.accounts();
+        let files = await intjs.getAccounts();
         if (files.err) {
           this.$message.error('读取 keystore 文件名出错');
         } else {

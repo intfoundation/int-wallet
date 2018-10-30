@@ -99,7 +99,7 @@
        * 初始化
        * */
       async init () {
-        let files = await intjs.accounts();
+        let files = await intjs.getAccounts();
         if (files.err) {
           this.$message.error('读取 keystore 文件出错');
         } else {

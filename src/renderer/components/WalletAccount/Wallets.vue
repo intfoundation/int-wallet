@@ -15,10 +15,10 @@
           incoming transactions.
         </div>
         <div style="margin: 30px 0 20px;max-width: 700px;">
-          <router-link to="" tag="div" class="accounts" v-for="(item, index) in balance"
+          <router-link to="" tag="div" class="accounts" v-for="(item, index) in balanceList"
                        :class="{'blue': index%3 == 0, 'light-blue': index%3 == 1, 'yellow': index%3== 2}">
             <div>Accounts {{index + 1}}</div>
-            <div>{{item.balance / Math.pow(10, 18)}}<span style="font-size: 14px;"> INT</span></div>
+            <div>{{(item.balance / Math.pow(10, 18)).toFixed(5)}}<span style="font-size: 14px;"> INT</span></div>
             <div class="account-address">{{item.address}}</div>
           </router-link>
         </div>
@@ -28,28 +28,28 @@
         </div>
         <div class="transaction">
           <div>Transaction record</div>
-          <div class="no-transaction">No transaction record.</div>
+          <div class="no-transaction" v-if="txList.length === 0">No transaction record.</div>
 
           <!--交易记录-->
-          <div>
+          <div v-if="txList.length > 0">
             <!--每一条交易记录-->
-            <div class="trasaction-record">
+            <div class="trasaction-record" v-for="item in txList">
               <!--左侧-->
               <div class="date">
-                <div class="bold-text">24</div>
-                <div style="color: #999;">9月</div>
+                <div class="bold-text">{{new Date(item.block.timestamp*1000).getDate()}}</div>
+                <div style="color: #999;">{{new Date(item.block.timestamp*1000).getMonth()+1}} 月</div>
               </div>
               <!--右侧-->
               <div style="display: inline-block;padding-left: 20px;">
                 <div class="bold-text">Send</div>
                 <div style="color: #999;font-size: 13px;margin-top: 8px;">
-                  <span>Accounts2</span>
-                  <i class="arrow-right icon-common"></i>
-                  <span>0xaf09dec48FDd83D2acfewebewbwefwevedvewwfcew</span>
+                  <span class="spe-caller">{{item.tx.caller}}</span>
+                  <i class="arrow-right icon-common" style="vertical-align: top;"></i>
+                  <span style="vertical-align: top;">{{item.tx.input.to}}</span>
                 </div>
               </div>
               <div style="float: right;" class="rpc">
-                <span style="color: #D7316F">-0.99</span>
+                <span style="color: #D7316F">-{{(item.tx.value / Math.pow(10, 18)).toFixed(3)}}</span>
                 <span style="color: #666;">&nbsp;INT</span>
                 <span class="right-angle"></span>
               </div>
@@ -65,12 +65,12 @@
         @close="some"
         center>
           <el-dialog
-                  class="hijk"
-                  title="Be careful"
-                  :visible.sync="carefulVisible"
-                  :show-close="showClose"
-                  center
-                  append-to-body>
+              class="hijk"
+              title="Be careful"
+              :visible.sync="carefulVisible"
+              :show-close="showClose"
+              center
+              append-to-body>
               <div class="ttt">Make sure you backup your keyfiles AND password!</div>
               <div class="fff">You can find your keyfiles folder using the main menu-> File -> Backup
                   -> Accounts.Keep a copy of the "keystore" folder where you can't lose it!</div>
@@ -155,10 +155,11 @@
 
   export default {
     name: 'wallets',
+    /* eslint-disable */
     data() {
       return {
         fileName: [],
-        balance: [],
+        balanceList: [],
         searchTx: '',
         visible: false,
         showPassword1: false,
@@ -171,6 +172,7 @@
         passwordError: false,
         isHaveAccount: false,
         showClose: false,
+        txList: [],
       };
     },
     watch: {
@@ -189,6 +191,10 @@
         }
       },
     },
+    computed: {
+      balance () {}
+
+    },
     methods: {
       some() {
         this.firstPassword = '';
@@ -205,24 +211,19 @@
         this.firstPassword = '';
         this.secondPassword = '';
       },
-      /* eslint-disable */
+
       /**
        * 初始化
        * */
       async init () {
-        let files = await intjs.accounts();
+        let files = await intjs.getAccounts();
         console.log('@@@@@@', files)
-        if (!files) {
+        if (files.err) {
           this.isHaveAccount = true;
             this.$message({
                 message: '请先创建帐户',
                 type: 'warning'
             });
-        } else if (files.err) {
-          this.$message({
-            message: '获取账户失败',
-            type: 'error'
-          });
         } else {
           this.fileName = files;
           let balanceArray = [];
@@ -230,6 +231,8 @@
             let address = value;
             let result = await intjs.getBalance(address);
             balanceArray.push({address: address, balance: result.balance});
+            await this.getTransactionHash(address);
+
           });
           // TODO 异步拿到的数据怎么排序？
           // if (balanceArray.length !== 0) {
@@ -238,7 +241,13 @@
           //     return (b.balance - a.balance);
           //   });
           // }
-          this.balance = balanceArray;
+
+          // this.hashList.forEach(async function(item) {
+          //
+          //   let detail = await intjs.getTransactionReceipt(item);
+          //   console.log('---detail', detail);
+          // })
+          this.balanceList = balanceArray;
         }
       },
       // 弹出创建账户的弹框
@@ -304,7 +313,16 @@
            });
          }
       },
-
+      async getTransactionHash(address) {
+        let txInformation = await intjs.chainClient.getTransactionByAddress({address})
+        if (txInformation.err === 0) {
+          txInformation.txs.forEach(async(item) => {
+            let result = await intjs.getTransactionReceipt(item.txhash)
+            this.txList.push(result)
+          })
+        }
+        console.log('---rsultRRR----', this.txList)
+      },
       addWalletContract() {
         // this.$prompt('请输入密码', '创建帐户', {
         //   confirmButtonText: '确定',
@@ -326,11 +344,8 @@
         // });
       },
     },
-    computed: {
-
-    },
     mounted() {
-        this.init();
+      this.init();
     },
   };
 </script>
@@ -597,6 +612,13 @@
               color: #3C31D7;
           }
       }
+  }
+  .spe-caller {
+    display: inline-block;
+    width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
 </style>

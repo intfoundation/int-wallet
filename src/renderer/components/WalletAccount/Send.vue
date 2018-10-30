@@ -7,36 +7,56 @@
         <div class="item-content">
             <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign" class="transactionForm">
                 <div class="first-text" style="margin-bottom: 16px;">Send founds</div>
+
                 <el-form-item label="FROM">
-                    <el-select class="select-from" v-model="formLabelAlign.from" placeholder="" @change="selectFrom">
-                        <el-option v-for="(item, index) in balance" :key="item.address" :label="'Account-' + ++index" :value="item.address"></el-option>
+                    <el-select v-model="formLabelAlign.from" placeholder="" @change="selectFrom" style="display: block;">
+                        <el-option
+                            v-for="(item, index) in balance"
+                            :key="index"
+                            :label="'Account-' + ++index + '-balance-' + item.balance"
+                            :value="item.address">
+                        </el-option>
                     </el-select>
                 </el-form-item>
+
                 <el-form-item label="TO">
                     <el-input v-model="formLabelAlign.to" placeholder="0x000000…"></el-input>
                 </el-form-item>
+
                 <el-form-item label="AMOUNT">
-                    <el-input v-model="formLabelAlign.amount" placeholder="0.0">
-                        {{checked ? formLabelAlign.balance : formLabelAlign.amount}}</el-input>
+                    <el-input v-model="balanceSubTx" placeholder="0.0"></el-input>
                 </el-form-item>
+
                 <el-form-item label="BALANCE">
-                    <el-input class="balance" v-model="formLabelAlign.balance" readonly>{{formLabelAlign.balance}}</el-input>
+                    <el-select v-model="formLabelAlign.balance" placeholder="" style="display: block;" @change="selectToken">
+                        <el-option
+                            v-for="(item, index) in balanceAndToken"
+                            :key="item.index"
+                            :label="item.name + ' ' + item.balance"
+                            :value="item.name">
+                        </el-option>
+                    </el-select>
                 </el-form-item>
+
+
                 <template>
                     <!-- `checked` 为 true 或 false -->
                     <el-checkbox v-model="checked">Send everything</el-checkbox>
                 </template>
 
+
                 <el-row class="want-to-send">
                     <el-col :span="6">
-                        You want to send <span style="font-size: 16px;color: #3c31d7;">{{formLabelAlign.amount}}</span> INT.
+                        You want to send <span style="font-size: 16px;color: #3c31d7;">{{balanceSubTx}}</span> INT.
                     </el-col>
                 </el-row>
+
+
                 <el-row style="margin-top: 40px;">
                     <el-col  class="fee">
                         <span class="title">SELECT FEE</span>
-                        <p><b>{{formLabelAlign.fee/20}}</b> INT</p>
-                        <el-slider v-model="formLabelAlign.fee"></el-slider>
+                        <p><b>{{txfee}}</b> INT</p>
+                        <el-slider v-model="formLabelAlign.fee" :min="slideMin" :max="slideMax"></el-slider>
                         <div>
                             <span>CHEAPER</span>
                             <span style="float: right;">FASTER</span>
@@ -47,10 +67,13 @@
                         <div class="declare2">probably within 30 seconds.</div>
                     </el-col>
                 </el-row>
+
+
                 <el-row>
                     <el-col :span="8" style="margin-top: 40px;">
                         <span class="title" style="font-size: 16px;">TOTAL</span>
-                        <p><span class="total-value">{{Number(formLabelAlign.amount) + formLabelAlign.fee/20}}</span> INT</p>
+                        <!--<p><span class="total-value">{{Number(formLabelAlign.amount) + formLabelAlign.fee/20}}</span> INT</p>-->
+                        <p><span class="total-value">{{checked ? balanceValue : (+balanceSubTx + +txfee)}}</span> INT</p>
                     </el-col>
                 </el-row>
                 <el-button @click="sendTransaction" class="send-btn"><span>SEND</span></el-button>
@@ -68,7 +91,8 @@
             <div class="second-detail" style="padding-bottom: 15px;border-bottom: 1px solid #ccc;">
                 <div>
                     <span>Amount:</span>
-                    <span>{{formLabelAlign.amount}}</span>
+                    <!--这个单位还要根据前面的名称做动态绑定-->
+                    <span>{{balanceSubTx}}</span>
                 </div>
                 <div>
                     <span>From:</span>
@@ -79,26 +103,26 @@
                     <span>{{formLabelAlign.to}}</span>
                 </div>
                 <div>
-                    You are about to execute a function on a contract. This mightinvolve transfer
+                    You are about to execute a function on a contract. This might involve transfer
                     of value.
                 </div>
             </div>
 
             <div class="stripe">
                 <div class="stripe-item">
-                    <span>Estimated fee consumption</span>
-                    <span>00007512 INT (37.559 gas)</span>
-                </div>
-
-                <div class="stripe-item">
-                    <span>00007512 INT (37.559 gas)</span>
-                    <span>0.00027512 INT (137.559 gas)</span>
+                    <span>Gas limit</span>
+                    <span>50000</span>
                 </div>
 
                 <div class="stripe-item">
                     <span>Gas price</span>
-                    <span>0.002 INT per mllin gas</span>
+                    <span>{{formLabelAlign.fee}}</span>
                 </div>
+
+                <!--<div class="stripe-item">-->
+                    <!--<span>Gas price</span>-->
+                    <!--<span>0.002 INT per mllin gas</span>-->
+                <!--</div>-->
 
                 <div style="text-align: center">
                     <el-input type="password" placeholder="Enter password to confim the transaction" v-model="password"></el-input>
@@ -107,7 +131,7 @@
             <span slot="footer" class="dialog-footer">
               <el-row>
                 <el-col :span="12"><el-button @click="cancelTransaction" class="btn1">Cancel</el-button></el-col>
-                <el-col :span="12"><el-button class="btn2">Confirm</el-button></el-col>
+                <el-col :span="12"><el-button class="btn2" @click="submitTransaction">Confirm</el-button></el-col>
               </el-row>
             </span>
         </el-dialog>
@@ -117,6 +141,7 @@
 
 <script>
   import Intjs from 'intjs';
+  import axios from 'axios';
 
   const intjs = new Intjs('localhost', 18089);
 
@@ -132,28 +157,77 @@
         labelPosition: 'top',
         centerDialogVisible: false,
         password: '',
+        pageSize: 10000,
+        slideMin: 0,
+        slideMax: 100,
+        balanceSubTx: '',
+        balanceValue: '',
+        from_address: '',
+        tokenName: '',
+        balanceAndToken: [],
         formLabelAlign: {
           from: '',
           to: '',
           amount: '',
-          balance: 0.00,
+          balance: '',
           fee: 20,
         },
       };
     },
+    /* eslint-disable */
+    computed: {
+      txfee () {
+        let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
+        if (this.checked) {
+          this.balanceSubTx = this.balanceValue - x;
+        } else {
+          // this.balanceSubTx = this.formLabelAlign.amount;
+        }
+        return x;
+      }
+    },
     methods: {
+      /* eslint-disable */
+      getTokenAccount() {
+        const that = this;
+        axios.get('https://explorer.intchain.io/api/wallet/walletList', {
+          params: {
+            source: 'wallet',
+            pageSize: that.pageSize,
+            address: that.formLabelAlign.from,
+          },
+        })
+          .then((res) => {
+            const result = res.data;
+            if (result.status === 'success') {
+              let tokenlist = result.data.tokenList;
+              if (tokenlist.length != 0) {
+                tokenlist.forEach(function(item){
+                  that.balanceAndToken.push({
+                    name: item.coin,
+                    balance: item.balance
+                  })
+                })
+              }
+            }
+          })
+          .catch((error) => {
+            alert(error);
+          });
+      },
       /* eslint-disable */
       /**
        * 初始化
        * */
       async init () {
-        let files = await intjs.accounts();
+        let files = await intjs.getAccounts();
+        this.formLabelAlign.fee = await intjs.getPrice();
+        this.slideMin = 20 * Math.pow(10, 9);
+        this.slideMax = 2000 * Math.pow(10, 9);
         if (files.err) {
-          this.$message.error('读取 keystore 文件出错');
-        } else if (files.err) {
           this.$message({
-            message: '获取账户失败',
-            type: 'error'
+            message: '请先创建帐户',
+            type: 'warning'
           });
         } else {
           this.fileName = files;
@@ -166,7 +240,6 @@
           // TODO 异步拿到的数据怎么排序？
           if (balanceArray.length !== 0) {
             balanceArray.sort(function (a, b) {
-              console.log(b.balance - a.balance);
               return (b.balance - a.balance);
             });
           }
@@ -178,7 +251,14 @@
         if (this.formLabelAlign.from) {
           this.balance.forEach((value) => {
             if (value.address === this.formLabelAlign.from) {
-              this.formLabelAlign.balance = value.balance;
+              this.balanceAndToken = [];
+              this.balanceAndToken.push({
+                name: 'INT',
+                balance: value.balance
+              });
+              this.getTokenAccount();
+              this.balanceValue = value.balance;
+              this.from_address = value.address;
             }
           });
         } else {
@@ -188,20 +268,22 @@
           });
         }
       },
-
+      selectToken (value) {
+        this.tokenName = value;
+      },
       sendTransaction() {
         if (this.formLabelAlign.from === '') {
           this.$message.error('请选择 From 地址');
         } else if (this.formLabelAlign.to === '') {
           this.$message.error('请输入 To 地址');
-        } else if (Number(this.formLabelAlign.amount) === 0) {
+        } else if (Number(this.balanceSubTx) === 0) {
           this.$message.error('转账金额不能为 0');
-        } else if (this.formLabelAlign.fee < 0.005) {
-          this.$message.error('交易费用必须大于等于0.005 INT');
-        } else if ((this.formLabelAlign.balance < (Number(this.formLabelAlign.amount) + this.formLabelAlign.fee/20)) || this.formLabelAlign.balance === 0) {
+        } else if (Number(this.balanceSubTx) === 0) {
+
+        }else if ( (+this.balanceSubTx + this.txfee) > +this.balanceValue) {
           this.$message.error('余额不足');
         } else {
-            this.centerDialogVisible = true;
+          this.centerDialogVisible = true;
         }
       },
       cancelTransaction() {
@@ -215,16 +297,27 @@
           this.$message.error('密码长度必须大于等于9');
         } else {
           setImmediate(async() => {
-            let keystore = await intjs.readKeystore(this.formLabelAlign.from);
-            if (keystore.err) {
-              this.$message.error('读取 keystore 文件出错');
+            let params = {
+              from: this.from_address,
+              method: '',
+              value: this.balanceSubTx,
+              limit: '500000',
+              price: this.formLabelAlign.fee,
+              input: '',
+              password: this.password
+            }
+            if (this.tokenName === 'INT') {
+              params.method = 'transferTo'
+              params.input = {to: this.formLabelAlign.to};
+              params.value = this.balanceSubTx*Math.pow(10,18);
             } else {
-              let keyParse = JSON.parse(keystore);
-              // console.log(keyParse);
-              // console.log(this.password);
-              let account = intjs.decrypt(keyParse, this.password);
-              // console.log(account);
-              let result = await intjs.transferTo(this.formLabelAlign.to, (this.formLabelAlign.amount*10^18).toString(), (this.formLabelAlign.fee/20*10^18).toString(), account.privateKey.toString());
+              params.method = 'transferTokenTo';
+              params.input = {to: this.formLabelAlign.to, tokenid: this.tokenName, amount: this.balanceSubTx*Math.pow(10,18)};
+              params.value = 0;
+            }
+            console.log('---value---', this.balanceSubTx, params.value)
+              let result = await intjs.sendTransaction(params);
+            console.log('-refrrr', result);
               if (result.err) {
                 this.centerDialogVisible = false;
                 this.$message.error('交易失败');
@@ -235,7 +328,6 @@
                   type: 'success'
                 });
               }
-            }
           });
 
         }
@@ -259,25 +351,6 @@
         .want-to-send {
             margin-top: 20px !important;
         }
-        /*.el-form-item {*/
-            /*float: left;*/
-            /*width: 45%;*/
-            /*margin-right: 20px;*/
-            /*margin-bottom: 24px;*/
-            /*.el-select {*/
-                /*width: 100%;*/
-            /*}*/
-            /*.el-form-item__label {*/
-                /*padding: 0;*/
-            /*}*/
-            /*.el-input__inner {*/
-                /*height: 38px;*/
-                /*line-height: 38px;*/
-            /*}*/
-
-        /*}*/
-
-
         .el-row {
             .title {
                 display: inline-block;
