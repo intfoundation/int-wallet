@@ -9,8 +9,13 @@
             <div class="transactionForm">
                 <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign" style="overflow: hidden">
                     <el-form-item label="FROM">
-                        <el-select class="select-from" v-model="formLabelAlign.from" placeholder="" @change="selectFrom">
-                            <el-option v-for="(item, index) in balance" :key="item.address" :label="'Account-' + ++index" :value="item.address"></el-option>
+                        <el-select v-model="formLabelAlign.account" placeholder="" @change="selectFrom" style="display: block;">
+                            <el-option
+                                    v-for="(item, index) in balance"
+                                    :key="index"
+                                    :label="'Account-' + ++index + '-balance-' + item.balance"
+                                    :value="item.address">
+                            </el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="VOTES">
@@ -48,8 +53,8 @@
                 <el-row style="margin-top: 40px;">
                     <el-col  class="fee">
                         <span class="title">SELECT FEE</span>
-                        <p><b>{{formLabelAlign.fee/20}}</b> INT</p>
-                        <el-slider v-model="formLabelAlign.fee"></el-slider>
+                        <p><b>{{txfee}}</b> INT</p>
+                        <el-slider v-model="formLabelAlign.fee" :min="slideMin" :max="slideMax"></el-slider>
                         <div>
                             <span>CHEAPER</span>
                             <span style="float: right;">FASTER</span>
@@ -60,7 +65,14 @@
                         <div class="declare2">probably within 30 seconds.</div>
                     </el-col>
                 </el-row>
-                <el-button  class="send-btn"><span>SEND</span></el-button>
+
+                <el-row>
+                    <el-col :span="8" style="margin-top: 40px;">
+                        <span class="title">TOTAL</span>
+                        <p><span class="total-value">{{txfee}}</span> INT</p>
+                    </el-col>
+                </el-row>
+                <el-button  class="send-btn" @click="sendTransaction"><span>SEND</span></el-button>
             </div>
 
 
@@ -68,18 +80,53 @@
 
 
         <el-dialog
-                title="Transaction"
+                title="vote"
                 :visible.sync="centerDialogVisible"
                 width="40%"
-                center>
-            <p>From: <span>{{formLabelAlign.from}}</span></p>
-            <p>Votes: <span>{{formLabelAlign.votes}}</span></p>
-            <p>Fee: <span>{{formLabelAlign.fee/20}}</span></p>
-            <p>Password: <input type="password" placeholder="Enter password" v-model="password"></p>
+                center
+                class="dark-blue-header two-btn">
+            <div class="second-detail" style="padding-bottom: 15px;border-bottom: 1px solid #ccc;">
+                <div>
+                    <span>Votes:</span>
+                    <!--这个单位还要根据前面的名称做动态绑定-->
+                    <span>{{formLabelAlign.votes}}</span>
+                </div>
+                <div>
+                    <span>From:</span>
+                    <span>{{formLabelAlign.account}}</span>
+                </div>
+                <div>
+                    You are about to execute a function on a contract. This might involve transfer
+                    of value.
+                </div>
+            </div>
+
+            <div class="stripe">
+                <div class="stripe-item">
+                    <span>Gas limit</span>
+                    <span>50000</span>
+                </div>
+
+                <div class="stripe-item">
+                    <span>Gas price</span>
+                    <span>{{formLabelAlign.fee}}</span>
+                </div>
+
+                <!--<div class="stripe-item">-->
+                <!--<span>Gas price</span>-->
+                <!--<span>0.002 INT per mllin gas</span>-->
+                <!--</div>-->
+
+                <div style="text-align: center">
+                    <el-input type="password" placeholder="Enter password to confim the transaction" v-model="password"></el-input>
+                </div>
+            </div>
             <span slot="footer" class="dialog-footer">
-            <el-button @click="cancelTransaction">Cancel</el-button>
-            <el-button type="primary" @click="submitTransaction">Send Transaction</el-button>
-          </span>
+              <el-row>
+                <el-col :span="12"><el-button @click="cancelTransaction" class="btn1">Cancel</el-button></el-col>
+                <el-col :span="12"><el-button class="btn2" @click="submitTransaction">Confirm</el-button></el-col>
+              </el-row>
+            </span>
         </el-dialog>
     </div>
 </template>
@@ -88,6 +135,7 @@
   import Intjs from 'intjs';
 
   const intjs = new Intjs('localhost', 18089);
+  /* eslint-disable */
   export default {
     name: 'vote',
     data() {
@@ -100,8 +148,11 @@
         labelPosition: 'top',
         centerDialogVisible: false,
         password: '',
+        balanceValue: '',
+        slideMin: 0,
+        slideMax: 100,
         formLabelAlign: {
-          from: '',
+          account: '',
           votes: 0.00,
           // amount: 0.00,
           balance: 0.00,
@@ -111,16 +162,26 @@
         multipleSelection: [],
       };
     },
-    components: {
-
+    computed: {
+      txfee () {
+        let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
+        if (this.checked) {
+          this.formLabelAlign.amount = this.balanceValue - x;
+        } else {
+          // this.balanceSubTx = this.formLabelAlign.amount;
+        }
+        return x;
+      }
     },
     methods: {
-      /* eslint-disable */
       /**
        * 初始化
        * */
       async init () {
         let files = await intjs.getAccounts();
+        this.formLabelAlign.fee = await intjs.getPrice();
+        this.slideMin = 20 * Math.pow(10, 9);
+        this.slideMax = 2000 * Math.pow(10, 9);
         if (files.err) {
           this.$message.error('读取 keystore 文件出错');
         } else {
@@ -129,7 +190,7 @@
           this.fileName.forEach(async (value) => {
             let address = value;
             let result = await intjs.getBalance(address);
-            balanceArray.push({address: address, balance: result.balance});
+            balanceArray.push({address: address, balance: result.balance / Math.pow(10, 18)});
           });
           // TODO 异步拿到的数据怎么排序？
           if (balanceArray.length !== 0) {
@@ -178,19 +239,20 @@
       },
 
       selectFrom () {
-        if (this.formLabelAlign.from) {
+        if (this.formLabelAlign.account) {
           this.balance.forEach((value) => {
-            if (value.address === this.formLabelAlign.from) {
+            if (value.address === this.formLabelAlign.account) {
               this.formLabelAlign.balance = value.balance;
+              this.balanceValue = value.balance;
             }
           });
           setImmediate(async () => {
-            let result = await intjs.getStoke(this.formLabelAlign.from);
+            let result = await intjs.getStake(this.formLabelAlign.account);
             if (result.err) {
               this.$message.error(result.err);
               return;
             } else {
-              this.formLabelAlign.votes = result.stoke;
+              this.formLabelAlign.votes = result.stake;
             }
           });
         } else {
@@ -229,16 +291,16 @@
           this.$message.error('密码长度必须大于等于9');
         } else {
           setImmediate(async() => {
-            let keystore = await intjs.readKeystore(this.formLabelAlign.from);
-            if (keystore.err) {
-              this.$message.error('读取 keystore 文件出错');
-            } else {
-              let keyParse = JSON.parse(keystore);
-              // console.log(keyParse);
-              // console.log(this.password);
-              let account = intjs.decrypt(keyParse, this.password);
-              // console.log(account);
-              let result = await intjs.vote(this.multipleSelection, (this.formLabelAlign.fee/20*10^18).toString(), account.privateKey.toString());
+            let params = {
+              method: 'vote',
+              value: 0,
+              limit: '500000',
+              price: this.formLabelAlign.fee,
+              input: this.multipleSelection,
+              password: this.password,
+              from: this.formLabelAlign.account
+            }
+            let result = await intjs.sendTransaction(params);
               if (result.err) {
                 this.centerDialogVisible = false;
                 this.$message.error('投票失败');
@@ -249,7 +311,6 @@
                   type: 'success'
                 });
               }
-            }
           });
         }
       },
@@ -261,9 +322,6 @@
           });
         }
       }
-    },
-    computed: {
-
     },
     mounted() {
       this.init();
@@ -303,6 +361,29 @@
         }
         .candidates {
             margin-bottom: 10px;
+        }
+        .el-dialog {
+            min-height: 100px !important;
+            min-width: 500px;
+            max-width: 600px;
+
+            .stripe {
+                padding: 20px 10px 0px;
+                .stripe-item {
+                    background-color: #F4F8FF;
+                    border-radius: 4px;
+                    padding: 9px 14px;
+                    margin-bottom: 10px;
+                    font-size: 13px;
+                    & > span:nth-of-type(2) {
+                        float: right;
+                    }
+                }
+                .el-input {
+                    margin-top: 20px;
+                    width: 300px;
+                }
+            }
         }
     }
 </style>

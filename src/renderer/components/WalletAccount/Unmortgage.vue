@@ -1,5 +1,5 @@
 <template>
-    <div class="mortgage">
+    <div class="unmortgage">
         <div class="item-title">
             <i class="unmortgage-icon icon-common"></i>
             <span class="item-text">Unmortgage</span>
@@ -8,7 +8,7 @@
         <div class="item-content">
             <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign" class="transactionForm">
                 <el-form-item label="ACCOUNT">
-                    <el-select v-model="formLabelAlign.from" placeholder="" @change="selectFrom" style="display: block;">
+                    <el-select v-model="formLabelAlign.account" placeholder="" @change="selectAccount" style="display: block;">
                         <el-option
                             v-for="(item, index) in balance"
                             :key="index"
@@ -40,8 +40,8 @@
                 <el-row style="margin-top: 40px;">
                     <el-col  class="fee">
                         <span class="title">SELECT FEE</span>
-                        <p><b>{{formLabelAlign.fee/20}}</b> INT</p>
-                        <el-slider v-model="formLabelAlign.fee"></el-slider>
+                        <p><b>{{txfee}}</b> INT</p>
+                        <el-slider v-model="formLabelAlign.fee" :min="slideMin" :max="slideMax"></el-slider>
                         <div>
                             <span>CHEAPER</span>
                             <span style="float: right;">FASTER</span>
@@ -56,29 +56,63 @@
                 <el-row>
                     <el-col :span="8" style="margin-top: 40px;">
                         <span class="title">TOTAL</span>
-                        <p><span class="total-value">{{Number(formLabelAlign.amount) + formLabelAlign.fee/20}}</span> INT</p>
+                        <p><span class="total-value">{{checked ? balanceValue : (formLabelAlign.amount + +txfee)}}</span> INT</p>
                     </el-col>
                 </el-row>
 
-                <el-button  class="send-btn"><span>SEND</span></el-button>
+                <el-button  class="send-btn" @click="sendTransaction"><span>SEND</span></el-button>
             </el-form>
 
 
         </div>
         <el-dialog
-            title="Mortgage"
-            :visible.sync="centerDialogVisible"
-            width="40%"
-            center>
-            <p>Account: <span>{{formLabelAlign.account}}</span></p>
-            <p>Votes: <span>{{formLabelAlign.votes}}</span></p>
-            <p>Amount: <span>{{formLabelAlign.amount}}</span></p>
-            <p>Fee: <span>{{formLabelAlign.fee/20}}</span></p>
-            <p>Password: <input type="password" placeholder="Enter password" v-model="password"></p>
+                title="Unmortgage"
+                :visible.sync="centerDialogVisible"
+                width="40%"
+                center
+                class="dark-blue-header two-btn">
+            <div class="second-detail" style="padding-bottom: 15px;border-bottom: 1px solid #ccc;">
+                <div>
+                    <span>Amount:</span>
+                    <!--这个单位还要根据前面的名称做动态绑定-->
+                    <span>{{formLabelAlign.amount}}</span>
+                </div>
+                <div>
+                    <span>From:</span>
+                    <span>{{formLabelAlign.account}}</span>
+                </div>
+                <div>
+                    You are about to execute a function on a contract. This might involve transfer
+                    of value.
+                </div>
+            </div>
+
+            <div class="stripe">
+                <div class="stripe-item">
+                    <span>Gas limit</span>
+                    <span>50000</span>
+                </div>
+
+                <div class="stripe-item">
+                    <span>Gas price</span>
+                    <span>{{formLabelAlign.fee}}</span>
+                </div>
+
+                <!--<div class="stripe-item">-->
+                <!--<span>Gas price</span>-->
+                <!--<span>0.002 INT per mllin gas</span>-->
+                <!--</div>-->
+
+                <div style="text-align: center">
+                    <el-input type="password" placeholder="Enter password to confim the transaction" v-model="password"></el-input>
+                </div>
+            </div>
             <span slot="footer" class="dialog-footer">
-            <el-button @click="cancelTransaction">Cancel</el-button>
-            <el-button type="primary" @click="submitTransaction">Send Transaction</el-button>
-          </span>
+              <el-row>
+                <el-col :span="12"><el-button @click="cancelTransaction" class="btn1">Cancel</el-button></el-col>
+                <el-col :span="12"><el-button class="btn2" @click="submitTransaction">Confirm</el-button></el-col>
+              </el-row>
+            </span>
         </el-dialog>
 
     </div>
@@ -88,8 +122,9 @@
   import Intjs from 'intjs';
 
   const intjs = new Intjs('localhost', 18089);
+  /* eslint-disable */
   export default {
-    name: 'mortgage',
+    name: 'unmortgage',
     data() {
       return {
         fileName: [],
@@ -100,6 +135,9 @@
         labelPosition: 'top',
         centerDialogVisible: false,
         password: '',
+        balanceValue: '',
+        slideMin: 0,
+        slideMax: 100,
         formLabelAlign: {
           account: '',
           votes: 0.00,
@@ -109,16 +147,26 @@
         },
       };
     },
-    components: {
-
+    computed: {
+      txfee () {
+        let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
+        if (this.checked) {
+          this.formLabelAlign.amount = this.balanceValue - x;
+        } else {
+          // this.balanceSubTx = this.formLabelAlign.amount;
+        }
+        return x;
+      }
     },
     methods: {
-      /* eslint-disable */
       /**
        * 初始化
        * */
       async init () {
         let files = await intjs.getAccounts();
+        this.formLabelAlign.fee = await intjs.getPrice();
+        this.slideMin = 20 * Math.pow(10, 9);
+        this.slideMax = 2000 * Math.pow(10, 9);
         if (files.err) {
           this.$message.error('读取 keystore 文件名出错');
         } else {
@@ -127,7 +175,7 @@
           this.fileName.forEach(async (value) => {
             let address = value;
             let result = await intjs.getBalance(address);
-            balanceArray.push({address: address, balance: result.balance});
+            balanceArray.push({address: address, balance: result.balance / Math.pow(10, 18)});
           });
           // TODO 异步拿到的数据怎么排序？
           if (balanceArray.length !== 0) {
@@ -145,14 +193,15 @@
           this.balance.forEach((value) => {
             if (value.address === this.formLabelAlign.account) {
               this.formLabelAlign.balance = value.balance;
+              this.balanceValue = value.balance;
             }
           });
           setImmediate(async () => {
-            let result = await intjs.getStoke(this.formLabelAlign.account);
+            let result = await intjs.getStake(this.formLabelAlign.account);
             if (result.err) {
               this.$message.error(result.err);
             } else {
-              this.formLabelAlign.votes = result.stoke;
+              this.formLabelAlign.votes = result.stake;
             }
           });
         } else {
@@ -170,7 +219,7 @@
           this.$message.error('换票数不能为 0');
         } else if (this.formLabelAlign.fee < 0.005) {
           this.$message.error('交易费用必须大于等于0.005 INT');
-        } else if ((this.formLabelAlign.balance < (Number(this.formLabelAlign.amount) + this.formLabelAlign.fee/20)) || this.formLabelAlign.balance === 0) {
+        } else if ((+this.formLabelAlign.amount + this.txfee) > +this.balanceValue) {
           this.$message.error('余额不足');
         } else {
           this.centerDialogVisible = true;
@@ -189,16 +238,16 @@
           this.$message.error('密码长度必须大于等于9');
         } else {
           setImmediate(async() => {
-            let keystore = await intjs.readKeystore(this.formLabelAlign.account);
-            if (keystore.err) {
-              this.$message.error('读取 keystore 文件出错');
-            } else {
-              let keyParse = JSON.parse(keystore);
-              // console.log(keyParse);
-              // console.log(this.password);
-              let account = intjs.decrypt(keyParse, this.password);
-              // console.log(account);
-              let result = await intjs.mortgage((this.formLabelAlign.amount*10^18).toString(), (this.formLabelAlign.fee/20*10^18).toString(), account.privateKey.toString());
+            let params = {
+              method: 'unmortgage',
+              value: this.formLabelAlign.amount*Math.pow(10, 18),
+              limit: '500000',
+              price: this.formLabelAlign.fee,
+              input: this.formLabelAlign.amount,
+              password: this.password,
+              from: this.formLabelAlign.account
+            }
+            let result = await intjs.sendTransaction(params);
               if (result.err) {
                 this.centerDialogVisible = false;
                 this.$message.error('换票失败');
@@ -209,13 +258,9 @@
                   type: 'success'
                 });
               }
-            }
           });
         }
       },
-    },
-    computed: {
-
     },
     mounted() {
       this.init();
@@ -224,7 +269,7 @@
 </script>
 
 <style lang="scss">
-    .mortgage {
+    .unmortgage {
         border-radius: 5px;
         background-color: #fff;
         .unmortgage-icon {
@@ -252,7 +297,26 @@
         }
         .el-dialog {
             min-height: 100px !important;
+            min-width: 500px;
+            max-width: 600px;
 
+            .stripe {
+                padding: 20px 10px 0px;
+                .stripe-item {
+                    background-color: #F4F8FF;
+                    border-radius: 4px;
+                    padding: 9px 14px;
+                    margin-bottom: 10px;
+                    font-size: 13px;
+                    & > span:nth-of-type(2) {
+                        float: right;
+                    }
+                }
+                .el-input {
+                    margin-top: 20px;
+                    width: 300px;
+                }
+            }
         }
     }
 </style>

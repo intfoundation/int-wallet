@@ -222,6 +222,7 @@
       async init () {
         let files = await intjs.getAccounts();
         this.formLabelAlign.fee = await intjs.getPrice();
+        console.log('^^^', this.formLabelAlign.fee);
         this.slideMin = 20 * Math.pow(10, 9);
         this.slideMax = 2000 * Math.pow(10, 9);
         if (files.err) {
@@ -315,9 +316,7 @@
               params.input = {to: this.formLabelAlign.to, tokenid: this.tokenName, amount: this.balanceSubTx*Math.pow(10,18)};
               params.value = 0;
             }
-            console.log('---value---', this.balanceSubTx, params.value)
               let result = await intjs.sendTransaction(params);
-            console.log('-refrrr', result);
               if (result.err) {
                 this.centerDialogVisible = false;
                 this.$message.error('交易失败');
