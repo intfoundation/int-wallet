@@ -49,7 +49,7 @@
       ]
     },
     "mac": {
-      "icon": "build/icons/icon.icns"
+      "icon": "build/icons/int-wallet.icns"
     },
     "win": {
       "icon": "build/icons/icon.ico"
@@ -61,7 +61,6 @@
   "dependencies": {
     "axios": "^0.18.0",
     "element-ui": "^2.4.6",
-    "electron": "^2.0.8",
     "intjs": "^1.6.38",
     "msgpack-lite": "^0.1.26",
     "scrypt": "^6.0.3",
@@ -89,6 +88,7 @@
     "css-loader": "^0.28.11",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
+    "electron": "^2.0.8",
     "electron-builder": "^20.28.3",
     "electron-debug": "^1.5.0",
     "electron-devtools-installer": "^2.2.4",
