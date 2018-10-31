@@ -52,7 +52,7 @@
       "icon": "build/icons/int-wallet.icns"
     },
     "win": {
-      "icon": "build/icons/icon.ico"
+      "icon": "build/icons/int-wallet.ico"
     },
     "linux": {
       "icon": "build/icons"
