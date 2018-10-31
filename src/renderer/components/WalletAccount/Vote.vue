@@ -270,10 +270,12 @@
           this.$message.error('余额为0，请先换票');
         } else if (this.multipleSelection.length === 0) {
           this.$message.error('请至少选择一个候选节点');
-        } else if (this.formLabelAlign.fee < 0.005) {
-          this.$message.error('交易费用必须大于等于0.005 INT');
-        } else if (this.formLabelAlign.balance < 0.005) {
-          this.$message.error('余额不足');
+        } else if (+this.formLabelAlign.fee < 200*Math.pow(10,9)) {
+          this.$message.error('手续费用太低');
+        } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {
+          this.$message.error('手续费用太高');
+        } else if ((+this.formLabelAlign.amount + this.txfee) > +this.balanceValue) {
+            this.$message.error('余额不足');
         } else {
           this.centerDialogVisible = true;
         }

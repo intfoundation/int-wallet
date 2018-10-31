@@ -279,9 +279,11 @@
           this.$message.error('请输入 To 地址');
         } else if (Number(this.balanceSubTx) === 0) {
           this.$message.error('转账金额不能为 0');
-        } else if (Number(this.balanceSubTx) === 0) {
-
-        }else if ( (+this.balanceSubTx + this.txfee) > +this.balanceValue) {
+        } else if (+this.formLabelAlign.fee < 200*Math.pow(10,9)) {
+          this.$message.error('手续费用太低');
+        } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {
+          this.$message.error('手续费用太高');
+        } else if ( (+this.balanceSubTx + this.txfee) > +this.balanceValue) {
           this.$message.error('余额不足');
         } else {
           this.centerDialogVisible = true;

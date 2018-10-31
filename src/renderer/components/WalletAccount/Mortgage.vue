@@ -215,8 +215,10 @@
           this.$message.error('请选择 Account 地址');
         } else if (Number(this.formLabelAlign.amount) === 0) {
           this.$message.error('换票数不能为 0');
-        } else if (this.formLabelAlign.fee < 0.005) {
-          this.$message.error('交易费用必须大于等于0.005 INT');
+        } else if (+this.formLabelAlign.fee < 200*Math.pow(10,9)) {
+            this.$message.error('手续费用太低');
+        } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {
+            this.$message.error('手续费用太高');
         } else if ((+this.formLabelAlign.amount + this.txfee) > +this.balanceValue) {
           this.$message.error('余额不足');
         } else {
