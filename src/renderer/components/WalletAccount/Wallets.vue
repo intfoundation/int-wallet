@@ -11,14 +11,14 @@
         <div class="first-text">Accounts</div>
         <div v-if="isHaveAccount" class="no-account-first">YOU HAVE NO ACCOUNTS YET</div>
         <div v-if="isHaveAccount" class="no-account-second">You need to create at least one account with a strong password</div>
-        <div v-else class="have-account-first">Accounts are password protected keys that can hold Ether and Ethereum-based tokens. They can control contracts, but can't display
+        <div v-else class="have-account-first">Accounts are password protected keys that can hold INT and tokens, but can't display
           incoming transactions.
         </div>
         <div style="margin: 30px 0 20px;max-width: 700px;">
           <router-link to="" tag="div" class="accounts" v-for="(item, index) in balanceList"
                        :class="{'blue': index%3 == 0, 'light-blue': index%3 == 1, 'yellow': index%3== 2}">
             <div>Accounts {{index + 1}}</div>
-            <div>{{ item.balance }}<span style="font-size: 14px;"> INT</span></div>
+            <div>{{ (item.balance / Math.pow(10, 18)).toFixed(2) }}<span style="font-size: 14px;"> INT</span></div>
             <div class="account-address">{{item.address}}</div>
           </router-link>
         </div>
@@ -45,11 +45,11 @@
                 <div style="color: #999;font-size: 13px;margin-top: 8px;">
                   <span class="spe-caller">{{item.tx.caller}}</span>
                   <i class="arrow-right icon-common" style="vertical-align: top;"></i>
-                  <span style="vertical-align: top;">{{item.tx.input.to}}</span>
+                  <span style="vertical-align: top;">{{item.tx.input.to ? item.tx.input.to : '' }}</span>
                 </div>
               </div>
               <div style="float: right;" class="rpc">
-                <span style="color: #D7316F">-{{(item.tx.value / Math.pow(10, 18)).toFixed(3)}}</span>
+                <span style="color: #D7316F">-{{(item.tx.value / Math.pow(10, 18)).toFixed(4)}}</span>
                 <span style="color: #666;">&nbsp;INT</span>
                 <span class="right-angle"></span>
               </div>
@@ -72,8 +72,8 @@
               center
               append-to-body>
               <div class="ttt">Make sure you backup your keyfiles AND password!</div>
-              <div class="fff">You can find your keyfiles folder using the main menu-> File -> Backup
-                  -> Accounts.Keep a copy of the "keystore" folder where you can't lose it!</div>
+              <!--<div class="fff">You can find your keyfiles folder using the main menu-> File -> Backup-->
+                  <!-- -> Accounts.Keep a copy of the "keystore" folder where you can't lose it!</div>-->
               <span slot="footer" class="dialog-footer">
                   <el-button class="btnConfirm" @click="carefulConfirm" style="font-size: 18px;">Confirm</el-button>
               </span>
@@ -230,7 +230,7 @@
           this.fileName.forEach(async (value) => {
             let address = value;
             let result = await intjs.getBalance(address);
-            balanceArray.push({address: address, balance: (result.balance / Math.pow(10,18)).toFixed(2)});
+            balanceArray.push({address: address, balance: result.balance});
             await this.getTransactionHash(address);
 
           });

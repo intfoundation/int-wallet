@@ -12,7 +12,7 @@
                         <el-option
                             v-for="(item, index) in balance"
                             :key="index"
-                            :label="'Account-' + ++index + '-balance-' + item.balance"
+                            :label="'Account-' + ++index + '-balance-' + ((item.balance / Math.pow(10, 18)).toFixed(2))"
                             :value="item.address">
                         </el-option>
                     </el-select>
@@ -24,7 +24,7 @@
                     <el-input v-model="formLabelAlign.amount">{{formLabelAlign.amount}}</el-input>
                 </el-form-item>
                 <el-form-item label="BALANCE">
-                    <el-input class="balance" v-model="formLabelAlign.balance" readonly>{{formLabelAlign.balance}}</el-input>
+                    <el-input class="balance" v-model="formLabelAlign.balance" readonly>{{(formLabelAlign.balance / Math.pow(10, 18)).toFixed(2)}}</el-input>
                 </el-form-item>
                 <template>
                     <!-- `checked` 为 true 或 false -->
@@ -49,7 +49,7 @@
                     </el-col>
                     <el-col :span="11" style="float: right;">
                         <div class="declare1">This is the most amount of money that might be used to process this transaction. Your transaction will be mined</div>
-                        <div class="declare2">probably within 30 seconds.</div>
+                        <div class="declare2">probably within 10 seconds.</div>
                     </el-col>
                 </el-row>
 
@@ -82,7 +82,7 @@
                     <span>{{formLabelAlign.account}}</span>
                 </div>
                 <div>
-                    You are about to execute a function on a contract. This might involve transfer
+                    You are about to execute a function of unmortgage. This might involve transfer
                     of value.
                 </div>
             </div>
@@ -175,7 +175,7 @@
           this.fileName.forEach(async (value) => {
             let address = value;
             let result = await intjs.getBalance(address);
-            balanceArray.push({address: address, balance: result.balance / Math.pow(10, 18)});
+            balanceArray.push({address: address, balance: result.balance});
           });
           // TODO 异步拿到的数据怎么排序？
           if (balanceArray.length !== 0) {
@@ -192,16 +192,16 @@
         if (this.formLabelAlign.account) {
           this.balance.forEach((value) => {
             if (value.address === this.formLabelAlign.account) {
-              this.formLabelAlign.balance = value.balance;
+              this.formLabelAlign.balance = (value.balance / Math.pow(10,18)).toFixed(2);
               this.balanceValue = value.balance;
             }
           });
           setImmediate(async () => {
             let result = await intjs.getStake(this.formLabelAlign.account);
             if (result.err) {
-              this.$message.error(result.err);
+              this.$message.error('获取票据出错');
             } else {
-              this.formLabelAlign.votes = result.stake;
+              this.formLabelAlign.votes = (result.stake / Math.pow(10,18)).toFixed(2);
             }
           });
         } else {
@@ -221,7 +221,7 @@
           this.$message.error('手续费用太低');
         } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {
           this.$message.error('手续费用太高');
-        } else if ((+this.formLabelAlign.amount + this.txfee) > +this.balanceValue) {
+        } else if (((+this.formLabelAlign.amount + this.txfee)*Math.pow(10,18)) > +this.balanceValue) {
           this.$message.error('余额不足');
         } else {
           this.centerDialogVisible = true;
@@ -242,10 +242,10 @@
           setImmediate(async() => {
             let params = {
               method: 'unmortgage',
-              value: this.formLabelAlign.amount*Math.pow(10, 18),
+              value: 0,
               limit: '500000',
               price: this.formLabelAlign.fee,
-              input: this.formLabelAlign.amount,
+              input: this.formLabelAlign.amount.Math.pow(10,18),
               password: this.password,
               from: this.formLabelAlign.account
             }
