@@ -180,7 +180,7 @@
       async init () {
         let files = await intjs.getAccounts();
         this.formLabelAlign.fee = await intjs.getPrice();
-        this.slideMin = 20 * Math.pow(10, 9);
+        // this.slideMin = 0;
         this.slideMax = 2000 * Math.pow(10, 9);
         if (files.err) {
           this.$message.error('读取 keystore 文件出错');

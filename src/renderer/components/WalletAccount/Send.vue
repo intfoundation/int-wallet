@@ -6,7 +6,7 @@
         </div>
         <div class="item-content">
             <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign" class="transactionForm">
-                <div class="first-text" style="margin-bottom: 16px;">Send founds</div>
+                <!--<div class="first-text" style="margin-bottom: 16px;">Send founds</div>-->
 
                 <el-form-item label="FROM">
                     <el-select v-model="formLabelAlign.from" placeholder="" @change="selectFrom" style="display: block;">
@@ -223,7 +223,7 @@
         let files = await intjs.getAccounts();
         this.formLabelAlign.fee = await intjs.getPrice();
         console.log('^^^', this.formLabelAlign.fee);
-        this.slideMin = 20 * Math.pow(10, 9);
+        // this.slideMin = 0 ;
         this.slideMax = 2000 * Math.pow(10, 9);
         if (files.err) {
           this.$message({
