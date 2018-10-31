@@ -224,10 +224,10 @@
             this.$message.error('获取节点票数出错');
           } else if (voteResult.vote.size !== 0) {
             this.candidates.forEach( (value) => {
-              // console.log(value);
-              // console.log(voteResult.vote.get(value.address));
-              if (voteResult.vote.get(value.address)) {
-                value.votes = voteResult.vote.get(value.address);
+              console.log(value);
+              console.log(voteResult.vote.get(value.address));
+              if (voteResult.vote.has(value.address)) {
+                value.votes = voteResult.vote.get(value.address).toString();
               }
             });
           }

@@ -18,7 +18,7 @@
           <router-link to="" tag="div" class="accounts" v-for="(item, index) in balanceList"
                        :class="{'blue': index%3 == 0, 'light-blue': index%3 == 1, 'yellow': index%3== 2}">
             <div>Accounts {{index + 1}}</div>
-            <div>{{(item.balance / Math.pow(10, 18)).toFixed(5)}}<span style="font-size: 14px;"> INT</span></div>
+            <div>{{ item.balance }}<span style="font-size: 14px;"> INT</span></div>
             <div class="account-address">{{item.address}}</div>
           </router-link>
         </div>
@@ -230,7 +230,7 @@
           this.fileName.forEach(async (value) => {
             let address = value;
             let result = await intjs.getBalance(address);
-            balanceArray.push({address: address, balance: result.balance});
+            balanceArray.push({address: address, balance: (result.balance / Math.pow(10,18)).toFixed(2)});
             await this.getTransactionHash(address);
 
           });
@@ -258,7 +258,7 @@
        * 创建帐户
        * */
       addAccount() {
-        let reg = /[\w]{1,}/;
+        let reg = /[\w]{9,}/;
         if (!this.firstPassword || !this.secondPassword) return;
 
         if (this.firstPassword != this.secondPassword) {
@@ -314,10 +314,10 @@
          }
       },
       async getTransactionHash(address) {
-        let txInformation = await intjs.chainClient.getTransactionByAddress({address})
+        let txInformation = await intjs.chainClient.getTransactionByAddress({address});
         if (txInformation.err === 0) {
           txInformation.txs.forEach(async(item) => {
-            let result = await intjs.getTransactionReceipt(item.txhash)
+            let result = await intjs.getTransactionReceipt(item.txhash);
             this.txList.push(result)
           })
         }

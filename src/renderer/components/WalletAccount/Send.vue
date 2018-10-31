@@ -236,7 +236,7 @@
           this.fileName.forEach(async (value) => {
             let address = value;
             let result = await intjs.getBalance(address);
-            balanceArray.push({address: address, balance: result.balance});
+            balanceArray.push({address: address, balance: result.balance/ Math.pow(10, 18)});
           });
           // TODO 异步拿到的数据怎么排序？
           if (balanceArray.length !== 0) {
