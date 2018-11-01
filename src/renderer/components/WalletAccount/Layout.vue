@@ -204,6 +204,6 @@
   }
   .el-main {
     background-color: #f5f5f5;
-    padding: 70px 50px;
+    padding: 20px 50px;
   }
 </style>

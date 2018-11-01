@@ -13,7 +13,7 @@
                             <el-option
                                     v-for="(item, index) in balance"
                                     :key="index"
-                                    :label="'Account-' + ++index + '-balance-' + item.balance"
+                                    :label="'Account-' + ++index + '-balance-' + ((item.balance / Math.pow(10, 18)).toFixed(2))"
                                     :value="item.address">
                             </el-option>
                         </el-select>
@@ -22,7 +22,7 @@
                         <el-input v-model="formLabelAlign.votes"></el-input>
                     </el-form-item>
                     <el-form-item label="BALANCE">
-                        <el-input class="balance" v-model="formLabelAlign.balance" readonly>{{formLabelAlign.balance}}</el-input>
+                        <el-input class="balance" v-model="formLabelAlign.balance" readonly></el-input>
                     </el-form-item>
 
 
@@ -190,7 +190,7 @@
           this.fileName.forEach(async (value) => {
             let address = value;
             let result = await intjs.getBalance(address);
-            balanceArray.push({address: address, balance: result.balance / Math.pow(10, 18)});
+            balanceArray.push({address: address, balance: result.balance });
           });
           // TODO 异步拿到的数据怎么排序？
           if (balanceArray.length !== 0) {
@@ -242,17 +242,17 @@
         if (this.formLabelAlign.account) {
           this.balance.forEach((value) => {
             if (value.address === this.formLabelAlign.account) {
-              this.formLabelAlign.balance = value.balance;
+              this.formLabelAlign.balance = (value.balance / Math.pow(10,18)).toFixed(2);
               this.balanceValue = value.balance;
             }
           });
           setImmediate(async () => {
             let result = await intjs.getStake(this.formLabelAlign.account);
             if (result.err) {
-              this.$message.error(result.err);
+              this.$message.error('获取票据出错');
               return;
             } else {
-              this.formLabelAlign.votes = result.stake;
+              this.formLabelAlign.votes = (result.stake / Math.pow(10,18)).toFixed(2);
             }
           });
         } else {
@@ -267,13 +267,15 @@
         if (this.formLabelAlign.from === '') {
           this.$message.error('请选择 From 地址');
         } else if (this.formLabelAlign.votes === 0) {
-          this.$message.error('余额为0，请先换票');
+          this.$message.error('余票为0，请先换票');
         } else if (this.multipleSelection.length === 0) {
           this.$message.error('请至少选择一个候选节点');
-        } else if (this.formLabelAlign.fee < 0.005) {
-          this.$message.error('交易费用必须大于等于0.005 INT');
-        } else if (this.formLabelAlign.balance < 0.005) {
-          this.$message.error('余额不足');
+        } else if (+this.formLabelAlign.fee < 200*Math.pow(10,9)) {
+          this.$message.error('手续费用太低');
+        } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {
+          this.$message.error('手续费用太高');
+        } else if (((+this.formLabelAlign.amount + this.txfee)*Math.pow(10,18)) > +this.balanceValue) {
+            this.$message.error('余额不足');
         } else {
           this.centerDialogVisible = true;
         }
