@@ -8,8 +8,8 @@
         </div>
         <div class="item-content">
             <div class="first-text">Accounts</div>
-            <div class="small-text">0xaf09dec48FDd83D2afjqp20093840280024hf203302</div>
-            <div class="middle-number">2.99 <span>INT</span></div>
+            <div class="small-text">{{address}}</div>
+            <div class="middle-number">{{balance}} <span>INT</span></div>
             <!--账户持有的token-->
             <div class="token">
                 <span>Internet Node Token</span>
@@ -29,38 +29,68 @@
                 <div>If your balance doesn't seem updated, make sure that you are in sync with the network.</div>
             </div>
 
-            <!--最后的链接-->
+            <!--四个功能性-->
             <div class="function">
-                <router-link to="" tag="span">
+                <router-link :to="{path: '/send', query: {address: address} }" tag="span">
                     <i class="transfer icon-common"></i>
                     <span>Transfer INT & Tokens</span>
                 </router-link>
 
-                <router-link to="" tag="span">
-                    <i class="explorer icon-common"></i>
-                    <span>View on INT explorer</span>
-                </router-link>
 
-                <router-link to="" tag="span">
+                <span @click="doCopy">
                     <i class="copy-address icon-common"></i>
                     <span>Copy address</span>
-                </router-link>
+                </span>
 
-                <router-link to="" tag="span">
+                <a @click="openQR">
                     <i class="show-qr icon-common"></i>
                     <span>Show QR-Code</span>
-                </router-link>
+                </a>
+            </div>
+
+            <!--交易记录-->
+            <div class="transaction">
+                <div>Transaction record</div>
+                <div class="no-transaction" v-if="txList.length === 0">No transaction record.</div>
+
+                <!--交易记录-->
+                <div v-if="txList.length > 0">
+                    <!--每一条交易记录-->
+                    <div class="trasaction-record" v-for="item in txList">
+                        <!--左侧-->
+                        <div class="date">
+                            <div class="bold-text">{{new Date(item.block.timestamp*1000).getDate()}}</div>
+                            <div style="color: #999;">{{new Date(item.block.timestamp*1000).getMonth()+1}} 月</div>
+                        </div>
+                        <!--右侧-->
+                        <div style="display: inline-block;padding-left: 20px;">
+                            <div class="bold-text">Send</div>
+                            <div style="color: #999;font-size: 13px;margin-top: 8px;">
+                                <span class="spe-caller">{{item.tx.caller}}</span>
+                                <i class="arrow-right icon-common" style="vertical-align: top;"></i>
+                                <span style="vertical-align: top;">{{item.tx.input.to}}</span>
+                            </div>
+                        </div>
+                        <div style="float: right;" class="rpc">
+                            <span style="color: #D7316F">-{{(item.tx.value / Math.pow(10, 18)).toFixed(3)}}</span>
+                            <span style="color: #666;">&nbsp;INT</span>
+                            <span class="right-angle"></span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <el-dialog
             title="Show QR-Code"
-            :visible.sync="aaa"
-            center>
-           <div>Point a compatible mobile app to this code</div>
+            :visible.sync="showQR"
+            center
+            class="dark-blue-header two-btn">
+            <canvas id="canvas"></canvas>
+            <div>Point a compatible mobile app to this code</div>
             <span slot="footer" class="dialog-footer">
           <el-row>
-            <el-col :span="12"><el-button @click="aaa = false" class="btn1">Cancel</el-button></el-col>
-            <el-col :span="12"><el-button  class="btn2">Confirm</el-button></el-col>
+            <el-col :span="12"><el-button @click="showQR = false" class="btn1">Cancel</el-button></el-col>
+            <el-col :span="12"><el-button  @click="showQR = false" class="btn2">Confirm</el-button></el-col>
           </el-row>
         </span>
         </el-dialog>
@@ -68,12 +98,92 @@
 </template>
 
 <script>
+  /* eslint-disable */
+  import Intjs from 'intjs';
+  import axios from 'axios';
+  import QRCode from 'qrcode';
+  const intjs = new Intjs('localhost', 18089);
     export default {
       data() {
         return {
-          aaa: true,
+          showQR: false,
+          address: '',
+          balance: '',
+          pageSize: 10000,
+          txList: []
         };
       },
+      created() {
+        this.address = this.$route.query.address;
+      },
+      mounted() {
+        this.getTransactionHash(this.address)
+        this.getTokenAccount()
+      },
+      methods: {
+        openQR () {
+          this.showQR = true;
+          let that = this;
+          setTimeout(function() {
+            let dom = document.getElementById('canvas')
+            QRCode.toCanvas(dom, that.address, function() {
+            })
+          }, 0)
+        },
+        doCopy () {
+          this.$copyText(this.address).then( () => {
+            this.$message({
+              type: 'success',
+              message: '复制成功',
+              duration: 1000
+            })
+          }, () => {
+            this.$message({
+              type: 'error',
+              message: '复制失败',
+              duration: 1000
+            })
+          })
+        },
+        async getTransactionHash(address) {
+          let result = await intjs.getBalance(address);
+          this.balance = +result.balance / Math.pow(10, 18);
+          let txInformation = await intjs.chainClient.getTransactionByAddress({address});
+          if (txInformation.err === 0) {
+            txInformation.txs.forEach(async(item) => {
+              let result = await intjs.getTransactionReceipt(item.txhash);
+              this.txList.push(result)
+            })
+          }
+        },
+        getTokenAccount (){
+          const that = this;
+          axios.get('https://explorer.intchain.io/api/wallet/walletList', {
+            params: {
+              source: 'wallet',
+              pageSize: that.pageSize,
+              address: that.address,
+            },
+          })
+            .then((res) => {
+              const result = res.data;
+              if (result.status === 'success') {
+                let tokenlist = result.data.tokenList;
+                if (tokenlist.length != 0) {
+                  tokenlist.forEach(function(item){
+                    that.balanceAndToken.push({
+                      name: item.coin,
+                      balance: item.balance
+                    })
+                  })
+                }
+              }
+            })
+            .catch((error) => {
+              alert(error);
+            });
+        },
+      }
     };
 </script>
 
@@ -138,7 +248,7 @@
             }
         }
         .function {
-            padding: 32px 0 98px 0;
+            padding: 32px 0;
             display: flex;
             justify-content: space-between;
             color: #3C31D7;
@@ -169,6 +279,55 @@
                 background-image: url("../../assets/images/show-qr.png");
                 margin-right: 5px;
             }
+        }
+        .transaction {
+            & > div:nth-of-type(1) {
+                color: #3C31D7;
+                font-size: 28px;
+            }
+            .no-transaction {
+                margin-top: 10px;
+                color: #999;
+            }
+            .trasaction-record {
+                background-color: #F4F8FF;
+                border-radius: 4px;
+                padding: 20px 36px;
+                margin-top: 20px;
+                .date {
+                    display: inline-block;
+                    border-right: 1px solid #ccc;
+                    padding-right: 20px;
+                    vertical-align: top;
+                }
+                .arrow-right {
+                    width: 15px;
+                    height: 12px;
+                    background-image: url("../../assets/images/arrow-right.png");
+                    margin: 0 15px;
+                }
+                .rpc {
+                    float: right;
+                    line-height: 49px;
+                    font-size: 16px;
+                    .right-angle {
+                        display: inline-block;
+                        width: 10px;
+                        height: 10px;
+                        border-top: 2px solid #ccc;
+                        border-right: 2px solid #ccc;
+                        transform: rotate(45deg);
+                        margin-left: 20px;
+                    }
+                }
+            }
+        }
+        #canvas {
+            width: 120px !important;
+            height: 120px !important;
+        }
+        .el-dialog__body {
+            text-align: center;
         }
     }
 </style>

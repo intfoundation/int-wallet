@@ -15,7 +15,7 @@
           incoming transactions.
         </div>
         <div style="margin: 30px 0 20px;max-width: 700px;">
-          <router-link to="" tag="div" class="accounts" v-for="(item, index) in balanceList"
+          <router-link :to="{path: '/accounts/detail', query: {address: item.address}}" tag="div" class="accounts" v-for="(item, index) in balanceList"
                        :class="{'blue': index%3 == 0, 'light-blue': index%3 == 1, 'yellow': index%3== 2}">
             <div>Accounts {{index + 1}}</div>
             <div>{{ item.balance }}<span style="font-size: 14px;"> INT</span></div>
@@ -33,7 +33,7 @@
           <!--交易记录-->
           <div v-if="txList.length > 0">
             <!--每一条交易记录-->
-            <div class="trasaction-record" v-for="item in txList">
+            <div class="trasaction-record" v-for="item in txList" @click="openTxDetail(item)">
               <!--左侧-->
               <div class="date">
                 <div class="bold-text">{{new Date(item.block.timestamp*1000).getDate()}}</div>
@@ -119,8 +119,8 @@
         :visible.sync="transactionVisible"
         center>
         <div class="first-detail">
-          <div class="">0x9e2db90c20cc877c7ea92ceb557fafa772f3f255816</div>
-          <div class="">Sunday, September 30, 2018 11:18 AM</div>
+          <div>{{ transDetail.hash }}</div>
+          <div>{{ transDetail.time }}</div>
         </div>
         <div class="second-detail">
           <div>
@@ -148,14 +148,15 @@
 </template>
 
 <script>
+  /* eslint-disable */
   import Intjs from 'intjs';
+  import moment from 'moment';
   // import { ipcRenderer } from 'electron';
 
   const intjs = new Intjs('localhost', 18089);
 
   export default {
     name: 'wallets',
-    /* eslint-disable */
     data() {
       return {
         fileName: [],
@@ -173,6 +174,10 @@
         isHaveAccount: false,
         showClose: false,
         txList: [],
+        transDetail: {
+          hash: '',
+          time: ''
+        },
       };
     },
     watch: {
@@ -191,11 +196,12 @@
         }
       },
     },
-    computed: {
-      balance () {}
-
-    },
     methods: {
+      openTxDetail(transobj) {
+        this.transactionVisible = true;
+        this.transDetail.hash = transobj.tx.hash;
+        this.transDetail.time = moment(new Date(transobj.block.timestamp * 1000)).format("dddd, MMMM Do YYYY, h:mm:ss a");
+      },
       some() {
         this.firstPassword = '';
         this.secondPassword = '';
@@ -232,21 +238,7 @@
             let result = await intjs.getBalance(address);
             balanceArray.push({address: address, balance: (result.balance / Math.pow(10,18)).toFixed(2)});
             await this.getTransactionHash(address);
-
           });
-          // TODO 异步拿到的数据怎么排序？
-          // if (balanceArray.length !== 0) {
-          //   balanceArray.sort(function (a, b) {
-          //     console.log(b.balance - a.balance);
-          //     return (b.balance - a.balance);
-          //   });
-          // }
-
-          // this.hashList.forEach(async function(item) {
-          //
-          //   let detail = await intjs.getTransactionReceipt(item);
-          //   console.log('---detail', detail);
-          // })
           this.balanceList = balanceArray;
         }
       },
@@ -267,25 +259,6 @@
         }
         if (!reg.test(this.firstPassword)) return
           this.carefulVisible = true;
-
-        // this.$prompt('请输入密码', '创建帐户', {
-        //   confirmButtonText: '确定',
-        //   cancelButtonText: '取消',
-        //   inputPattern: /[\w]{9,}/,
-        //   inputErrorMessage: '密码格式不正确',
-        // }).then(async ({ value }) => {
-        //   await this.createWallet(value);
-        //   await this.init();
-        //
-        // }).catch(() => {
-        //   this.$message({
-        //     type: 'info',
-        //     message: '取消输入',
-        //   });
-        // });
-        // setImmediate(async () => {
-        //     await this.createWallet(password);
-        // });
       },
       async carefulConfirm() {
         await this.createWallet(this.firstPassword);
@@ -299,7 +272,6 @@
        * 生成 keystore
        * */
       async createWallet(password) {
-         // console.log(password);
          let result = await intjs.newAccount(password);
          if (result.err) {
             this.$message({
@@ -321,7 +293,7 @@
             this.txList.push(result)
           })
         }
-        console.log('---rsultRRR----', this.txList)
+        console.log('[[[[]]]', this.txList)
       },
       addWalletContract() {
         // this.$prompt('请输入密码', '创建帐户', {
@@ -351,7 +323,6 @@
 </script>
 
 <style lang="scss">
-  /*@import '../../style/common';*/
     .wallets {
       background-color: #fff;
       border-radius: 5px;
@@ -511,7 +482,7 @@
 
       .el-dialog {
         min-width: 500px;
-        max-width: 600px;
+        max-width: 650px;
         .el-dialog__header {
           border-bottom: 1px solid #ccc;
           padding: 20px;

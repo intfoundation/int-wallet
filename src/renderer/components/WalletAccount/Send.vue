@@ -222,7 +222,6 @@
       async init () {
         let files = await intjs.getAccounts();
         this.formLabelAlign.fee = await intjs.getPrice();
-        console.log('^^^', this.formLabelAlign.fee);
         // this.slideMin = 0 ;
         this.slideMax = 2000 * Math.pow(10, 9);
         if (files.err) {
@@ -333,6 +332,9 @@
       },
     },
     mounted() {
+      if (this.$route.query.address) {
+        this.formLabelAlign.to = this.$route.query.address
+      }
       this.init();
     },
   };
