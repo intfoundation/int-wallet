@@ -19,7 +19,7 @@
                       <span>A Minite since last block</span>
                   </span>
               </div>
-              <span class="balance">Balance: 10.99 INT</span>
+              <span class="balance" >Balance: {{totalBalance}} INT</span>
           </div>
         </el-header>
         <el-container>
@@ -76,11 +76,13 @@
     data() {
       return {
         activeIndex: '1',
+        totalBalance: 0,
       };
     },
     components: {
       Wallets,
     },
+    /* eslint-disable */
     methods: {
       walletInfor() {
         this.$router.push('/wallets');
@@ -97,6 +99,10 @@
       vote() {
         this.$router.push('/vote');
       },
+      // onBalance(val) {
+      //   console.log(val);
+      //   this.totalBalance = val;
+      // },
     },
     computed: {
 

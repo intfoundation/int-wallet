@@ -1,5 +1,6 @@
 <template>
     <div class="wallets">
+      <span>{{totalBalance}}</span>
       <div class="item-title">
         <div>
           <i class="wallet icon-common"></i>
@@ -161,6 +162,7 @@
       return {
         fileName: [],
         balanceList: [],
+        totalBalance: 0,
         searchTx: '',
         visible: false,
         showPassword1: false,
@@ -236,6 +238,7 @@
           this.fileName.forEach(async (value) => {
             let address = value;
             let result = await intjs.getBalance(address);
+            this.totalBalance += +result.balance;
             balanceArray.push({address: address, balance: result.balance});
             await this.getTransactionHash(address);
           });
