@@ -131,7 +131,7 @@
         checked: false,
         isSelected: true,
         labelPosition: 'top',
-        centerDialogVisible: true,
+        centerDialogVisible: false,
         password: '',
         balanceValue: '',
         slideMin: 0,

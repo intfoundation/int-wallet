@@ -125,23 +125,23 @@
         <div class="second-detail">
           <div>
             <span>Amount:</span>
-            <span>0.01 INT</span>
+            <span>{{ transDetail.value }}</span>
           </div>
           <div>
             <span>From:</span>
-            <span>Accounts 1</span>
+            <span>{{ transDetail.from }}</span>
           </div>
-          <div>
+          <div v-if="transDetail.to">
             <span>To:</span>
-            <span>0x960Bd04ac250da64972Cd43cD246a2D</span>
+            <span>{{ transDetail.to }}</span>
           </div>
           <div>
             <span>Fee paid:</span>
-            <span>0.0034234344 INT</span>
+            <span>{{ transDetail.cost }} INT</span>
           </div>
         </div>
         <span slot="footer" class="dialog-footer">
-          <el-button class="btn2" @click="transactionVisible = false" style="font-size: 18px;">Confirm</el-button>
+          <el-button class="el-btn-confirm" @click="transactionVisible = false" style="font-size: 18px;">Confirm</el-button>
         </span>
       </el-dialog>
     </div>
@@ -173,10 +173,15 @@
         passwordError: false,
         isHaveAccount: false,
         showClose: false,
+        totalBalance: null,
         txList: [],
         transDetail: {
           hash: '',
-          time: ''
+          time: '',
+          value: '',
+          from: '',
+          to: '',
+          cost: ''
         },
       };
     },
@@ -197,10 +202,17 @@
       },
     },
     methods: {
+      pressCon () {
+        this.$emit('listento', this.totalBalance);
+      },
       openTxDetail(transobj) {
         this.transactionVisible = true;
         this.transDetail.hash = transobj.tx.hash;
         this.transDetail.time = moment(new Date(transobj.block.timestamp * 1000)).format("dddd, MMMM Do YYYY, h:mm:ss a");
+        this.transDetail.value = (transobj.tx.value / Math.pow(10, 18)).toFixed(4);
+        this.transDetail.from = transobj.tx.caller;
+        this.transDetail.to = transobj.tx.input.to;
+        this.transDetail.cost = +transobj.receipt.cost / Math.pow(10, 18);
       },
       some() {
         this.firstPassword = '';
@@ -223,7 +235,7 @@
        * */
       async init () {
         let files = await intjs.getAccounts();
-        console.log('@@@@@@', files)
+        console.log('---files---', files)
         if (files.err) {
           this.isHaveAccount = true;
             this.$message({
@@ -235,7 +247,9 @@
           let balanceArray = [];
           this.fileName.forEach(async (value) => {
             let address = value;
-            let result = await intjs.getBalance(address);
+            let result = await intjs.getBalance(address)
+            console.log('***', result.balance);
+            this.totalBalance += Number(result.balance);
             balanceArray.push({address: address, balance: result.balance});
             await this.getTransactionHash(address);
           });
@@ -293,7 +307,6 @@
             this.txList.push(result)
           })
         }
-        console.log('[[[[]]]', this.txList)
       },
       addWalletContract() {
         // this.$prompt('请输入密码', '创建帐户', {
@@ -316,14 +329,19 @@
         // });
       },
     },
-    mounted() {
+    created() {
       this.init();
     },
+    mounted() {
+      setTimeout(() => {
+        this.pressCon();
+      }, 1000)
+    }
   };
 </script>
 
 <style lang="scss">
-    .wallets {
+  .wallets {
       background-color: #fff;
       border-radius: 5px;
       .item-content {
@@ -478,11 +496,23 @@
             margin-bottom: 15px;
           }
         }
+        .el-dialog__footer {
+            padding: 15px;
+        }
+        .el-btn-confirm {
+          border: none;
+          background: #fff;
+          color: #3C31D7;
+        }
+        .el-btn-confirm:hover {
+          background-color: #fff;
+          color: #3C31D7;
+        }
       }
 
       .el-dialog {
-        min-width: 500px;
-        max-width: 650px;
+        width: 650px !important;
+        max-width: 650px !important;
         .el-dialog__header {
           border-bottom: 1px solid #ccc;
           padding: 20px;
@@ -591,5 +621,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
 
 </style>

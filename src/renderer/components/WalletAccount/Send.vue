@@ -24,7 +24,7 @@
                 </el-form-item>
 
                 <el-form-item label="AMOUNT">
-                    <el-input v-model="balanceSubTx" placeholder="0.0"></el-input>
+                    <el-input v-model="balanceSubTx" placeholder="0.0" :readonly="checked"></el-input>
                 </el-form-item>
 
                 <el-form-item label="BALANCE">
@@ -179,9 +179,10 @@
       txfee () {
         let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
         if (this.checked) {
-          this.balanceSubTx = this.balanceValue - x;
+          this.balanceSubTx = (this.balanceValue - x).toFixed(2);
         } else {
-          // this.balanceSubTx = this.formLabelAlign.amount;
+          console.log('---amount---', this.formLabelAlign.amount)
+          // this.balanceSubTx = '';
         }
         return x;
       }
@@ -222,7 +223,6 @@
       async init () {
         let files = await intjs.getAccounts();
         this.formLabelAlign.fee = await intjs.getPrice();
-        // this.slideMin = 0 ;
         this.slideMax = 2000 * Math.pow(10, 9);
         if (files.err) {
           this.$message({
@@ -257,7 +257,7 @@
                 balance: value.balance
               });
               this.getTokenAccount();
-              this.balanceValue = value.balance;
+              this.balanceValue = (value.balance / Math.pow(10, 18));
               this.from_address = value.address;
             }
           });
@@ -318,6 +318,7 @@
               params.value = 0;
             }
               let result = await intjs.sendTransaction(params);
+              console.log('--rrrr', result)
               if (result.err) {
                 this.centerDialogVisible = false;
                 this.$message.error('交易失败');

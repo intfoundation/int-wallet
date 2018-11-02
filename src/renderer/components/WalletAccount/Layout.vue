@@ -11,7 +11,7 @@
 
                   <span>
                       <i class="block-height icon-common"></i>
-                      <span>6498292</span>
+                      <span>{{height}}</span>
                   </span>
 
                   <span>
@@ -19,50 +19,27 @@
                       <span>A Minite since last block</span>
                   </span>
               </div>
-              <span class="balance">Balance: 10.99 INT</span>
+              <span class="balance">Balance: {{totalBalance}} INT</span>
           </div>
         </el-header>
         <el-container>
             <el-aside width="200px">
-              <router-link class="aside-item" to="/wallets" tag="div">
+              <router-link class="aside-item" :class="{'background-shadow': activeIndex === index}" :to="item.address" tag="div" v-for="(item, index) in navlist" @click.native="switchNav(index)">
                 <div class="aside-item-inner">
-                  <i class="wallet icon-common"></i>
-                  <span>Wallets</span>
-                </div>
-              </router-link>
-              <router-link class="aside-item" to="/send" tag="div">
-                <div class="aside-item-inner">
-                  <i class="send icon-common"></i>
-                  <span>Send</span>
-                </div>
-              </router-link>
-              <router-link class="aside-item" to="/token" tag="div">
-                <div class="aside-item-inner">
-                  <i class="tokens icon-common"></i>
-                  <span>Custom Tokens</span>
-                </div>
-              </router-link>
-              <router-link class="aside-item" to="/mortgage" tag="div">
-                <div class="aside-item-inner">
-                  <i class="mortgage icon-common"></i>
-                  <span>Mortgage</span>
-                </div>
-              </router-link>
-              <router-link class="aside-item" to="/unmortgage" tag="div">
-                <div class="aside-item-inner">
-                  <i class="unmortgage icon-common"></i>
-                  <span>Unmortgage</span>
-                </div>
-              </router-link>
-              <router-link class="aside-item" to="/vote" tag="div">
-                <div class="aside-item-inner">
-                  <i class="vote icon-common"></i>
-                  <span>Vote</span>
+                  <i
+                    class="icon-common"
+                    :class="[{'wallet': index === 0}, {'send': index === 1}, {'mortgage': index === 2},
+                    {'unmortgage': index === 3 }, {'vote': index === 4}, {'active-wallet': index === 0 && activeIndex === index},
+                    {'active-send': index === 1 && activeIndex === index},
+                    {'active-mortgage': index === 2 && activeIndex === index},
+                    {'active-unmortgage': index === 3 && activeIndex === index},
+                    {'active-vote': index === 4 && activeIndex === index}]"></i>
+                  <span :class="{'blue-color': activeIndex === index}">{{item.name}}</span>
                 </div>
               </router-link>
             </el-aside>
             <el-main>
-                <router-view></router-view>
+                <router-view v-on:listento="receive"></router-view>
                 <!--这是项目中第二层router-view，他对应的是第二层路由-->
             </el-main>
         </el-container>
@@ -70,40 +47,68 @@
 </template>
 
 <script>
-  import Wallets from './Wallets';
+  /* eslint-disable */
+  import Intjs from 'intjs';
+  const intjs = new Intjs('localhost', 18089);
   export default {
     name: 'wallet-account',
     data() {
       return {
-        activeIndex: '1',
+        activeIndex: 0,
+        height: '',
+        time: '',
+        navlist: [
+          {
+            address: '/wallets',
+            name: 'Wallets',
+            className: 'wallet',
+            activeClassName: 'active-wallet'
+          },
+          {
+            address: '/send',
+            name: 'Send',
+            className: 'send',
+            activeClassName: 'active-send'
+          },
+          {
+            address: '/mortgage',
+            name: 'Mortgage',
+            className: 'mortgage',
+            activeClassName: 'active-mortgage'
+          },
+          {
+            address: '/unmortgage',
+            name: 'Unmortgage',
+            className: 'unmortgage',
+            activeClassName: 'active-unmortgage'
+          },
+          {
+            address: '/vote',
+            name: 'Vote',
+            className: 'vote',
+            activeClassName: 'active-vote'
+          },
+        ],
+        totalBalance: null
       };
     },
-    components: {
-      Wallets,
+    mounted() {
+      this.getBlockHeight()
+      // setInterval(() => {
+      //   this.getBlockHeight()
+      // }, 1000)
     },
     methods: {
-      walletInfor() {
-        this.$router.push('/wallets');
+      receive (data) {
+        this.totalBalance = data / Math.pow(10, 18);
       },
-      sendTx() {
-        this.$router.push('/send');
+      switchNav (index) {
+        this.activeIndex = index;
       },
-      mortgage() {
-        this.$router.push('/mortgage');
-      },
-      unmortgage() {
-        this.$router.push('/unmortgage');
-      },
-      vote() {
-        this.$router.push('/vote');
-      },
-    },
-    computed: {
-
-    },
-    mounted() {
-
-    },
+      async getBlockHeight() {
+        this.height = await intjs.getBlockNumber()
+      }
+    }
   };
 </script>
 
@@ -154,7 +159,7 @@
     // background-color: #bbb;
     .aside-item {
       height: 60px;
-      border: 1px solid #e5edff;
+      border-bottom: 1px solid #3C31D7;
         cursor: pointer;
       .aside-item-inner {
         line-height: 60px;
@@ -165,11 +170,23 @@
           background-image: url('../../assets/images/wallet.png');
           margin-right: 10px;
         }
+        .active-wallet {
+            width: 18px;
+            height: 15px;
+            background-image: url('../../assets/images/wallet-active.png');
+            margin-right: 10px;
+        }
         .send {
           width: 18px;
           height: 15px;
           background-image: url('../../assets/images/send.png');
           margin-right: 10px;
+        }
+        .active-send {
+            width: 18px;
+            height: 15px;
+            background-image: url('../../assets/images/send-active.png');
+            margin-right: 10px;
         }
         .tokens {
           width: 18px;
@@ -183,17 +200,38 @@
           background-image: url('../../assets/images/mortgage.png');
           margin-right: 10px;
         }
+        .active-mortgage {
+            width: 18px;
+            height: 15px;
+            background-image: url('../../assets/images/mortgage-active.png');
+            margin-right: 10px;
+        }
         .unmortgage {
           width: 18px;
           height: 15px;
           background-image: url('../../assets/images/unmortgage.png');
           margin-right: 10px;
         }
+        .active-unmortgage {
+            width: 18px;
+            height: 15px;
+            background-image: url('../../assets/images/unmortgage-active.png');
+            margin-right: 10px;
+        }
         .vote {
           width: 18px;
           height: 15px;
           background-image: url('../../assets/images/vote.png');
           margin-right: 10px;
+        }
+        .active-vote {
+            width: 18px;
+            height: 15px;
+            background-image: url('../../assets/images/vote-active.png');
+            margin-right: 10px;
+        }
+        .blue-color {
+            color: #3C31D7;
         }
         & span {
           font-size: 14px;
@@ -205,5 +243,9 @@
   .el-main {
     background-color: #f5f5f5;
     padding: 20px 50px;
+  }
+  .background-shadow {
+      /*border-left: 4px solid #3C31D7 !important;*/
+      /*background: linear-gradient(to right, #dde6ff, #f6f9ff);*/
   }
 </style>
