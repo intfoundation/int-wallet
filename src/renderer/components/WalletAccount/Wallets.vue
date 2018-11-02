@@ -1,6 +1,5 @@
 <template>
     <div class="wallets">
-      <span>{{totalBalance}}</span>
       <div class="item-title">
         <div>
           <i class="wallet icon-common"></i>
@@ -219,7 +218,6 @@
         this.firstPassword = '';
         this.secondPassword = '';
       },
-
       /**
        * 初始化
        * */

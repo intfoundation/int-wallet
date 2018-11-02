@@ -24,7 +24,7 @@
                 </el-form-item>
 
                 <el-form-item label="AMOUNT">
-                    <el-input v-model="balanceSubTx" placeholder="0.0"></el-input>
+                    <el-input v-model="formLabelAlign.amount" placeholder="0.0" ></el-input>
                 </el-form-item>
 
                 <el-form-item label="BALANCE">
@@ -47,7 +47,7 @@
 
                 <el-row class="want-to-send">
                     <el-col :span="6">
-                        You want to send <span style="font-size: 16px;color: #3c31d7;">{{balanceSubTx}}</span> INT.
+                        You want to send <span style="font-size: 16px;color: #3c31d7;">{{formLabelAlign.amount}}</span> INT.
                     </el-col>
                 </el-row>
 
@@ -73,7 +73,7 @@
                     <el-col :span="8" style="margin-top: 40px;">
                         <span class="title" style="font-size: 16px;">TOTAL</span>
                         <!--<p><span class="total-value">{{Number(formLabelAlign.amount) + formLabelAlign.fee/20}}</span> INT</p>-->
-                        <p><span class="total-value">{{checked ? balanceValue : (+balanceSubTx + +txfee)}}</span> INT</p>
+                        <p><span class="total-value">{{checked ? balanceValue : ((+formLabelAlign.amount + +txfee))}}</span> INT</p>
                     </el-col>
                 </el-row>
                 <el-button @click="sendTransaction" class="send-btn"><span>SEND</span></el-button>
@@ -92,7 +92,7 @@
                 <div>
                     <span>Amount:</span>
                     <!--这个单位还要根据前面的名称做动态绑定-->
-                    <span>{{balanceSubTx}}</span>
+                    <span>{{formLabelAlign.amount}}</span>
                 </div>
                 <div>
                     <span>From:</span>
@@ -168,7 +168,7 @@
         formLabelAlign: {
           from: '',
           to: '',
-          amount: '',
+          amount: 0,
           balance: '',
           fee: 20,
         },
@@ -179,9 +179,9 @@
       txfee () {
         let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
         if (this.checked) {
-          this.balanceSubTx = this.balanceValue - x;
+          this.formLabelAlign.amount = this.balanceValue - x;
         } else {
-          // this.balanceSubTx = this.formLabelAlign.amount;
+          this.formLabelAlign.amount = 0;
         }
         return x;
       }
@@ -257,7 +257,7 @@
                 balance: value.balance
               });
               this.getTokenAccount();
-              this.balanceValue = value.balance;
+              this.balanceValue = value.balance / Math.pow(10,18);
               this.from_address = value.address;
             }
           });
@@ -282,7 +282,7 @@
           this.$message.error('手续费用太低');
         } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {
           this.$message.error('手续费用太高');
-        } else if ( ((+this.balanceSubTx + this.txfee)*Math.pow(10,18)) > +this.balanceValue) {
+        } else if ( ((+this.balanceSubTx + this.txfee)*Math.pow(10,18)) > +this.balanceValue*Math.pow(10,18)) {
           this.$message.error('余额不足');
         } else {
           this.centerDialogVisible = true;
@@ -302,20 +302,19 @@
             let params = {
               from: this.from_address,
               method: '',
-              value: this.balanceSubTx,
+              value: 0,
               limit: '500000',
               price: this.formLabelAlign.fee,
               input: '',
               password: this.password
             }
             if (this.tokenName === 'INT') {
-              params.method = 'transferTo'
+              params.method = 'transferTo';
               params.input = {to: this.formLabelAlign.to};
               params.value = this.balanceSubTx*Math.pow(10,18);
             } else {
               params.method = 'transferTokenTo';
               params.input = {to: this.formLabelAlign.to, tokenid: this.tokenName, amount: this.balanceSubTx*Math.pow(10,18)};
-              params.value = 0;
             }
               let result = await intjs.sendTransaction(params);
               if (result.err) {

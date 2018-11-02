@@ -99,10 +99,6 @@
       vote() {
         this.$router.push('/vote');
       },
-      // onBalance(val) {
-      //   console.log(val);
-      //   this.totalBalance = val;
-      // },
     },
     computed: {
 
