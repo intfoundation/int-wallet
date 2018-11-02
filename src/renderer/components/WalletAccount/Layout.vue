@@ -20,6 +20,7 @@
                   </span>
               </div>
               <span class="balance">Balance: {{totalBalance}} INT</span>
+              <span class="balance" >Balance: {{totalBalance}} INT</span>
           </div>
         </el-header>
         <el-container>

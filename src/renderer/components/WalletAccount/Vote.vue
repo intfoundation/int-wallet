@@ -168,7 +168,7 @@
         if (this.checked) {
           this.formLabelAlign.amount = this.balanceValue - x;
         } else {
-          // this.balanceSubTx = this.formLabelAlign.amount;
+          this.formLabelAlign.amount = 0;
         }
         return x;
       }
@@ -243,7 +243,7 @@
           this.balance.forEach((value) => {
             if (value.address === this.formLabelAlign.account) {
               this.formLabelAlign.balance = (value.balance / Math.pow(10,18)).toFixed(2);
-              this.balanceValue = value.balance;
+              this.balanceValue = value.balance / Math.pow(10,18);
             }
           });
           setImmediate(async () => {
@@ -274,7 +274,7 @@
           this.$message.error('手续费用太低');
         } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {
           this.$message.error('手续费用太高');
-        } else if (((+this.formLabelAlign.amount + this.txfee)*Math.pow(10,18)) > +this.balanceValue) {
+        } else if (((+this.formLabelAlign.amount + this.txfee)*Math.pow(10,18)) > +this.balanceValue * Math.pow(10,18)) {
             this.$message.error('余额不足');
         } else {
           this.centerDialogVisible = true;

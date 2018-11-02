@@ -202,9 +202,6 @@
       },
     },
     methods: {
-      pressCon () {
-        this.$emit('listento', this.totalBalance);
-      },
       openTxDetail(transobj) {
         this.transactionVisible = true;
         this.transDetail.hash = transobj.tx.hash;
@@ -235,7 +232,6 @@
        * */
       async init () {
         let files = await intjs.getAccounts();
-        console.log('---files---', files)
         if (files.err) {
           this.isHaveAccount = true;
             this.$message({
@@ -247,9 +243,8 @@
           let balanceArray = [];
           this.fileName.forEach(async (value) => {
             let address = value;
-            let result = await intjs.getBalance(address)
-            console.log('***', result.balance);
-            this.totalBalance += Number(result.balance);
+            let result = await intjs.getBalance(address);
+            this.totalBalance += +result.balance;
             balanceArray.push({address: address, balance: result.balance});
             await this.getTransactionHash(address);
           });
@@ -329,13 +324,8 @@
         // });
       },
     },
-    created() {
-      this.init();
-    },
     mounted() {
-      setTimeout(() => {
-        this.pressCon();
-      }, 1000)
+      this.init();
     }
   };
 </script>
@@ -621,6 +611,5 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-
 
 </style>
