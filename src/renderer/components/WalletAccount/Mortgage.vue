@@ -28,7 +28,7 @@
                 </el-form-item>
                 <template>
                     <!-- `checked` 为 true 或 false -->
-                    <el-checkbox v-model="checked">Mortgage all</el-checkbox>
+                    <el-checkbox v-model="checked" @click.native="sendEverything">Mortgage all</el-checkbox>
                 </template>
 
                 <el-row class="want-to-send">
@@ -133,7 +133,6 @@
         labelPosition: 'top',
         centerDialogVisible: false,
         password: '',
-        balanceSubTx: 0,
         balanceValue: '',
         slideMin: 0,
         slideMax: 100,
@@ -149,15 +148,20 @@
     computed: {
       txfee () {
         let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
-        if (this.checked) {
-          this.formLabelAlign.amount = this.balanceValue - x;
-        } else {
-          this.formLabelAlign.amount = 0;
-        }
         return x;
       }
     },
     methods: {
+      sendActiveIndex () {
+        this.$emit('listenToActive', 2)
+      },
+      sendEverything () {
+        if (!this.checked) {
+          this.formLabelAlign.amount = this.balanceValue - this.txfee;
+        } else {
+          this.formLabelAlign.amount = 0;
+        }
+      },
       /**
        * 初始化
        * */
@@ -265,6 +269,7 @@
     },
     mounted() {
       this.init();
+      this.sendActiveIndex();
     },
   };
 </script>

@@ -112,11 +112,6 @@
                     <span>{{formLabelAlign.fee}}</span>
                 </div>
 
-                <!--<div class="stripe-item">-->
-                <!--<span>Gas price</span>-->
-                <!--<span>0.002 INT per mllin gas</span>-->
-                <!--</div>-->
-
                 <div style="text-align: center">
                     <el-input type="password" placeholder="Enter password to confim the transaction" v-model="password"></el-input>
                 </div>
@@ -165,15 +160,13 @@
     computed: {
       txfee () {
         let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
-        if (this.checked) {
-          this.formLabelAlign.amount = this.balanceValue - x;
-        } else {
-          this.formLabelAlign.amount = 0;
-        }
         return x;
       }
     },
     methods: {
+      sendActiveIndex () {
+        this.$emit('listenToActive', 4)
+      },
       /**
        * 初始化
        * */
@@ -327,6 +320,7 @@
     },
     mounted() {
       this.init();
+      this.sendActiveIndex();
     },
   };
 </script>

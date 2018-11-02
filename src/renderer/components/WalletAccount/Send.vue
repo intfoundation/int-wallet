@@ -24,7 +24,7 @@
                 </el-form-item>
 
                 <el-form-item label="AMOUNT">
-                    <el-input v-model="formLabelAlign.amount" placeholder="0.0" ></el-input>
+                    <el-input v-model="formLabelAlign.amount" placeholder="0.0" :readonly="checked"></el-input>
                 </el-form-item>
 
                 <el-form-item label="BALANCE">
@@ -41,7 +41,7 @@
 
                 <template>
                     <!-- `checked` 为 true 或 false -->
-                    <el-checkbox v-model="checked">Send everything</el-checkbox>
+                    <el-checkbox v-model="checked" @click.native="sendEverything">Send everything</el-checkbox>
                 </template>
 
 
@@ -178,16 +178,21 @@
     computed: {
       txfee () {
         let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
-        if (this.checked) {
-          this.formLabelAlign.amount = this.balanceValue - x;
-        } else {
-          this.formLabelAlign.amount = 0;
-        }
         return x;
       }
     },
     methods: {
       /* eslint-disable */
+      sendActiveIndex () {
+        this.$emit('listenToActive', 1)
+      },
+      sendEverything () {
+        if (!this.checked) {
+          this.formLabelAlign.amount = this.balanceValue - this.txfee;
+        } else {
+          this.formLabelAlign.amount = 0;
+        }
+      },
       getTokenAccount() {
         const that = this;
         axios.get('https://explorer.intchain.io/api/wallet/walletList', {
@@ -336,7 +341,9 @@
         this.formLabelAlign.to = this.$route.query.address
       }
       this.init();
-    },
+      this.sendActiveIndex()
+    }
+
   };
 </script>
 

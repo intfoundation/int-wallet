@@ -19,28 +19,32 @@
                       <span>A Minite since last block</span>
                   </span>
               </div>
-              <span class="balance">Balance: {{totalBalance}} INT</span>
-              <span class="balance" >Balance: {{totalBalance}} INT</span>
+              <span class="balance">Balance: {{ (totalBalance / Math.pow(10, 18)).toFixed(2) }} INT</span>
           </div>
         </el-header>
         <el-container>
             <el-aside width="200px">
-              <router-link class="aside-item" :class="{'background-shadow': activeIndex === index}" :to="item.address" tag="div" v-for="(item, index) in navlist" @click.native="switchNav(index)">
-                <div class="aside-item-inner">
-                  <i
-                    class="icon-common"
-                    :class="[{'wallet': index === 0}, {'send': index === 1}, {'mortgage': index === 2},
-                    {'unmortgage': index === 3 }, {'vote': index === 4}, {'active-wallet': index === 0 && activeIndex === index},
-                    {'active-send': index === 1 && activeIndex === index},
-                    {'active-mortgage': index === 2 && activeIndex === index},
-                    {'active-unmortgage': index === 3 && activeIndex === index},
-                    {'active-vote': index === 4 && activeIndex === index}]"></i>
-                  <span :class="{'blue-color': activeIndex === index}">{{item.name}}</span>
-                </div>
-              </router-link>
+                <router-link
+                        class="aside-item"
+                        :class="{'background-shadow': activeIndex === index}"
+                        :to="item.address" tag="div" v-for="(item, index) in navlist"
+                        @click.native="switchNav(index)">
+                    <div class="aside-item-inner">
+                        <i
+                            class="icon-common"
+                            :class="[{'wallet': index === 0}, {'send': index === 1}, {'mortgage': index === 2},
+                            {'unmortgage': index === 3 }, {'vote': index === 4},
+                            {'active-wallet': index === 0 && activeIndex === index},
+                            {'active-send': index === 1 && activeIndex === index},
+                            {'active-mortgage': index === 2 && activeIndex === index},
+                            {'active-unmortgage': index === 3 && activeIndex === index},
+                            {'active-vote': index === 4 && activeIndex === index}]"></i>
+                        <span :class="{'blue-color': activeIndex === index}">{{item.name}}</span>
+                    </div>
+                </router-link>
             </el-aside>
             <el-main>
-                <router-view v-on:listento="receive"></router-view>
+                <router-view v-on:listenToActive="seeActiveIndex"></router-view>
                 <!--这是项目中第二层router-view，他对应的是第二层路由-->
             </el-main>
         </el-container>
@@ -90,24 +94,33 @@
             activeClassName: 'active-vote'
           },
         ],
-        totalBalance: null
+        totalBalance: null,
+        fileName: []
       };
     },
     mounted() {
       this.getBlockHeight()
-      // setInterval(() => {
-      //   this.getBlockHeight()
-      // }, 1000)
+      this.init()
     },
     methods: {
-      receive (data) {
-        this.totalBalance = data / Math.pow(10, 18);
+      seeActiveIndex (data) {
+        this.activeIndex = data;
+      },
+      async init () {
+        let files = await intjs.getAccounts();
+        this.fileName = files;
+        this.fileName.forEach(async (value) => {
+        let address = value;
+        let result = await intjs.getBalance(address);
+        this.totalBalance += +result.balance;
+      });
+      },
+
+      async getBlockHeight() {
+        this.height = await intjs.getBlockNumber()
       },
       switchNav (index) {
         this.activeIndex = index;
-      },
-      async getBlockHeight() {
-        this.height = await intjs.getBlockNumber()
       }
     }
   };
@@ -156,94 +169,94 @@
           }
       }
   }
-  .el-aside {
-    // background-color: #bbb;
-    .aside-item {
-      height: 60px;
-      border-bottom: 1px solid #3C31D7;
-        cursor: pointer;
-      .aside-item-inner {
-        line-height: 60px;
-        margin-left: 25px;
-        .wallet {
-          width: 18px;
-          height: 15px;
-          background-image: url('../../assets/images/wallet.png');
-          margin-right: 10px;
-        }
-        .active-wallet {
-            width: 18px;
-            height: 15px;
-            background-image: url('../../assets/images/wallet-active.png');
-            margin-right: 10px;
-        }
-        .send {
-          width: 18px;
-          height: 15px;
-          background-image: url('../../assets/images/send.png');
-          margin-right: 10px;
-        }
-        .active-send {
-            width: 18px;
-            height: 15px;
-            background-image: url('../../assets/images/send-active.png');
-            margin-right: 10px;
-        }
-        .tokens {
-          width: 18px;
-          height: 15px;
-          background-image: url('../../assets/images/custom-tokens.png');
-          margin-right: 10px;
-        }
-        .mortgage {
-          width: 18px;
-          height: 15px;
-          background-image: url('../../assets/images/mortgage.png');
-          margin-right: 10px;
-        }
-        .active-mortgage {
-            width: 18px;
-            height: 15px;
-            background-image: url('../../assets/images/mortgage-active.png');
-            margin-right: 10px;
-        }
-        .unmortgage {
-          width: 18px;
-          height: 15px;
-          background-image: url('../../assets/images/unmortgage.png');
-          margin-right: 10px;
-        }
-        .active-unmortgage {
-            width: 18px;
-            height: 15px;
-            background-image: url('../../assets/images/unmortgage-active.png');
-            margin-right: 10px;
-        }
-        .vote {
-          width: 18px;
-          height: 15px;
-          background-image: url('../../assets/images/vote.png');
-          margin-right: 10px;
-        }
-        .active-vote {
-            width: 18px;
-            height: 15px;
-            background-image: url('../../assets/images/vote-active.png');
-            margin-right: 10px;
-        }
-        .blue-color {
-            color: #3C31D7;
-        }
-        & span {
-          font-size: 14px;
-          vertical-align: middle;
-        }
-      }
-    }
-  }
+
   .el-main {
     background-color: #f5f5f5;
     padding: 20px 50px;
+  }
+  .el-aside {
+      .aside-item {
+          height: 60px;
+          border-bottom: 1px solid #3C31D7;
+          cursor: pointer;
+          .aside-item-inner {
+              line-height: 60px;
+              margin-left: 25px;
+              .wallet {
+                  width: 18px;
+                  height: 15px;
+                  background-image: url('../../assets/images/wallet.png');
+                  margin-right: 10px;
+              }
+              .active-wallet {
+                  width: 18px;
+                  height: 15px;
+                  background-image: url('../../assets/images/wallet-active.png');
+                  margin-right: 10px;
+              }
+              .send {
+                  width: 18px;
+                  height: 15px;
+                  background-image: url('../../assets/images/send.png');
+                  margin-right: 10px;
+              }
+              .active-send {
+                  width: 18px;
+                  height: 15px;
+                  background-image: url('../../assets/images/send-active.png');
+                  margin-right: 10px;
+              }
+              .tokens {
+                  width: 18px;
+                  height: 15px;
+                  background-image: url('../../assets/images/custom-tokens.png');
+                  margin-right: 10px;
+              }
+              .mortgage {
+                  width: 18px;
+                  height: 15px;
+                  background-image: url('../../assets/images/mortgage.png');
+                  margin-right: 10px;
+              }
+              .active-mortgage {
+                  width: 18px;
+                  height: 15px;
+                  background-image: url('../../assets/images/mortgage-active.png');
+                  margin-right: 10px;
+              }
+              .unmortgage {
+                  width: 18px;
+                  height: 15px;
+                  background-image: url('../../assets/images/unmortgage.png');
+                  margin-right: 10px;
+              }
+              .active-unmortgage {
+                  width: 18px;
+                  height: 15px;
+                  background-image: url('../../assets/images/unmortgage-active.png');
+                  margin-right: 10px;
+              }
+              .vote {
+                  width: 18px;
+                  height: 15px;
+                  background-image: url('../../assets/images/vote.png');
+                  margin-right: 10px;
+              }
+              .active-vote {
+                  width: 18px;
+                  height: 15px;
+                  background-image: url('../../assets/images/vote-active.png');
+                  margin-right: 10px;
+              }
+              .blue-color {
+                  color: #3C31D7;
+              }
+              & span {
+                  font-size: 14px;
+                  vertical-align: middle;
+              }
+          }
+      }
   }
   .background-shadow {
       /*border-left: 4px solid #3C31D7 !important;*/
