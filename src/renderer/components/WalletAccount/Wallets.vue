@@ -63,6 +63,7 @@
         :visible.sync="visible"
         class="two-btn"
         @close="some"
+        :close-on-click-modal="isMask"
         center>
           <el-dialog
               class="hijk"
@@ -172,6 +173,7 @@
         secondPassword: '',
         passwordError: false,
         isHaveAccount: false,
+        isMask: false,
         showClose: false,
         totalBalance: null,
         txList: [],

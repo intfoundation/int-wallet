@@ -12,13 +12,8 @@
             <div class="middle-number">{{balance}} <span>INT</span></div>
             <!--账户持有的token-->
             <div class="token">
-                <span>Internet Node Token</span>
-                <span>727.995532 INT</span>
-            </div>
-
-            <div class="token">
-                <span>Internet Node Token</span>
-                <span>727.995532 INT</span>
+                <span>INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq</span>
+                <span>{{tokenBalance}}</span>
             </div>
 
             <!--注意事项-->
@@ -110,7 +105,8 @@
           address: '',
           balance: '',
           pageSize: 10000,
-          txList: []
+          txList: [],
+          tokenBalance: ''
         };
       },
       created() {
@@ -118,7 +114,8 @@
       },
       mounted() {
         this.getTransactionHash(this.address)
-        this.getTokenAccount()
+        // this.getTokenAccount()
+        this.getTokenBalance()
       },
       methods: {
         openQR () {
@@ -179,10 +176,15 @@
                 }
               }
             })
-            .catch((error) => {
-              alert(error);
+            .catch(error => {
+              console.log(error);
             });
         },
+        async getTokenBalance () {
+          let that = this;
+          let result = await intjs.getTokenBalance('INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq', that.address);
+          that.tokenBalance = +result.balance / Math.pow(10, 18);
+        }
       }
     };
 </script>

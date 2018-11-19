@@ -125,7 +125,7 @@
                 <!--</div>-->
 
                 <div style="text-align: center">
-                    <el-input type="password" placeholder="Enter password to confim the transaction" v-model="password"></el-input>
+                    <el-input type="password" placeholder="Enter password to confirm the transaction" v-model="password"></el-input>
                 </div>
             </div>
             <span slot="footer" class="dialog-footer">
@@ -140,11 +140,10 @@
 </template>
 
 <script>
+  /* eslint-disable */
   import Intjs from 'intjs';
   import axios from 'axios';
-
   const intjs = new Intjs('localhost', 18089);
-
   export default {
     name: 'send',
     data() {
@@ -160,7 +159,7 @@
         pageSize: 10000,
         slideMin: 0,
         slideMax: 100,
-        balanceSubTx: '',
+        // balanceSubTx: '',
         balanceValue: '',
         from_address: '',
         tokenName: '',
@@ -174,11 +173,18 @@
         },
       };
     },
-    /* eslint-disable */
+
     computed: {
       txfee () {
-        let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
-        return x;
+        if (this.formLabelAlign.fee > 20) {
+          let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
+          if (x.toString().split('.')[1].length > 5) {
+            x = x.toFixed(5);
+          } else {
+            x = x;
+          }
+          return x;
+        }
       }
     },
     methods: {
@@ -216,8 +222,8 @@
               }
             }
           })
-          .catch((error) => {
-            alert(error);
+          .catch(error => {
+            console.log(error);
           });
       },
       /* eslint-disable */
@@ -236,11 +242,17 @@
         } else {
           this.fileName = files;
           let balanceArray = [];
-          this.fileName.forEach(async (value) => {
+          // await this.fileName.forEach(async (value,i) => {
+          //   let address = value;
+          //   let result = await intjs.getBalance(address);
+          //   balanceArray.push({address: address, balance: result.balance});
+          //   console.log(i)
+          // });
+          for(let value of this.fileName){
             let address = value;
             let result = await intjs.getBalance(address);
             balanceArray.push({address: address, balance: result.balance});
-          });
+          }
           // TODO 异步拿到的数据怎么排序？
           if (balanceArray.length !== 0) {
             balanceArray.sort(function (a, b) {
@@ -248,6 +260,10 @@
             });
           }
           this.balance = balanceArray;
+          // if (this.balance.length) {
+          //   this.formLabelAlign.from = this.balance[0]
+          //   this.formLabelAlign.balance = await intjs.getBalance(this.formLabelAlign.from.address)
+          // }
         }
       },
 
@@ -260,7 +276,7 @@
                 name: 'INT',
                 balance: value.balance
               });
-              this.getTokenAccount();
+              // this.getTokenAccount();
               this.balanceValue = value.balance / Math.pow(10,18);
               this.from_address = value.address;
             }
@@ -280,7 +296,7 @@
           this.$message.error('请选择 From 地址');
         } else if (this.formLabelAlign.to === '') {
           this.$message.error('请输入 To 地址');
-        } else if (Number(this.balanceSubTx) === 0) {
+        } else if (Number(this.formLabelAlign.amount) === 0) {
           this.$message.error('转账金额不能为 0');
         } else if (+this.formLabelAlign.fee < 200*Math.pow(10,9)) {
           this.$message.error('手续费用太低');
@@ -318,9 +334,10 @@
               params.value = this.formLabelAlign.amount*Math.pow(10,18);
             } else {
               params.method = 'transferTokenTo';
-              params.input = {to: this.formLabelAlign.to, tokenid: this.tokenName, amount: this.balanceSubTx*Math.pow(10,18)};
+              params.input = {to: this.formLabelAlign.to, tokenid: this.tokenName, amount: this.formLabelAlign.amount*Math.pow(10,18)};
             }
               let result = await intjs.sendTransaction(params);
+              console.log('--rrr---', result)
               if (result.err) {
                 this.centerDialogVisible = false;
                 this.$message.error('交易失败');

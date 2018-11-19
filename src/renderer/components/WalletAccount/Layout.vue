@@ -14,10 +14,10 @@
                       <span>{{height}}</span>
                   </span>
 
-                  <span>
-                      <i class="block-time icon-common"></i>
-                      <span>A Minite since last block</span>
-                  </span>
+                  <!--<span>-->
+                      <!--<i class="block-time icon-common"></i>-->
+                      <!--<span>A Minite since last block</span>-->
+                  <!--</span>-->
               </div>
               <span class="balance">Balance: {{ (totalBalance / Math.pow(10, 18)).toFixed(2) }} INT</span>
           </div>
@@ -108,12 +108,20 @@
       },
       async init () {
         let files = await intjs.getAccounts();
-        this.fileName = files;
-        this.fileName.forEach(async (value) => {
-        let address = value;
-        let result = await intjs.getBalance(address);
-        this.totalBalance += +result.balance;
-      });
+        if (files.err) {
+          this.isHaveAccount = true;
+          this.$message({
+            message: '请先创建帐户',
+            type: 'warning'
+          });
+        } else {
+          this.fileName = files;
+          this.fileName.forEach(async (value) => {
+            let address = value;
+            let result = await intjs.getBalance(address);
+            this.totalBalance += +result.balance;
+          });
+        }
       },
 
       async getBlockHeight() {
@@ -153,7 +161,7 @@
                   background-image: url("../../assets/images/linkfrom.png");
               }
               .block-height {
-                  width: 15px;
+                  width: 16px;
                   height: 15px;
                   background-image: url("../../assets/images/asset.png");
               }
