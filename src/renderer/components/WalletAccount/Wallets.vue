@@ -608,7 +608,7 @@
   }
   .spe-caller {
     display: inline-block;
-    width: 100px;
+    width: 90px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

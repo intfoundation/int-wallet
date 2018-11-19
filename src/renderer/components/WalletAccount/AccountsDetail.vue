@@ -11,9 +11,9 @@
             <div class="small-text">{{address}}</div>
             <div class="middle-number">{{balance}} <span>INT</span></div>
             <!--账户持有的token-->
-            <div class="token">
+            <div class="token" v-if="tokenBalance !== '' ">
                 <span>INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq</span>
-                <span>{{tokenBalance}}</span>
+                <span style="float: right;">{{tokenBalance}}</span>
             </div>
 
             <!--注意事项-->
@@ -231,9 +231,6 @@
             font-size: 16px;
             color: #666;
             margin-bottom: 20px;
-            & > span {
-                margin-right: 45%;
-            }
         }
         .note {
             margin-top: 50px;

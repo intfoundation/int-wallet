@@ -159,7 +159,6 @@
         pageSize: 10000,
         slideMin: 0,
         slideMax: 100,
-        // balanceSubTx: '',
         balanceValue: '',
         from_address: '',
         tokenName: '',
@@ -188,7 +187,11 @@
       }
     },
     methods: {
-      /* eslint-disable */
+      async getTokenBalance () {
+        let that = this;
+        let result = await intjs.getTokenBalance('INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq', that.address);
+        that.tokenBalance = +result.balance / Math.pow(10, 18);
+      },
       sendActiveIndex () {
         this.$emit('listenToActive', 1)
       },
@@ -199,34 +202,34 @@
           this.formLabelAlign.amount = 0;
         }
       },
-      getTokenAccount() {
-        const that = this;
-        axios.get('https://explorer.intchain.io/api/wallet/walletList', {
-          params: {
-            source: 'wallet',
-            pageSize: that.pageSize,
-            address: that.formLabelAlign.from,
-          },
-        })
-          .then((res) => {
-            const result = res.data;
-            if (result.status === 'success') {
-              let tokenlist = result.data.tokenList;
-              if (tokenlist.length != 0) {
-                tokenlist.forEach(function(item){
-                  that.balanceAndToken.push({
-                    name: item.coin,
-                    balance: item.balance
-                  })
-                })
-              }
-            }
-          })
-          .catch(error => {
-            console.log(error);
-          });
-      },
-      /* eslint-disable */
+      // getTokenAccount() {
+      //   const that = this;
+      //   axios.get('https://explorer.intchain.io/api/wallet/walletList', {
+      //     params: {
+      //       source: 'wallet',
+      //       pageSize: that.pageSize,
+      //       address: that.formLabelAlign.from,
+      //     },
+      //   })
+      //     .then((res) => {
+      //       const result = res.data;
+      //       if (result.status === 'success') {
+      //         console.log('+++++***((((((', result);
+      //         let tokenlist = result.data.tokenList;
+      //         if (tokenlist.length != 0) {
+      //           tokenlist.forEach(function(item){
+      //             that.balanceAndToken.push({
+      //               name: item.coin,
+      //               balance: item.balance
+      //             })
+      //           })
+      //         }
+      //       }
+      //     })
+      //     .catch(error => {
+      //       console.log(error);
+      //     });
+      // },
       /**
        * 初始化
        * */
