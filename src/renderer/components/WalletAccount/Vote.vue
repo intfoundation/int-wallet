@@ -13,13 +13,13 @@
                             <el-option
                                     v-for="(item, index) in balance"
                                     :key="index"
-                                    :label="'Account-' + ++index + '-balance-' + ((item.balance / Math.pow(10, 18)).toFixed(2))"
+                                    :label="'Account' + ++index + '-' + item.address"
                                     :value="item.address">
                             </el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="VOTES">
-                        <el-input v-model="formLabelAlign.votes"></el-input>
+                        <el-input v-model="formLabelAlign.votes" readonly></el-input>
                     </el-form-item>
                     <el-form-item label="BALANCE">
                         <el-input class="balance" v-model="formLabelAlign.balance" readonly></el-input>
@@ -246,6 +246,7 @@
               return;
             } else {
               this.formLabelAlign.votes = (result.stake / Math.pow(10,18)).toFixed(2);
+              console.log('[[[]]]', this.formLabelAlign.votes)
             }
           });
         } else {

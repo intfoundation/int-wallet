@@ -12,7 +12,7 @@
                         <el-option
                             v-for="(item, index) in balance"
                             :key="index"
-                            :label="'Account-' + ++index + '-balance-' + ((item.balance / Math.pow(10, 18)).toFixed(2))"
+                            :label="'Account' + ++index + '-' + item.address"
                             :value="item.address">
                         </el-option>
                     </el-select>
@@ -250,7 +250,7 @@
               value: 0,
               limit: '500000',
               price: this.formLabelAlign.fee,
-              input: this.formLabelAlign.amount.Math.pow(10,18),
+              input: {amount: this.formLabelAlign.amount * Math.pow(10,18)},
               password: this.password,
               from: this.formLabelAlign.account
             }

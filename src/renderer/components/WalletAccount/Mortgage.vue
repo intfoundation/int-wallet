@@ -12,7 +12,7 @@
                         <el-option
                             v-for="(item, index) in balance"
                             :key="index"
-                            :label="'Account-' + ++index + '-balance-' + ((item.balance / Math.pow(10, 18)).toFixed(2))"
+                            :label="'Account' + ++index + '-' + item.address"
                             :value="item.address">
                         </el-option>
                     </el-select>
@@ -56,7 +56,7 @@
                 <el-row>
                     <el-col :span="8" style="margin-top: 40px;">
                         <span class="title">TOTAL</span>
-                        <p><span class="total-value">{{checked ? balanceValue : (formLabelAlign.amount + +txfee)}}</span> INT</p>
+                        <p><span class="total-value">{{checked ? balanceValue : (+formLabelAlign.amount + +txfee)}}</span> INT</p>
                     </el-col>
                 </el-row>
 
@@ -237,6 +237,7 @@
       },
 
       submitTransaction() {
+        console.log('____')
         if (this.password === '') {
           this.$message.error('请输入密码');
         } else if (this.password.length < 9) {
@@ -248,11 +249,12 @@
               value: this.formLabelAlign.amount*Math.pow(10, 18),
               limit: '500000',
               price: this.formLabelAlign.fee,
-              input: this.formLabelAlign.amount*Math.pow(10,18),
+              input: {amount: this.formLabelAlign.amount*Math.pow(10,18)},
               password: this.password,
               from: this.formLabelAlign.account
             }
               let result = await intjs.sendTransaction(params);
+              console.log('===rr mortgage---', result)
               if (result.err) {
                 this.centerDialogVisible = false;
                 this.$message.error('换票失败');

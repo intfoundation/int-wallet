@@ -13,7 +13,7 @@
                         <el-option
                             v-for="(item, index) in balance"
                             :key="index"
-                            :label="'Account-' + ++index + '-balance-' + ((item.balance / Math.pow(10, 18)).toFixed(2))"
+                            :label="'Account' + ++index + '-' + item.address"
                             :value="item.address">
                         </el-option>
                     </el-select>
@@ -270,14 +270,19 @@
         }
       },
 
-      selectFrom () {
+       selectFrom () {
         if (this.formLabelAlign.from) {
-          this.balance.forEach((value) => {
+          this.balance.forEach(async(value) => {
             if (value.address === this.formLabelAlign.from) {
               this.balanceAndToken = [];
               this.balanceAndToken.push({
                 name: 'INT',
                 balance: value.balance
+              });
+              let data = await intjs.getTokenBalance('INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq', this.formLabelAlign.from)
+              this.balanceAndToken.push({
+                name: 'INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq',
+                balance: +data.balance
               });
               // this.getTokenAccount();
               this.balanceValue = value.balance / Math.pow(10,18);
@@ -337,10 +342,10 @@
               params.value = this.formLabelAlign.amount*Math.pow(10,18);
             } else {
               params.method = 'transferTokenTo';
-              params.input = {to: this.formLabelAlign.to, tokenid: this.tokenName, amount: this.formLabelAlign.amount*Math.pow(10,18)};
+              params.input = {to: this.formLabelAlign.to, tokenid: 'INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq', amount: this.formLabelAlign.amount*Math.pow(10,18)};
             }
               let result = await intjs.sendTransaction(params);
-              console.log('--rrr---', result)
+              console.log('--rrrsend---', result)
               if (result.err) {
                 this.centerDialogVisible = false;
                 this.$message.error('交易失败');
