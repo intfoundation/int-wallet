@@ -49,7 +49,7 @@
                 </div>
               </div>
               <div style="float: right;" class="rpc">
-                <span style="color: #D7316F">-{{(item.tx.value / Math.pow(10, 18))}}</span>
+                <span style="color: #D7316F">-{{(item.tx.value / Math.pow(10, 18)).toFixed(4)}}</span>
                 <span style="color: #666;">&nbsp;INT</span>
                 <span class="right-angle"></span>
               </div>

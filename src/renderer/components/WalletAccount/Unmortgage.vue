@@ -104,7 +104,11 @@
                 <!--</div>-->
 
                 <div style="text-align: center">
-                    <el-input type="password" placeholder="Enter password to confim the transaction" v-model="password"></el-input>
+                    <el-input
+                        type="password"
+                        placeholder="Enter password to confim the transaction"
+                        v-model="password"
+                        @keyup.enter.native="submitTransaction"></el-input>
                 </div>
             </div>
             <span slot="footer" class="dialog-footer">
@@ -248,13 +252,14 @@
             let params = {
               method: 'unmortgage',
               value: 0,
-              limit: '500000',
+              limit: '50000',
               price: this.formLabelAlign.fee,
               input: {amount: this.formLabelAlign.amount * Math.pow(10,18)},
               password: this.password,
               from: this.formLabelAlign.account
             }
             let result = await intjs.sendTransaction(params);
+            console.log('---unmortgage---', result);
               if (result.err) {
                 this.centerDialogVisible = false;
                 this.$message.error('换票失败');

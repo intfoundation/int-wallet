@@ -113,7 +113,11 @@
                 </div>
 
                 <div style="text-align: center">
-                    <el-input type="password" placeholder="Enter password to confim the transaction" v-model="password"></el-input>
+                    <el-input
+                        type="password"
+                        placeholder="Enter password to confim the transaction"
+                        v-model="password"
+                        @keyup.enter.native="submitTransaction"></el-input>
                 </div>
             </div>
             <span slot="footer" class="dialog-footer">
@@ -289,7 +293,7 @@
             let params = {
               method: 'vote',
               value: 0,
-              limit: '500000',
+              limit: '50000',
               price: this.formLabelAlign.fee,
               input: {candidates: this.multipleSelection},
               password: this.password,

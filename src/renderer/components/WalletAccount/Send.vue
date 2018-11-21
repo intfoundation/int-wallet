@@ -125,7 +125,11 @@
                 <!--</div>-->
 
                 <div style="text-align: center">
-                    <el-input type="password" placeholder="Enter password to confirm the transaction" v-model="password"></el-input>
+                    <el-input
+                        type="password"
+                        placeholder="Enter password to confirm the transaction"
+                        v-model="password"
+                        @keyup.enter.native="submitTransaction"></el-input>
                 </div>
             </div>
             <span slot="footer" class="dialog-footer">
@@ -300,7 +304,6 @@
         this.tokenName = value;
       },
       sendTransaction() {
-        console.log('--balance---', +this.formLabelAlign.amount + +this.txfee, +this.balanceValue)
         if (this.formLabelAlign.from === '') {
           this.$message.error('请选择 From 地址');
         } else if (this.formLabelAlign.to === '') {
@@ -327,14 +330,15 @@
         } else if (this.password.length < 9) {
           this.$message.error('密码长度必须大于等于9');
         } else {
+          console.log('++++++')
           setImmediate(async() => {
             let params = {
               from: this.from_address,
               method: '',
               value: 0,
-              limit: '500000',
+              limit: '50000',
               price: this.formLabelAlign.fee,
-              input: '',
+              input: {},
               password: this.password
             }
             if (this.tokenName === 'INT') {

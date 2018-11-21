@@ -102,7 +102,11 @@
                 <!--</div>-->
 
                 <div style="text-align: center">
-                    <el-input type="password" placeholder="Enter password to confim the transaction" v-model="password"></el-input>
+                    <el-input
+                        type="password"
+                        placeholder="Enter password to confim the transaction"
+                        v-model="password"
+                        @keyup.enter.native="submitTransaction"></el-input>
                 </div>
             </div>
             <span slot="footer" class="dialog-footer">
@@ -237,7 +241,6 @@
       },
 
       submitTransaction() {
-        console.log('____')
         if (this.password === '') {
           this.$message.error('请输入密码');
         } else if (this.password.length < 9) {
@@ -247,12 +250,13 @@
             let params = {
               method: 'mortgage',
               value: this.formLabelAlign.amount*Math.pow(10, 18),
-              limit: '500000',
+              limit: '50000',
               price: this.formLabelAlign.fee,
               input: {amount: this.formLabelAlign.amount*Math.pow(10,18)},
               password: this.password,
               from: this.formLabelAlign.account
             }
+              console.log('222')
               let result = await intjs.sendTransaction(params);
               console.log('===rr mortgage---', result)
               if (result.err) {
