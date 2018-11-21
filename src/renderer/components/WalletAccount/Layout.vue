@@ -26,7 +26,7 @@
             <el-aside width="200px">
                 <router-link
                         class="aside-item"
-                        :class="{'background-shadow': activeIndex === index}"
+                        :class="{'aside-item-active': activeIndex === index}"
                         :to="item.address" tag="div" v-for="(item, index) in navlist"
                         @click.native="switchNav(index)">
                     <div class="aside-item-inner">
@@ -54,7 +54,7 @@
 <script>
   /* eslint-disable */
   import Intjs from 'intjs';
-  const intjs = new Intjs('localhost', 18089);
+  const intjs = new Intjs('localhost', 8555);
   export default {
     name: 'wallet-account',
     data() {
@@ -100,6 +100,9 @@
     },
     mounted() {
       this.getBlockHeight()
+      setInterval( () => {
+        this.getBlockHeight()
+      }, 10000)
       this.init()
     },
     methods: {
@@ -183,9 +186,12 @@
     padding: 20px 50px;
   }
   .el-aside {
+      .aside-item-active {
+          border-bottom: 2px solid #3C31D7;
+      }
       .aside-item {
           height: 60px;
-          border-bottom: 1px solid #3C31D7;
+          margin: 0 10px;
           cursor: pointer;
           .aside-item-inner {
               line-height: 60px;
@@ -265,9 +271,5 @@
               }
           }
       }
-  }
-  .background-shadow {
-      /*border-left: 4px solid #3C31D7 !important;*/
-      /*background: linear-gradient(to right, #dde6ff, #f6f9ff);*/
   }
 </style>

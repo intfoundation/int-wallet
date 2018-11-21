@@ -143,7 +143,7 @@
   /* eslint-disable */
   import Intjs from 'intjs';
   import axios from 'axios';
-  const intjs = new Intjs('localhost', 18089);
+  const intjs = new Intjs('localhost', 8555);
   export default {
     name: 'send',
     data() {
@@ -300,6 +300,7 @@
         this.tokenName = value;
       },
       sendTransaction() {
+        console.log('--balance---', +this.formLabelAlign.amount + +this.txfee, +this.balanceValue)
         if (this.formLabelAlign.from === '') {
           this.$message.error('请选择 From 地址');
         } else if (this.formLabelAlign.to === '') {
@@ -310,7 +311,7 @@
           this.$message.error('手续费用太低');
         } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {
           this.$message.error('手续费用太高');
-        } else if ( ((+this.formLabelAlign.amount + this.txfee)*Math.pow(10,18)) > +this.balanceValue*Math.pow(10,18)) {
+        } else if ( ((+this.formLabelAlign.amount + +this.txfee)*Math.pow(10,18)) > +this.balanceValue*Math.pow(10,18)) {
           this.$message.error('余额不足');
         } else {
           this.centerDialogVisible = true;

@@ -108,7 +108,7 @@
             <span slot="footer" class="dialog-footer">
               <el-row>
                 <el-col :span="12"><el-button @click="close" class="btn1">Cancel</el-button></el-col>
-                <el-col :span="12"><el-button @click="addAccount" class="btn2" :disabled="passwordError || !firstPassword || !secondPassword">Confirm</el-button></el-col>
+                <el-col :span="12"><el-button @click="addAccount" class="btn2" :disabled="passwordError">Confirm</el-button></el-col>
               </el-row>
             </span>
         </el-dialog>
@@ -154,7 +154,7 @@
   import moment from 'moment';
   // import { ipcRenderer } from 'electron';
 
-  const intjs = new Intjs('localhost', 18089);
+  const intjs = new Intjs('localhost', 8555);
 
   export default {
     name: 'wallets',
@@ -262,14 +262,25 @@
        * */
       addAccount() {
         let reg = /[\w]{9,}/;
-        if (!this.firstPassword || !this.secondPassword) return;
-
+        if (!this.firstPassword || !this.secondPassword) {
+          this.$message({
+            type: 'error',
+            message: 'Please input password'
+          });
+          return;
+        }
         if (this.firstPassword != this.secondPassword) {
             this.passwordError = true;
             return;
         }
-        if (!reg.test(this.firstPassword)) return
-          this.carefulVisible = true;
+        if (!reg.test(this.firstPassword)) {
+          this.$message({
+            type: 'error',
+            message: 'Incorrect password format. Please enter more than 9 passwords'
+          });
+          return;
+        }
+        this.carefulVisible = true;
       },
       async carefulConfirm() {
         await this.createWallet(this.firstPassword);

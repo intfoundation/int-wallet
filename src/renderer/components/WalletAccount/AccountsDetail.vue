@@ -51,7 +51,7 @@
                 <!--交易记录-->
                 <div v-if="txList.length > 0">
                     <!--每一条交易记录-->
-                    <div class="trasaction-record" v-for="item in txList">
+                    <div class="trasaction-record" v-for="item in txList" @click="openTxDetail(item)">
                         <!--左侧-->
                         <div class="date">
                             <div class="bold-text">{{new Date(item.block.timestamp*1000).getDate()}}</div>
@@ -89,6 +89,37 @@
           </el-row>
         </span>
         </el-dialog>
+        <el-dialog
+                class="txDetail"
+                title="Transaction"
+                :visible.sync="transactionVisible"
+                center>
+            <div class="first-detail">
+                <div>{{ transDetail.hash }}</div>
+                <div>{{ transDetail.time }}</div>
+            </div>
+            <div class="second-detail">
+                <div>
+                    <span>Amount:</span>
+                    <span>{{ transDetail.value }}</span>
+                </div>
+                <div>
+                    <span>From:</span>
+                    <span>{{ transDetail.from }}</span>
+                </div>
+                <div v-if="transDetail.to">
+                    <span>To:</span>
+                    <span>{{ transDetail.to }}</span>
+                </div>
+                <div>
+                    <span>Fee paid:</span>
+                    <span>{{ transDetail.cost }} INT</span>
+                </div>
+            </div>
+            <span slot="footer" class="dialog-footer">
+          <el-button class="el-btn-confirm" @click="transactionVisible = false" style="font-size: 18px;">Confirm</el-button>
+        </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -97,7 +128,8 @@
   import Intjs from 'intjs';
   import axios from 'axios';
   import QRCode from 'qrcode';
-  const intjs = new Intjs('localhost', 18089);
+  import moment from 'moment';
+  const intjs = new Intjs('localhost', 8555);
     export default {
       data() {
         return {
@@ -106,7 +138,16 @@
           balance: '',
           pageSize: 10000,
           txList: [],
-          tokenBalance: ''
+          tokenBalance: '',
+          transactionVisible: false,
+          transDetail: {
+            hash: '',
+            time: '',
+            value: '',
+            from: '',
+            to: '',
+            cost: ''
+          },
         };
       },
       created() {
@@ -182,8 +223,18 @@
         },
         async getTokenBalance () {
           let that = this;
-          let result = await intjs.getTokenBalance('INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq', that.address);
+          let result = await intjs.getTokenBalance('INT1CGgVhaSx67hYrxb7qCZBj6TU5W9W3CFFf', that.address);
+          console.log('----re---detail---', result)
           that.tokenBalance = +result.balance / Math.pow(10, 18);
+        },
+        openTxDetail(transobj) {
+          this.transactionVisible = true;
+          this.transDetail.hash = transobj.tx.hash;
+          this.transDetail.time = moment(new Date(transobj.block.timestamp * 1000)).format("dddd, MMMM Do YYYY, h:mm:ss a");
+          this.transDetail.value = (transobj.tx.value / Math.pow(10, 18)).toFixed(4);
+          this.transDetail.from = transobj.tx.caller;
+          this.transDetail.to = transobj.tx.input.to;
+          this.transDetail.cost = +transobj.receipt.cost / Math.pow(10, 18);
         }
       }
     };
@@ -327,6 +378,63 @@
         }
         .el-dialog__body {
             text-align: center;
+        }
+        .txDetail {
+            .el-dialog {
+                width: 650px !important;
+                max-width: 650px !important;
+            }
+            .el-dialog__header {
+                background-color: #F4F8FF;
+                text-align: left;
+            }
+            .el-dialog__title {
+                padding-left: 20px;
+                color: #3C31D7;
+            }
+            .first-detail {
+                padding-bottom: 25px;
+                padding-left: 20px;
+                border-bottom: 1px solid #ccc;
+                text-align: left;
+                font-size: 16px;
+                div:first-of-type {
+                    color: #3C31D7;
+                    margin-bottom: 10px;
+                }
+            }
+            .second-detail {
+                padding-top: 24px;
+                text-align: left;
+                padding-left: 40px;
+                & > div {
+                    span:nth-of-type(1) {
+                        display: inline-block;
+                        text-align: right;
+                        width: 100px;
+                        margin-right: 10px;
+                        color: #999;
+                    }
+                    span:nth-of-type(2) {
+                        color: #666;
+                    }
+                }
+                & > div:not(first-of-type) {
+                    margin-bottom: 15px;
+                }
+            }
+            .el-dialog__footer {
+                padding: 15px;
+            }
+            .el-btn-confirm {
+                border: none;
+                background: #fff;
+                color: #3C31D7;
+            }
+            .el-btn-confirm:hover {
+                background-color: #fff;
+                color: #3C31D7;
+            }
         }
     }
 </style>

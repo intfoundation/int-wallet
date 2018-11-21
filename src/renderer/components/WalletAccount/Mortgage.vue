@@ -119,7 +119,7 @@
 <script>
   import Intjs from 'intjs';
 
-  const intjs = new Intjs('localhost', 18089);
+  const intjs = new Intjs('localhost', 8555);
   /* eslint-disable */
   export default {
     name: 'mortgage',
