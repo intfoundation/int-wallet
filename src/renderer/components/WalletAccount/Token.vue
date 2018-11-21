@@ -64,7 +64,7 @@
 <script>
   import Intjs from 'intjs';
 
-  const intjs = new Intjs('localhost', 18089);
+  const intjs = new Intjs('localhost', 8555);
   const cardList = [];
   for (let i = 0; i < 4; i += 1) {
     cardList.push({

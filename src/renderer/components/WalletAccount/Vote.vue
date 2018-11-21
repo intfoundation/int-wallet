@@ -113,7 +113,11 @@
                 </div>
 
                 <div style="text-align: center">
-                    <el-input type="password" placeholder="Enter password to confim the transaction" v-model="password"></el-input>
+                    <el-input
+                        type="password"
+                        placeholder="Enter password to confim the transaction"
+                        v-model="password"
+                        @keyup.enter.native="submitTransaction"></el-input>
                 </div>
             </div>
             <span slot="footer" class="dialog-footer">
@@ -129,7 +133,7 @@
 <script>
   import Intjs from 'intjs';
 
-  const intjs = new Intjs('localhost', 18089);
+  const intjs = new Intjs('localhost', 8555);
   /* eslint-disable */
   export default {
     name: 'vote',
@@ -246,7 +250,6 @@
               return;
             } else {
               this.formLabelAlign.votes = (result.stake / Math.pow(10,18)).toFixed(2);
-              console.log('[[[]]]', this.formLabelAlign.votes)
             }
           });
         } else {
@@ -290,13 +293,14 @@
             let params = {
               method: 'vote',
               value: 0,
-              limit: '500000',
+              limit: '50000',
               price: this.formLabelAlign.fee,
-              input: this.multipleSelection,
+              input: {candidates: this.multipleSelection},
               password: this.password,
               from: this.formLabelAlign.account
             }
             let result = await intjs.sendTransaction(params);
+            console.log('---re vote---', result)
               if (result.err) {
                 this.centerDialogVisible = false;
                 this.$message.error('投票失败');

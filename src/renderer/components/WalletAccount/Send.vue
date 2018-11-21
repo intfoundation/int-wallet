@@ -125,7 +125,11 @@
                 <!--</div>-->
 
                 <div style="text-align: center">
-                    <el-input type="password" placeholder="Enter password to confirm the transaction" v-model="password"></el-input>
+                    <el-input
+                        type="password"
+                        placeholder="Enter password to confirm the transaction"
+                        v-model="password"
+                        @keyup.enter.native="submitTransaction"></el-input>
                 </div>
             </div>
             <span slot="footer" class="dialog-footer">
@@ -143,7 +147,7 @@
   /* eslint-disable */
   import Intjs from 'intjs';
   import axios from 'axios';
-  const intjs = new Intjs('localhost', 18089);
+  const intjs = new Intjs('localhost', 8555);
   export default {
     name: 'send',
     data() {
@@ -310,7 +314,7 @@
           this.$message.error('手续费用太低');
         } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {
           this.$message.error('手续费用太高');
-        } else if ( ((+this.formLabelAlign.amount + this.txfee)*Math.pow(10,18)) > +this.balanceValue*Math.pow(10,18)) {
+        } else if ( ((+this.formLabelAlign.amount + +this.txfee)*Math.pow(10,18)) > +this.balanceValue*Math.pow(10,18)) {
           this.$message.error('余额不足');
         } else {
           this.centerDialogVisible = true;
@@ -326,14 +330,15 @@
         } else if (this.password.length < 9) {
           this.$message.error('密码长度必须大于等于9');
         } else {
+          console.log('++++++')
           setImmediate(async() => {
             let params = {
               from: this.from_address,
               method: '',
               value: 0,
-              limit: '500000',
+              limit: '50000',
               price: this.formLabelAlign.fee,
-              input: '',
+              input: {},
               password: this.password
             }
             if (this.tokenName === 'INT') {
