@@ -1,5 +1,5 @@
 import { app, BrowserWindow,  Menu, shell, globalShortcut } from 'electron' // eslint-disable-line
-
+import { INTNode } from './INTNode';
 
 /**
  * Set `__static` path to static files in production
@@ -43,6 +43,7 @@ function createWindow() {
   });
 
   createMenu();
+  new INTNode().init('test');
 }
 
 app.on('ready', createWindow);
