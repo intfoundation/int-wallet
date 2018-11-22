@@ -67,7 +67,7 @@
                             </div>
                         </div>
                         <div style="float: right;" class="rpc">
-                            <span style="color: #D7316F">-{{(item.tx.value / Math.pow(10, 18)).toFixed(3)}}</span>
+                            <span style="color: #D7316F">{{item.tx.value}}</span>
                             <span style="color: #666;">&nbsp;INT</span>
                             <span class="right-angle"></span>
                         </div>
@@ -187,11 +187,33 @@
           let result = await intjs.getBalance(address);
           this.balance = +result.balance / Math.pow(10, 18);
           let txInformation = await intjs.chainClient.getTransactionByAddress({address});
+          // if (txInformation.err === 0) {
+          //   txInformation.txs.forEach(async(item) => {
+          //     let result = await intjs.getTransactionReceipt(item.txhash);
+          //     this.txList.push(result)
+          //   })
+          // }
+
           if (txInformation.err === 0) {
-            txInformation.txs.forEach(async(item) => {
-              let result = await intjs.getTransactionReceipt(item.txhash);
-              this.txList.push(result)
-            })
+            let arr = txInformation.txs;
+            for (let i in arr) {
+              let result = await intjs.getTransactionReceipt(arr[i].txhash);
+              result.tx.value = +result.tx.value / Math.pow(10, 18);
+              if (result.tx.value.toString().split('.')[1]) {
+                if (result.tx.value.toString().split('.')[1].length > 4) {
+                  result.tx.value = '-' + result.tx.value.toFixed(4);
+                }
+              } else {
+                if (result.tx.value === 0) {
+                  result.tx.value = result.tx.value
+                } else {
+                  result.tx.value = '-' + result.tx.value.toString()
+                }
+              }
+              this.txList.push(result);
+            }
+          } else {
+            return false;
           }
         },
         getTokenAccount (){
@@ -224,7 +246,6 @@
         async getTokenBalance () {
           let that = this;
           let result = await intjs.getTokenBalance('INT1CGgVhaSx67hYrxb7qCZBj6TU5W9W3CFFf', that.address);
-          console.log('----re---detail---', result)
           that.tokenBalance = +result.balance / Math.pow(10, 18);
         },
         openTxDetail(transobj) {
