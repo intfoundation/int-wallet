@@ -1,6 +1,8 @@
 import { app, BrowserWindow,  Menu, shell, globalShortcut } from 'electron' // eslint-disable-line
 import { INTNode } from './INTNode';
 
+const INTNODE = new INTNode();
+
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -43,7 +45,7 @@ function createWindow() {
   });
 
   createMenu();
-  new INTNode().init('test');
+    INTNODE.init('test');
 }
 
 app.on('ready', createWindow);
@@ -130,7 +132,6 @@ let menuList = function (webviews) {
             submenu: [
                 {role: 'reload'},
                 {role: 'forcereload'},
-                {role: 'toggledevtools'},
                 {type: 'separator'},
                 {role: 'resetzoom'},
                 {role: 'zoomin'},
@@ -142,6 +143,28 @@ let menuList = function (webviews) {
         {
             label: 'Develop',
             submenu: [
+                {role: 'toggledevtools'},
+                {
+                    label: 'Switching Network',
+                    submenu: [
+                        {
+                            label: 'Main',
+                            checked: false,
+                            type: 'checkbox',
+                            click() {
+                                INTNODE.restart('main');
+                            }
+                        },
+                        {
+                            label: 'Test',
+                            checked: true,
+                            type: 'checkbox',
+                            click() {
+                                INTNODE.restart('test');
+                            }
+                        }
+                    ]
+                }
             ]
         },
         {
