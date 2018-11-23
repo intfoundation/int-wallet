@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable */
-import { app } from 'electron';
+import { app, dialog } from 'electron';
 const EventEmitter = require('events').EventEmitter;
 const { spawn} = require('child_process');
 const path = require('path');
@@ -48,8 +48,10 @@ export class INTNode extends EventEmitter {
     }
 
     init() {
-        let network = this._network || DEFAULT_NETWORK;
-        this.start(network);
+        this._network = DEFAULT_NETWORK;
+
+        this.getUserData();
+        this.start(this._network);
     }
 
     restart(network) {
@@ -97,18 +99,30 @@ export class INTNode extends EventEmitter {
     }
 
     _startNode(network) {
-        this.getUserData();
-
-        if (!this._network) {
-            this._network = network;
-        }
+        this._network = network;
 
         if (this._network === 'test') {
             console.info('Node will connect the test network');
+            dialog.showMessageBox({
+                type: 'info',
+                buttons: ['OK'],
+                title: 'Network',
+                message: 'Node will connect the test network',
+                },
+                () => {}
+                );
         }
 
         if (this._network === 'main') {
             console.info('Node will connect the main network');
+            dialog.showMessageBox({
+                    type: 'info',
+                    buttons: ['OK'],
+                    title: 'Network',
+                    message: 'Node will connect the main network',
+                },
+                () => {}
+                );
         }
 
         this.setUserData(this._network);

@@ -44,11 +44,16 @@ function createWindow() {
     mainWindow = null;
   });
 
+  INTNODE.init('test');
   createMenu();
-    INTNODE.init('test');
 }
 
 app.on('ready', createWindow);
+
+app.on('will-quit', () => {
+    // 清空所有快捷键
+    globalShortcut.unregisterAll();
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -93,7 +98,15 @@ let register = function () {
     globalShortcut.register('Alt+CommandOrControl+I', () => {
 
     });
-}
+
+    globalShortcut.register('Alt+CommandOrControl+1', () => {
+        INTNODE.restart('main');
+    });
+
+    globalShortcut.register('Alt+CommandOrControl+2', () => {
+        INTNODE.restart('test');
+    });
+};
 
 let menuList = function (webviews) {
     webviews = webviews || [];
@@ -148,17 +161,19 @@ let menuList = function (webviews) {
                     label: 'Switching Network',
                     submenu: [
                         {
-                            label: 'Main',
-                            checked: false,
-                            type: 'checkbox',
+                            label: 'Main Network',
+                            checked: INTNODE.network === 'main',
+                            acceleration: 'Alt+CommandOrControl+1',
+                            type: 'radio',
                             click() {
                                 INTNODE.restart('main');
                             }
                         },
                         {
-                            label: 'Test',
-                            checked: true,
-                            type: 'checkbox',
+                            label: 'Test Network',
+                            checked: INTNODE.network === 'test',
+                            acceleration: 'Alt+CommandOrControl+2',
+                            type: 'radio',
                             click() {
                                 INTNODE.restart('test');
                             }
@@ -223,16 +238,7 @@ let menuList = function (webviews) {
                 ]
             }
         );
-
-        // // Window menu
-        // template[5].submenu = [
-        //     {role: 'close'},
-        //     {role: 'minimize'},
-        //     {role: 'zoom'},
-        //     {type: 'separator'},
-        //     {role: 'front'}
-        // ]
     }
 
     return template;
-}
+};
