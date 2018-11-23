@@ -20,7 +20,7 @@ Install int-cli
 $ npm install int-cli --global
 ```
 
-_Note: If you start int-cli in the terminal, please do not change the rpc port(default: 8555)._
+_Note: If you start int-cli in the terminal, please do not change the rpc port (default: 8555)._
 
 ### Config folder
 
@@ -55,7 +55,7 @@ $ npm run dev
 
 ``` bash
 # build int-wallet application for production
-$ npm run build --mac
+$ npm run build
 ```
 
 ## Testing
