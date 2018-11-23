@@ -56,7 +56,8 @@
                 <el-row>
                     <el-col :span="8" style="margin-top: 40px;">
                         <span class="title">TOTAL</span>
-                        <p><span class="total-value">{{+txfee}}</span> INT</p>
+                        <p style="font-size: 16px;">Votes: <span class="total-value" style="margin-left: 15px;">{{formLabelAlign.votes}}</span></p>
+                        <p style="font-size: 16px;">TxFee: <span class="total-value" style="margin-left: 15px;">{{+txfee}}</span> INT</p>
                     </el-col>
                 </el-row>
 
@@ -154,6 +155,11 @@
     computed: {
       txfee () {
         let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
+        if (this.checked) {
+          this.formLabelAlign.amount = this.balanceValue - x;
+        } else {
+          this.formLabelAlign.amount = this.formLabelAlign.amount;
+        }
         return x;
       }
     },
@@ -203,6 +209,7 @@
             if (value.address === this.formLabelAlign.account) {
               this.formLabelAlign.balance = (value.balance / Math.pow(10,18)).toFixed(2);
               this.balanceValue = value.balance / Math.pow(10, 18);
+              console.log('~~~~~~~', this.formLabelAlign.balance, this.balanceValue)
             }
           });
           setImmediate(async () => {
@@ -230,7 +237,9 @@
           this.$message.error('手续费用太低');
         } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {
           this.$message.error('手续费用太高');
-        } else if (((+this.formLabelAlign.amount + this.txfee)*Math.pow(10,18)) > +this.balanceValue * Math.pow(10, 18)) {
+        } else if (((+this.formLabelAlign.amount)*Math.pow(10,18)) > +this.formLabelAlign.votes * Math.pow(10, 18)) {
+          this.$message.error('票数不足');
+        } else if(this.txfee > this.balanceValue) {
           this.$message.error('余额不足');
         } else {
           this.centerDialogVisible = true;
@@ -258,6 +267,7 @@
               password: this.password,
               from: this.formLabelAlign.account
             }
+            console.log('+++++', params.limit, params.price, params.input.amount)
             let result = await intjs.sendTransaction(params);
             console.log('---unmortgage---', result);
               if (result.err) {

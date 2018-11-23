@@ -181,10 +181,15 @@
       txfee () {
         if (this.formLabelAlign.fee > 20) {
           let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
-          if (x.toString().split('.')[1].length > 5) {
-            x = x.toFixed(5);
+          // if (x.toString().split('.')[1].length > 5) {
+          //   x = x.toFixed(5);
+          // } else {
+          //   x = x;
+          // }
+          if (this.checked) {
+            this.formLabelAlign.amount = this.balanceValue - x;
           } else {
-            x = x;
+            this.formLabelAlign.amount = this.formLabelAlign.amount;
           }
           return x;
         }
