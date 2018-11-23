@@ -152,7 +152,11 @@
   /* eslint-disable */
   import Intjs from 'intjs';
   import moment from 'moment';
-  // import { ipcRenderer } from 'electron';
+  import { ipcRenderer } from 'electron';
+
+  // ipcRenderer.once('switch-node', (event, arg) => {
+  //     console.log(event);
+  // });
 
   const intjs = new Intjs('localhost', 8555);
 

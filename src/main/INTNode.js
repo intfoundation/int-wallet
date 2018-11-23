@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable */
-import { app, dialog } from 'electron';
+import { app, dialog, ipcMain } from 'electron';
 const EventEmitter = require('events').EventEmitter;
 const { spawn} = require('child_process');
 const path = require('path');
@@ -56,6 +56,9 @@ export class INTNode extends EventEmitter {
 
     restart(network) {
         this.start(network);
+
+        // ipcMain.emit('switch-network');
+        // console.info(`Emit switch network event, switch network to ${network} network`);
     }
 
     stop() {
@@ -84,7 +87,7 @@ export class INTNode extends EventEmitter {
             clearTimeout(killTimer);
             this._node = null;
             this.state = STATES.STOPPED;
-            console.info(`Node has been stopped`);
+            console.info(`Previous node has been stopped`);
         });
     }
 
