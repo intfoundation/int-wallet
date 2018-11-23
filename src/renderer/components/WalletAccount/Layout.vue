@@ -11,7 +11,8 @@
 
                   <span>
                       <i class="block-height icon-common"></i>
-                      <span>{{height}}</span>
+                      <span v-if="!this.height.err">{{height}}</span>
+                      <span v-else>Waiting for blocks...</span>
                   </span>
 
                   <!--<span>-->
@@ -114,7 +115,7 @@
         if (files.err) {
           this.isHaveAccount = true;
           this.$message({
-            message: '请先创建帐户',
+            message: 'Please create an account first.',
             type: 'warning'
           });
         } else {
