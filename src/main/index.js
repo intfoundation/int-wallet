@@ -164,7 +164,7 @@ let menuList = function (webviews) {
                             label: 'Main Network',
                             checked: INTNODE.network === 'main',
                             acceleration: 'Alt+CommandOrControl+1',
-                            type: 'checkbox',
+                            type: 'radio',
                             click() {
                                 INTNODE.restart('main');
                             }
@@ -173,7 +173,7 @@ let menuList = function (webviews) {
                             label: 'Test Network',
                             checked: INTNODE.network === 'test',
                             acceleration: 'Alt+CommandOrControl+2',
-                            type: 'checkbox',
+                            type: 'radio',
                             click() {
                                 INTNODE.restart('test');
                             }
