@@ -237,7 +237,7 @@
         if (files.err) {
           this.isHaveAccount = true;
             this.$message({
-                message: '请先创建帐户',
+                message: 'Please create an account first.',
                 type: 'warning'
             });
         } else {

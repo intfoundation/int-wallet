@@ -248,7 +248,7 @@
         this.slideMax = 2000 * Math.pow(10, 9);
         if (files.err) {
           this.$message({
-            message: '请先创建帐户',
+            message: 'Please create an account first.',
             type: 'warning'
           });
         } else {
