@@ -183,7 +183,7 @@
         // this.slideMin = 0;
         this.slideMax = 2000 * Math.pow(10, 9);
         if (files.err) {
-          this.$message.error('读取 keystore 文件名出错');
+          this.$message.error('Reading keystore file error.');
         } else {
           this.fileName = files;
           let balanceArray = [];
@@ -209,20 +209,19 @@
             if (value.address === this.formLabelAlign.account) {
               this.formLabelAlign.balance = (value.balance / Math.pow(10,18)).toFixed(2);
               this.balanceValue = value.balance / Math.pow(10, 18);
-              console.log('~~~~~~~', this.formLabelAlign.balance, this.balanceValue)
             }
           });
           setImmediate(async () => {
             let result = await intjs.getStake(this.formLabelAlign.account);
             if (result.err) {
-              this.$message.error('获取票据出错');
+              this.$message.error('Error in obtaining votes');
             } else {
               this.formLabelAlign.votes = (result.stake / Math.pow(10,18)).toFixed(2);
             }
           });
         } else {
           this.$message({
-            message: '请选择一个地址',
+            message: 'Please choose an address.',
             type: 'warning'
           });
         }
@@ -230,17 +229,17 @@
 
       sendTransaction() {
         if (this.formLabelAlign.account === '') {
-          this.$message.error('请选择 Account 地址');
+          this.$message.error('Please choose Account address.');
         } else if (Number(this.formLabelAlign.amount) === 0) {
-          this.$message.error('换票数不能为 0');
+          this.$message.error('The number of votes should not be 0.');
         } else if (+this.formLabelAlign.fee < 200*Math.pow(10,9)) {
-          this.$message.error('手续费用太低');
+          this.$message.error('Txfee is too slow.');
         } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {
-          this.$message.error('手续费用太高');
+          this.$message.error('Txfee is too high.');
         } else if (((+this.formLabelAlign.amount)*Math.pow(10,18)) > +this.formLabelAlign.votes * Math.pow(10, 18)) {
-          this.$message.error('票数不足');
+          this.$message.error('Votes are not enough.');
         } else if(this.txfee > this.balanceValue) {
-          this.$message.error('余额不足');
+          this.$message.error('Balance is not enough.');
         } else {
           this.centerDialogVisible = true;
         }
@@ -248,14 +247,14 @@
 
       cancelTransaction() {
         this.centerDialogVisible = false;
-        this.$message.error('取消换票');
+        this.$message.error('Unmortgage cancel');
       },
 
       submitTransaction() {
         if (this.password === '') {
-          this.$message.error('请输入密码');
+          this.$message.error('Please input the password.');
         } else if (this.password.length < 9) {
-          this.$message.error('密码长度必须大于等于9');
+          this.$message.error('Password length must be greater than or equal to 9.');
         } else {
           setImmediate(async() => {
             let params = {
@@ -267,16 +266,15 @@
               password: this.password,
               from: this.formLabelAlign.account
             }
-            console.log('+++++', params.limit, params.price, params.input.amount)
             let result = await intjs.sendTransaction(params);
             console.log('---unmortgage---', result);
               if (result.err) {
                 this.centerDialogVisible = false;
-                this.$message.error('换票失败');
+                this.$message.error('Unmortgage failed');
               } else {
                 this.centerDialogVisible = false;
                 this.$message({
-                  message: `换票成功，hash:${result.hash}`,
+                  message: `Unmortgage successfully，hash:${result.hash}`,
                   type: 'success'
                 });
               }

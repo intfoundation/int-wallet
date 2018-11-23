@@ -172,13 +172,13 @@
           this.$copyText(this.address).then( () => {
             this.$message({
               type: 'success',
-              message: '复制成功',
+              message: 'Copy Successfully',
               duration: 1000
             })
           }, () => {
             this.$message({
               type: 'error',
-              message: '复制失败',
+              message: 'Copy Failed',
               duration: 1000
             })
           })

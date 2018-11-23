@@ -181,7 +181,7 @@
         // this.slideMin = 0;
         this.slideMax = 2000 * Math.pow(10, 9);
         if (files.err) {
-          this.$message.error('读取 keystore 文件名出错');
+          this.$message.error('Reading keystore file error.');
         } else {
           this.fileName = files;
           let balanceArray = [];
@@ -212,14 +212,14 @@
           setImmediate(async () => {
             let result = await intjs.getStake(this.formLabelAlign.account);
             if (result.err) {
-              this.$message.error('获取票据出错');
+              this.$message.error('Error in obtaining votes');
             } else {
               this.formLabelAlign.votes = (result.stake / Math.pow(10,18)).toFixed(2);
             }
           });
         } else {
           this.$message({
-            message: '请选择一个地址',
+            message: 'Please choose an address.',
             type: 'warning'
           });
         }
@@ -227,15 +227,15 @@
 
       sendTransaction() {
         if (this.formLabelAlign.account === '') {
-          this.$message.error('请选择 Account 地址');
+          this.$message.error('Please choose Account address.');
         } else if (Number(this.formLabelAlign.amount) === 0) {
-          this.$message.error('换票数不能为 0');
+          this.$message.error('The number of votes should not be 0.');
         } else if (+this.formLabelAlign.fee < 200*Math.pow(10,9)) {
-            this.$message.error('手续费用太低');
+            this.$message.error('Txfee is too slow.');
         } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {
-            this.$message.error('手续费用太高');
+            this.$message.error('Txfee is too high.');
         } else if (((+this.formLabelAlign.amount + this.txfee)*Math.pow(10,18)) > +this.balanceValue * Math.pow(10, 18)) {
-          this.$message.error('余额不足');
+          this.$message.error('Balance is not enough.');
         } else {
           this.centerDialogVisible = true;
         }
@@ -243,14 +243,14 @@
 
       cancelTransaction() {
         this.centerDialogVisible = false;
-        this.$message.error('取消换票');
+        this.$message.error('Mortgage cancel');
       },
 
       submitTransaction() {
         if (this.password === '') {
-          this.$message.error('请输入密码');
+          this.$message.error('Please input the password.');
         } else if (this.password.length < 9) {
-          this.$message.error('密码长度必须大于等于9');
+          this.$message.error('Password length must be greater than or equal to 9.');
         } else {
           setImmediate(async() => {
             let params = {
@@ -262,16 +262,15 @@
               password: this.password,
               from: this.formLabelAlign.account
             }
-              console.log('222')
               let result = await intjs.sendTransaction(params);
               console.log('===rr mortgage---', result)
               if (result.err) {
                 this.centerDialogVisible = false;
-                this.$message.error('换票失败');
+                this.$message.error('Mortgage failed');
               } else {
                 this.centerDialogVisible = false;
                 this.$message({
-                  message: `换票成功，hash:${result.hash}`,
+                  message: `Mortgage successfully，hash:${result.hash}`,
                   type: 'success'
                 });
               }

@@ -95,7 +95,7 @@
             activeClassName: 'active-vote'
           },
         ],
-        totalBalance: null,
+        totalBalance: 0,
         fileName: []
       };
     },

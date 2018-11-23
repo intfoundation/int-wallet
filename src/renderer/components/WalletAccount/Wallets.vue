@@ -175,7 +175,6 @@
         isHaveAccount: false,
         isMask: false,
         showClose: false,
-        totalBalance: null,
         txList: [],
         transDetail: {
           hash: '',
@@ -246,7 +245,6 @@
           this.fileName.forEach(async (value) => {
             let address = value;
             let result = await intjs.getBalance(address);
-            this.totalBalance += +result.balance;
             balanceArray.push({address: address, balance: result.balance});
             await this.getTransactionHash(address);
           });
@@ -298,12 +296,12 @@
          if (result.err) {
             this.$message({
               type: 'error',
-              message: '帐户创建失败'
+              message: 'Account creation failed'
             });
          } else {
            this.$message({
              type: 'success',
-             message: ' 帐户创建成功，地址： ' + result,
+             message: ' Account creation success，address： ' + result,
            });
          }
       },
@@ -355,6 +353,9 @@
     },
     mounted() {
       this.init();
+      setInterval( () => {
+        this.init()
+      }, 10000)
     }
   };
 </script>

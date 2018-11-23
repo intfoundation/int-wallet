@@ -25,7 +25,6 @@
                         <el-input class="balance" v-model="formLabelAlign.balance" readonly></el-input>
                     </el-form-item>
 
-
                 </el-form>
                 <template>
                     <div class="title" style="margin-top: 25px;">Candidates</div>
@@ -181,7 +180,7 @@
         // this.slideMin = 0;
         this.slideMax = 2000 * Math.pow(10, 9);
         if (files.err) {
-          this.$message.error('读取 keystore 文件出错');
+          this.$message.error('Reading keystore file error');
         } else {
           this.fileName = files;
           let balanceArray = [];
@@ -211,7 +210,7 @@
           let voteResult = await intjs.getVote();
 
           if (candidates.err) {
-            this.$message.error('获取候选节点出错');
+            this.$message.error('Error in obtaining candidate nodes.');
           } else if (candidates.length !== 0) {
             for (let i = 0; i < candidates.length; i++) {
               this.candidates.push({address: candidates[i], votes: 0});
@@ -219,7 +218,7 @@
           }
 
           if (voteResult.err) {
-            this.$message.error('获取节点票数出错');
+            this.$message.error('Error in obtaining node votes.');
           } else if (voteResult.vote.size !== 0) {
             this.candidates.forEach( (value) => {
               console.log(value);
@@ -247,7 +246,7 @@
           setImmediate(async () => {
             let result = await intjs.getStake(this.formLabelAlign.account);
             if (result.err) {
-              this.$message.error('获取票据出错');
+              this.$message.error('Error in obtaining votes.');
               return;
             } else {
               this.formLabelAlign.votes = (result.stake / Math.pow(10,18)).toFixed(2);
@@ -255,7 +254,7 @@
           });
         } else {
           this.$message({
-            message: '请选择一个地址',
+            message: 'Please choose an address.',
             type: 'warning'
           });
         }
@@ -263,17 +262,17 @@
 
       sendTransaction() {
         if (this.formLabelAlign.from === '') {
-          this.$message.error('请选择 From 地址');
+          this.$message.error('Please choose From address.');
         } else if (this.formLabelAlign.votes === 0) {
-          this.$message.error('余票为0，请先换票');
+          this.$message.error('Remaining votes is 0, please mortgage first.');
         } else if (this.multipleSelection.length === 0) {
-          this.$message.error('请至少选择一个候选节点');
+          this.$message.error('Please choose at least 1 candidate node.');
         } else if (+this.formLabelAlign.fee < 200*Math.pow(10,9)) {
-          this.$message.error('手续费用太低');
+          this.$message.error('Txfee is too slow.');
         } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {
-          this.$message.error('手续费用太高');
+          this.$message.error('Txfee is too high.');
         } else if (((+this.formLabelAlign.amount + this.txfee)*Math.pow(10,18)) > +this.balanceValue * Math.pow(10,18)) {
-            this.$message.error('余额不足');
+            this.$message.error('Balance is not enough.');
         } else {
           this.centerDialogVisible = true;
         }
@@ -281,14 +280,14 @@
 
       cancelTransaction() {
         this.centerDialogVisible = false;
-        this.$message.error('取消投票');
+        this.$message.error('Vote cancel');
       },
 
       submitTransaction() {
         if (this.password === '') {
-          this.$message.error('请输入密码');
+          this.$message.error('Please input the password.');
         } else if (this.password.length < 9) {
-          this.$message.error('密码长度必须大于等于9');
+          this.$message.error('Password length must be greater than or equal to 9.');
         } else {
           setImmediate(async() => {
             let params = {
@@ -304,11 +303,11 @@
             console.log('---re vote---', result)
               if (result.err) {
                 this.centerDialogVisible = false;
-                this.$message.error('投票失败');
+                this.$message.error('Vote failed');
               } else {
                 this.centerDialogVisible = false;
                 this.$message({
-                  message: `投票成功，hash:${result.hash}`,
+                  message: `Vote successfully，hash:${result.hash}`,
                   type: 'success'
                 });
               }
