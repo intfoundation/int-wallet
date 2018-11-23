@@ -20,7 +20,7 @@ Install int-cli
 $ npm install int-cli --global
 ```
 
-_Note: If you start int-cli in the terminal, please do not change the rpc port(default: 8555).
+_Note: If you start int-cli in the terminal, please do not change the rpc port(default: 8555)._
 
 ### Config folder
 
