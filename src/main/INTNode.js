@@ -56,9 +56,6 @@ export class INTNode extends EventEmitter {
 
     restart(network) {
         this.start(network);
-
-        // ipcMain.emit('switch-network');
-        // console.info(`Emit switch network event, switch network to ${network} network`);
     }
 
     stop() {
@@ -195,7 +192,7 @@ export class INTNode extends EventEmitter {
 
     getUserData() {
         let userPath = app.getPath('userData');
-        // console.log(path);
+        console.log(userPath);
         let filePath = path.join(userPath, 'network.json');
 
         try{
@@ -204,7 +201,7 @@ export class INTNode extends EventEmitter {
             this._network = network.network;
             console.info(`Get user data ${data}`);
         } catch(err) {
-            this._network = null;
+            this._network = DEFAULT_NETWORK;
             console.error(`Get user data error ${err}`);
         }
     }

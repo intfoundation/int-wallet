@@ -1,4 +1,4 @@
-import { app, BrowserWindow,  Menu, shell, globalShortcut } from 'electron' // eslint-disable-line
+import { app, BrowserWindow,  Menu, shell, globalShortcut, ipcMain } from 'electron' // eslint-disable-line
 import { INTNode } from './INTNode';
 
 const INTNODE = new INTNode();
@@ -44,7 +44,12 @@ function createWindow() {
     mainWindow = null;
   });
 
-  INTNODE.init('test');
+  INTNODE.init();
+  // ipcMain.on('mode', (event, arg) => {
+  //     event.returnValue = INTNODE.network;
+  // });
+  // console.info(`Watch mode event, return value: ${INTNODE.network} network`);
+
   createMenu();
 }
 

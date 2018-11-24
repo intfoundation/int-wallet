@@ -152,9 +152,10 @@
   /* eslint-disable */
   import Intjs from 'intjs';
   import moment from 'moment';
-  import { ipcRenderer } from 'electron';
-
-
+  // import { ipcRenderer } from 'electron';
+  //
+  // let mode = ipcRenderer.sendSync('mode', '');
+  // console.log('----mode----', mode);
 
   const intjs = new Intjs('localhost', 8555);
 
@@ -234,8 +235,6 @@
        * 初始化
        * */
       async init () {
-        let mode = ipcRenderer.sendSync('mode', '')
-        console.log('----mode----', mode)
         let files = await intjs.getAccounts();
         if (files.err) {
           this.isHaveAccount = true;
