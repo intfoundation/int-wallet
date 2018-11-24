@@ -300,7 +300,7 @@
           });
         } else {
           this.$message({
-            message: '请选择一个地址',
+            message: 'Please choose an address.',
             type: 'warning'
           });
         }
@@ -310,32 +310,31 @@
       },
       sendTransaction() {
         if (this.formLabelAlign.from === '') {
-          this.$message.error('请选择 From 地址');
+          this.$message.error('Please choose From address.');
         } else if (this.formLabelAlign.to === '') {
-          this.$message.error('请输入 To 地址');
+          this.$message.error('Please choose To address.');
         } else if (Number(this.formLabelAlign.amount) === 0) {
-          this.$message.error('转账金额不能为 0');
+          this.$message.error('The number of amount should not be 0.');
         } else if (+this.formLabelAlign.fee < 200*Math.pow(10,9)) {
-          this.$message.error('手续费用太低');
+          this.$message.error('Txfee is too slow.');
         } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {
-          this.$message.error('手续费用太高');
+          this.$message.error('Txfee is too high.');
         } else if ( ((+this.formLabelAlign.amount + +this.txfee)*Math.pow(10,18)) > +this.balanceValue*Math.pow(10,18)) {
-          this.$message.error('余额不足');
+          this.$message.error('Balance is not enough.');
         } else {
           this.centerDialogVisible = true;
         }
       },
       cancelTransaction() {
         this.centerDialogVisible = false;
-        this.$message.error('取消交易');
+        this.$message.error('Transaction cancel');
       },
       submitTransaction() {
         if (this.password === '') {
-          this.$message.error('请输入密码');
+          this.$message.error('Please input the password.');
         } else if (this.password.length < 9) {
-          this.$message.error('密码长度必须大于等于9');
+          this.$message.error('Password length must be greater than or equal to 9.');
         } else {
-          console.log('++++++')
           setImmediate(async() => {
             let params = {
               from: this.from_address,
@@ -358,11 +357,11 @@
               console.log('--rrrsend---', result)
               if (result.err) {
                 this.centerDialogVisible = false;
-                this.$message.error('交易失败');
+                this.$message.error('Transaction failed');
               } else {
                 this.centerDialogVisible = false;
                 this.$message({
-                  message: `交易成功，hash:${result.hash}`,
+                  message: `Transaction successfully，hash:${result.hash}`,
                   type: 'success'
                 });
               }
