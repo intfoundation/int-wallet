@@ -192,7 +192,7 @@ export class INTNode extends EventEmitter {
 
     getUserData() {
         let userPath = app.getPath('userData');
-        console.log(userPath);
+        // console.log(userPath);
         let filePath = path.join(userPath, 'network.json');
 
         try{
