@@ -20,9 +20,7 @@
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
     "test": "npm run unit && npm run e2e",
     "unit": "karma start test/unit/karma.conf.js",
-    "postinstall": "npm run lint:fix",
-    "app": "node ./server/app.js",
-    "startPeer": "node ./int/tool/startPeer.js"
+    "postinstall": "npm run lint:fix"
   },
   "build": {
     "productName": "INT wallet",
