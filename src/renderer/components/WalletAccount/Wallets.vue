@@ -42,7 +42,7 @@
               </div>
               <!--右侧-->
               <div style="display: inline-block;padding-left: 20px;">
-                <div class="bold-text">Send</div>
+                <div class="bold-text">{{item.tx.method}}</div>
                 <div style="color: #999;font-size: 13px;margin-top: 8px;">
                   <span class="spe-caller">{{item.tx.caller}}</span>
                   <i class="arrow-right icon-common" style="vertical-align: top;"></i>
@@ -335,6 +335,7 @@
               }
             }
             this.txList.push(result);
+            console.log('---txlist--', this.txList)
           }
         } else {
           return false;
