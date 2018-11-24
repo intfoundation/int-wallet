@@ -11,10 +11,10 @@
             <div class="small-text">{{address}}</div>
             <div class="middle-number">{{balance}} <span>INT</span></div>
             <!--账户持有的token-->
-            <div class="token" v-if="tokenBalance !== '' ">
-                <span>INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq</span>
-                <span style="float: right;">{{tokenBalance}}</span>
-            </div>
+            <!--<div class="token" v-if="tokenBalance !== '' ">-->
+                <!--<span>INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq</span>-->
+                <!--<span style="float: right;">{{tokenBalance}}</span>-->
+            <!--</div>-->
 
             <!--注意事项-->
             <div class="note">
@@ -156,7 +156,7 @@
       mounted() {
         this.getTransactionHash(this.address)
         // this.getTokenAccount()
-        this.getTokenBalance()
+        // this.getTokenBalance()
       },
       methods: {
         openQR () {
@@ -243,11 +243,11 @@
               console.log(error);
             });
         },
-        async getTokenBalance () {
-          let that = this;
-          let result = await intjs.getTokenBalance('INT1CGgVhaSx67hYrxb7qCZBj6TU5W9W3CFFf', that.address);
-          that.tokenBalance = +result.balance / Math.pow(10, 18);
-        },
+        // async getTokenBalance () {
+        //   let that = this;
+        //   let result = await intjs.getTokenBalance('INT1CGgVhaSx67hYrxb7qCZBj6TU5W9W3CFFf', that.address);
+        //   that.tokenBalance = +result.balance / Math.pow(10, 18);
+        // },
         openTxDetail(transobj) {
           this.transactionVisible = true;
           this.transDetail.hash = transobj.tx.hash;

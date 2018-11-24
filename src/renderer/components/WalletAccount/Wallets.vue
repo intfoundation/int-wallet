@@ -18,7 +18,8 @@
           <router-link :to="{path: '/accounts/detail', query: {address: item.address}}" tag="div" class="accounts" v-for="(item, index) in balanceList"
                        :class="{'blue': index%3 == 0, 'light-blue': index%3 == 1, 'yellow': index%3== 2}">
             <div>Accounts {{index + 1}}</div>
-            <div>{{ (item.balance / Math.pow(10, 18)).toFixed(2) }}<span style="font-size: 14px;"> INT</span></div>
+            <div v-if="item.balance">{{ (item.balance / Math.pow(10, 18)).toFixed(2) }}<span style="font-size: 14px;"> INT</span></div>
+            <div v-else>0.00</div>
             <div class="account-address">{{item.address}}</div>
           </router-link>
         </div>
@@ -236,21 +237,28 @@
        * */
       async init () {
         let files = await intjs.getAccounts();
-        if (files.err) {
+        if (files.length === 0) {
           this.isHaveAccount = true;
-            this.$message({
-                message: 'Please create an account first.',
-                type: 'warning'
-            });
+        } else {
+          this.fileName = files;
+          for (let i in this.fileName) {
+            let address = this.fileName[i];
+            await this.getTransactionHash(address);
+          }
+        }
+      },
+      async getAddress() {
+        let files = await intjs.getAccounts();
+        if (files.length === 0) {
+          this.isHaveAccount = true;
         } else {
           this.fileName = files;
           let balanceArray = [];
-          this.fileName.forEach(async (value) => {
-            let address = value;
+          for (let i in this.fileName) {
+            let address = this.fileName[i];
             let result = await intjs.getBalance(address);
             balanceArray.push({address: address, balance: result.balance});
-            await this.getTransactionHash(address);
-          });
+          }
           this.balanceList = balanceArray;
         }
       },
@@ -262,7 +270,7 @@
        * 创建帐户
        * */
       addAccount() {
-        let reg = /[\w]{9,}/;
+        let reg = /[\S]{9,}/;
         if (!this.firstPassword || !this.secondPassword) {
           this.$message({
             type: 'error',
@@ -277,7 +285,7 @@
         if (!reg.test(this.firstPassword)) {
           this.$message({
             type: 'error',
-            message: 'Incorrect password format. Please enter more than 9 passwords'
+            message: 'password should not contain space.'
           });
           return;
         }
@@ -356,8 +364,9 @@
     },
     mounted() {
       this.init();
+      this.getAddress();
       setInterval( () => {
-        this.init()
+        this.getAddress()
       }, 10000)
     }
   };

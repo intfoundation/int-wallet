@@ -289,10 +289,10 @@
                 balance: value.balance
               });
               let data = await intjs.getTokenBalance('INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq', this.formLabelAlign.from)
-              this.balanceAndToken.push({
-                name: 'INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq',
-                balance: +data.balance
-              });
+              // this.balanceAndToken.push({
+              //   name: 'INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq',
+              //   balance: +data.balance
+              // });
               // this.getTokenAccount();
               this.balanceValue = value.balance / Math.pow(10,18);
               this.from_address = value.address;

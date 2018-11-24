@@ -96,34 +96,37 @@
           },
         ],
         totalBalance: 0,
-        fileName: []
+        fileName: [],
+        h: 0
       };
     },
     mounted() {
       this.getBlockHeight()
+      this.init()
       setInterval( () => {
         this.getBlockHeight()
+        this.init()
       }, 10000)
-      this.init()
     },
     methods: {
       seeActiveIndex (data) {
         this.activeIndex = data;
       },
       async init () {
+        this.h = 0;
         let files = await intjs.getAccounts();
         if (files.err) {
-          this.isHaveAccount = true;
-          this.$message({
-            message: 'Please create an account first.',
-            type: 'warning'
-          });
         } else {
           this.fileName = files;
           this.fileName.forEach(async (value) => {
             let address = value;
             let result = await intjs.getBalance(address);
-            this.totalBalance += +result.balance;
+            if (!result.balance) {
+              this.totalBalance = 0;
+            } else {
+              this.h += Number(result.balance);
+              this.totalBalance = this.h;
+            }
           });
         }
       },
