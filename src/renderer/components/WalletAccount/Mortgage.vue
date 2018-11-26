@@ -1,5 +1,5 @@
 <template>
-    <div class="mortgage">
+    <div class="mortgage" v-loading="isloading">
         <div class="item-title">
             <i class="mortgage-icon icon-common"></i>
             <span class="item-text">Mortgage</span>
@@ -141,6 +141,7 @@
         balanceValue: '',
         slideMin: 0,
         slideMax: 100,
+        isloading: false,
         formLabelAlign: {
           account: '',
           votes: 0.00,
@@ -176,6 +177,7 @@
        * 初始化
        * */
       async init () {
+        this.isloading = true;
         let files = await intjs.getAccounts();
         this.formLabelAlign.fee = await intjs.getPrice();
         // this.slideMin = 0;
@@ -198,6 +200,7 @@
             });
           }
           this.balance = balanceArray;
+          this.isloading = false;
         }
       },
 

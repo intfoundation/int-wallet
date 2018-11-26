@@ -1,5 +1,5 @@
 <template>
-    <div class="send">
+    <div class="send" v-loading="isloading">
         <div class="item-title">
             <i class="send-icon icon-common"></i>
             <span class="item-text">Send</span>
@@ -20,7 +20,7 @@
                 </el-form-item>
 
                 <el-form-item label="TO">
-                    <el-input v-model="formLabelAlign.to" placeholder="0x000000…"></el-input>
+                    <el-input v-model="formLabelAlign.to" placeholder="INT000000…"></el-input>
                 </el-form-item>
 
                 <el-form-item label="AMOUNT">
@@ -146,7 +146,7 @@
 <script>
   /* eslint-disable */
   import Intjs from 'intjs';
-  import axios from 'axios';
+  // import axios from 'axios';
   const intjs = new Intjs('localhost', 8555);
   export default {
     name: 'send',
@@ -166,6 +166,7 @@
         balanceValue: '',
         from_address: '',
         tokenName: '',
+        isloading: false,
         balanceAndToken: [],
         formLabelAlign: {
           from: '',
@@ -243,6 +244,7 @@
        * 初始化
        * */
       async init () {
+        this.isloading = true;
         let files = await intjs.getAccounts();
         this.formLabelAlign.fee = await intjs.getPrice();
         this.slideMax = 2000 * Math.pow(10, 9);
@@ -272,6 +274,7 @@
             });
           }
           this.balance = balanceArray;
+          this.isloading = false;
           // if (this.balance.length) {
           //   this.formLabelAlign.from = this.balance[0]
           //   this.formLabelAlign.balance = await intjs.getBalance(this.formLabelAlign.from.address)

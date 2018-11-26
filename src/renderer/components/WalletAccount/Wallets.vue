@@ -1,5 +1,5 @@
 <template>
-    <div class="wallets">
+    <div class="wallets" v-loading="isloading">
       <div class="item-title">
         <div>
           <i class="wallet icon-common"></i>
@@ -179,6 +179,7 @@
         isHaveAccount: false,
         isMask: false,
         showClose: false,
+        isloading: false,
         txList: [],
         transDetail: {
           hash: '',
@@ -236,6 +237,7 @@
        * 初始化
        * */
       async init () {
+        this.isloading = true
         let files = await intjs.getAccounts();
         if (files.length === 0) {
           this.isHaveAccount = true;
@@ -319,6 +321,7 @@
       async getTransactionHash(address) {
         let txInformation = await intjs.chainClient.getTransactionByAddress({address});
         if (txInformation.err === 0) {
+          this.isloading = false;
           let arr = txInformation.txs;
           for (let i in arr) {
             let result = await intjs.getTransactionReceipt(arr[i].txhash);
@@ -335,7 +338,6 @@
               }
             }
             this.txList.push(result);
-            console.log('---txlist--', this.txList)
           }
         } else {
           return false;
@@ -366,6 +368,10 @@
     mounted() {
       this.init();
       this.getAddress();
+      setTimeout(() => {
+        this.getAddress();
+        this.init();
+      }, 4000)
       setInterval( () => {
         this.getAddress()
       }, 10000)

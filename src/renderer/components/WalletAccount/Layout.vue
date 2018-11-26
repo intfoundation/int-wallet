@@ -103,6 +103,10 @@
     mounted() {
       this.getBlockHeight()
       this.init()
+      setTimeout(() => {
+        this.getBlockHeight()
+        this.init()
+      }, 4000)
       setInterval( () => {
         this.getBlockHeight()
         this.init()

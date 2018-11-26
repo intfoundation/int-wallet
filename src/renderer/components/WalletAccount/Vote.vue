@@ -1,5 +1,5 @@
 <template>
-    <div class="vote">
+    <div class="vote" v-loading="isloading">
         <div class="item-title">
             <i class="vote-icon icon-common"></i>
             <span class="item-text">Vote</span>
@@ -150,6 +150,7 @@
         balanceValue: '',
         slideMin: 0,
         slideMax: 100,
+        isloading: false,
         formLabelAlign: {
           account: '',
           votes: 0.00,
@@ -175,6 +176,7 @@
        * 初始化
        * */
       async init () {
+        this.isloading = true;
         let files = await intjs.getAccounts();
         this.formLabelAlign.fee = await intjs.getPrice();
         // this.slideMin = 0;
@@ -208,7 +210,7 @@
         setImmediate(async () => {
           let candidates = await intjs.getCandidates();
           let voteResult = await intjs.getVote();
-
+          this.isloading = false;
           if (candidates.err) {
             this.$message.error('Error in obtaining candidate nodes.');
           } else if (candidates.length !== 0) {
@@ -221,10 +223,9 @@
             this.$message.error('Error in obtaining node votes.');
           } else if (voteResult.vote.size !== 0) {
             this.candidates.forEach( (value) => {
-              console.log(value);
-              console.log(voteResult.vote.get(value.address));
               if (voteResult.vote.has(value.address)) {
                 value.votes = voteResult.vote.get(value.address).toString();
+                value.votes = +value.votes / Math.pow(10, 18);
               }
             });
           }
