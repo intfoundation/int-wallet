@@ -21,7 +21,7 @@
                     <el-input v-model="formLabelAlign.votes" readonly></el-input>
                 </el-form-item>
                 <el-form-item label="AMOUNT">
-                    <el-input v-model="formLabelAlign.amount"></el-input>
+                    <el-input v-model="formLabelAlign.amount" @keypress.native="checkNumber($event)"></el-input>
                 </el-form-item>
                 <el-form-item label="BALANCE">
                     <el-input class="balance" v-model="formLabelAlign.balance" readonly>{{formLabelAlign.balance}}</el-input>
@@ -163,6 +163,12 @@
       }
     },
     methods: {
+      checkNumber(e) {
+        if ( e.keyCode < 48 || e.keyCode > 57) {
+          e.preventDefault()
+          alert('Please input numbers only.')
+        }
+      },
       sendActiveIndex () {
         this.$emit('listenToActive', 2)
       },
