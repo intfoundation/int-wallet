@@ -14,11 +14,11 @@
         <div v-else class="have-account-first">Accounts are password protected keys that can hold INT and tokens, but can't display
           incoming transactions.
         </div>
-        <div style="margin: 30px 0 20px;max-width: 700px;">
+        <div style="margin: 30px 0 20px;max-width: 700px;" v-if="balanceList.length > 0 && balanceList[0].address !== 'FAILED' ">
           <router-link :to="{path: '/accounts/detail', query: {address: item.address}}" tag="div" class="accounts" v-for="(item, index) in balanceList"
                        :class="{'blue': index%3 == 0, 'light-blue': index%3 == 1, 'yellow': index%3== 2}">
             <div>Accounts {{index + 1}}</div>
-            <div v-if="item.balance">{{ (item.balance / Math.pow(10, 18)).toFixed(2) }}<span style="font-size: 14px;"> INT</span></div>
+            <div v-if="item.balance">{{ item.balance }}<span style="font-size: 14px;"> INT</span></div>
             <div v-else>0.00</div>
             <div class="account-address">{{item.address}}</div>
           </router-link>
@@ -46,7 +46,7 @@
                 <div style="color: #999;font-size: 13px;margin-top: 8px;">
                   <span class="spe-caller">{{item.tx.caller}}</span>
                   <i class="arrow-right icon-common" style="vertical-align: top;"></i>
-                  <span style="vertical-align: top;">{{item.tx.input.to ? item.tx.input.to : '' }}</span>
+                  <span style="vertical-align: top;" class="spe-caller">{{item.tx.input.to ? item.tx.input.to : '' }}</span>
                 </div>
               </div>
               <div style="float: right;" class="rpc">
@@ -259,6 +259,11 @@
           for (let i in this.fileName) {
             let address = this.fileName[i];
             let result = await intjs.getBalance(address);
+            if (+result.balance > 10000 * Math.pow(10, 18)) {
+              result.balance = parseFloat(+result.balance / Math.pow(10, 18)).toExponential(5)
+            } else {
+              result.balance = (+result.balance / Math.pow(10, 18)).toFixed(2)
+            }
             balanceArray.push({address: address, balance: result.balance});
           }
           this.balanceList = balanceArray;
@@ -655,7 +660,7 @@
   }
   .spe-caller {
     display: inline-block;
-    width: 90px;
+    width: 140px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
