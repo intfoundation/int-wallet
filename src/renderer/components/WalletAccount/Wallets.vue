@@ -241,6 +241,7 @@
         let files = await intjs.getAccounts();
         if (files.length === 0) {
           this.isHaveAccount = true;
+          this.isloading = false;
         } else {
           this.fileName = files;
           for (let i in this.fileName) {
@@ -394,7 +395,7 @@
           margin-bottom: 5px;
           margin-top: 28px;
         }
-        no-account-second {
+        .no-account-second {
           color: #666;
           margin-bottom: 28px;
         }
