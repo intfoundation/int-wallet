@@ -212,7 +212,8 @@
         this.transactionVisible = true;
         this.transDetail.hash = transobj.tx.hash;
         this.transDetail.time = moment(new Date(transobj.block.timestamp * 1000)).format("dddd, MMMM Do YYYY, h:mm:ss a");
-        this.transDetail.value = (transobj.tx.value / Math.pow(10, 18)).toFixed(4);
+        console.log('---', transobj)
+        this.transDetail.value = transobj.tx.value;
         this.transDetail.from = transobj.tx.caller;
         this.transDetail.to = transobj.tx.input.to;
         this.transDetail.cost = +transobj.receipt.cost / Math.pow(10, 18);
@@ -268,12 +269,14 @@
             balanceArray.push({address: address, balance: result.balance});
           }
           this.balanceList = balanceArray;
+          this.isloading = false;
         }
       },
       // 弹出创建账户的弹框
       pop () {
         this.visible = true;
       },
+
       /**
        * 创建帐户
        * */
@@ -306,7 +309,6 @@
         this.visible = false
       },
 
-
       /**
        * 生成 keystore
        * */
@@ -327,7 +329,6 @@
       async getTransactionHash(address) {
         let txInformation = await intjs.chainClient.getTransactionByAddress({address});
         if (txInformation.err === 0) {
-          this.isloading = false;
           let arr = txInformation.txs;
           for (let i in arr) {
             let result = await intjs.getTransactionReceipt(arr[i].txhash);
@@ -349,35 +350,14 @@
           return false;
         }
       },
-
-      addWalletContract() {
-        // this.$prompt('请输入密码', '创建帐户', {
-        //   confirmButtonText: '确定',
-        //   cancelButtonText: '取消',
-        //   inputPattern: /[\w]{9,}/,
-        //   inputErrorMessage: '密码格式不正确',
-        // }).then(({ value }) => {
-        //   this.$message({
-        //     type: 'success',
-        //     message: ' 创建成功 ',
-        //   });
-        //   // this.createWallet(value);
-        //   // this.init();
-        // }).catch(() => {
-        //   this.$message({
-        //     type: 'info',
-        //     message: '取消输入',
-        //   });
-        // });
       },
-    },
     mounted() {
       this.init();
       this.getAddress();
-      setTimeout(() => {
-        this.getAddress();
-        this.init();
-      }, 4000)
+      // setTimeout(() => {
+      //   this.getAddress();
+      //   this.init();
+      // }, 4000)
       setInterval( () => {
         this.getAddress()
       }, 10000)

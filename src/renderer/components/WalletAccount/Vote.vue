@@ -132,7 +132,7 @@
 
 <script>
   import Intjs from 'intjs';
-
+  import { sendActiveIndex } from './common/index';
   const intjs = new Intjs('localhost', 8555);
   /* eslint-disable */
   export default {
@@ -169,9 +169,6 @@
       }
     },
     methods: {
-      sendActiveIndex () {
-        this.$emit('listenToActive', 4)
-      },
       /**
        * 初始化
        * */
@@ -326,7 +323,7 @@
     },
     mounted() {
       this.init();
-      this.sendActiveIndex();
+      sendActiveIndex(this, 4);
     },
   };
 </script>

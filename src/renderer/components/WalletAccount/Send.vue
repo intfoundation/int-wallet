@@ -11,7 +11,7 @@
                 <el-form-item label="FROM">
                     <el-select v-model="formLabelAlign.from" placeholder="" @change="selectFrom" style="display: block;">
                         <el-option
-                            v-for="(item, index) in balance"
+                            v-for="(item, index) in accountList"
                             :key="index"
                             :label="'Account' + ++index + '-' + item.address"
                             :value="item.address">
@@ -28,14 +28,7 @@
                 </el-form-item>
 
                 <el-form-item label="BALANCE">
-                    <el-select v-model="formLabelAlign.balance" placeholder="" style="display: block;" @change="selectToken">
-                        <el-option
-                            v-for="(item, index) in balanceAndToken"
-                            :key="item.index"
-                            :label="item.name + ' ' + ((item.balance / Math.pow(10,18)).toFixed(2))"
-                            :value="item.name">
-                        </el-option>
-                    </el-select>
+                    <el-input v-model="formLabelAlign.balance" readonly></el-input>
                 </el-form-item>
 
                 <template>
@@ -71,8 +64,7 @@
                 <el-row>
                     <el-col :span="8" style="margin-top: 40px;">
                         <span class="title" style="font-size: 16px;">TOTAL</span>
-                        <!--<p><span class="total-value">{{Number(formLabelAlign.amount) + formLabelAlign.fee/20}}</span> INT</p>-->
-                        <p><span class="total-value">{{checked ? balanceValue : ((+formLabelAlign.amount + +txfee))}}</span> INT</p>
+                        <p><span class="total-value">{{checked ? formLabelAlign.balance : ((+formLabelAlign.amount + +txfee))}}</span> INT</p>
                     </el-col>
                 </el-row>
                 <el-button @click="sendTransaction" class="send-btn"><span>SEND</span></el-button>
@@ -118,11 +110,6 @@
                     <span>{{formLabelAlign.fee}}</span>
                 </div>
 
-                <!--<div class="stripe-item">-->
-                    <!--<span>Gas price</span>-->
-                    <!--<span>0.002 INT per mllin gas</span>-->
-                <!--</div>-->
-
                 <div style="text-align: center">
                     <el-input
                         type="password"
@@ -145,13 +132,13 @@
 <script>
   /* eslint-disable */
   import Intjs from 'intjs';
-  // import axios from 'axios';
+  import { sendActiveIndex, init, selectFromAction, checkTransaction } from './common/index';
   const intjs = new Intjs('localhost', 8555);
   export default {
     name: 'send',
     data() {
       return {
-        fileName: [],
+        accountList: [],
         balance: [],
         checkedFrom: '',
         checked: false,
@@ -161,7 +148,7 @@
         password: '',
         pageSize: 10000,
         slideMin: 0,
-        slideMax: 100,
+        slideMax: 2000 * Math.pow(10, 9),
         balanceValue: '',
         from_address: '',
         tokenName: '',
@@ -176,18 +163,20 @@
         },
       };
     },
+    mounted() {
+      if (this.$route.query.address) {
+        this.formLabelAlign.to = this.$route.query.address
+      }
+      init(this);
+      sendActiveIndex(this, 1)
+    },
 
     computed: {
       txfee () {
         if (this.formLabelAlign.fee > 20) {
           let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
-          // if (x.toString().split('.')[1].length > 5) {
-          //   x = x.toFixed(5);
-          // } else {
-          //   x = x;
-          // }
           if (this.checked) {
-            this.formLabelAlign.amount = this.balanceValue - x;
+            this.formLabelAlign.amount = this.formLabelAlign.balance - x;
           } else {
             this.formLabelAlign.amount = this.formLabelAlign.amount;
           }
@@ -202,17 +191,14 @@
           alert('Please input numbers only.')
         }
       },
-      async getTokenBalance () {
-        let that = this;
-        let result = await intjs.getTokenBalance('INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq', that.address);
-        that.tokenBalance = +result.balance / Math.pow(10, 18);
-      },
-      sendActiveIndex () {
-        this.$emit('listenToActive', 1)
-      },
+      // async getTokenBalance () {
+      //   let that = this;
+      //   let result = await intjs.getTokenBalance('INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq', that.address);
+      //   that.tokenBalance = +result.balance / Math.pow(10, 18);
+      // },
       sendEverything () {
         if (!this.checked) {
-          this.formLabelAlign.amount = this.balanceValue - this.txfee;
+          this.formLabelAlign.amount = this.formLabelAlign.balance - this.txfee;
         } else {
           this.formLabelAlign.amount = 0;
         }
@@ -245,93 +231,11 @@
       //       console.log(error);
       //     });
       // },
-      /**
-       * 初始化
-       * */
-      async init () {
-        this.isloading = true;
-        let files = await intjs.getAccounts();
-        this.formLabelAlign.fee = await intjs.getPrice();
-        this.slideMax = 2000 * Math.pow(10, 9);
-        if (files.err) {
-          this.$message({
-            message: 'Please create an account first.',
-            type: 'warning'
-          });
-        } else {
-          this.fileName = files;
-          let balanceArray = [];
-          // await this.fileName.forEach(async (value,i) => {
-          //   let address = value;
-          //   let result = await intjs.getBalance(address);
-          //   balanceArray.push({address: address, balance: result.balance});
-          //   console.log(i)
-          // });
-          for(let value of this.fileName){
-            let address = value;
-            let result = await intjs.getBalance(address);
-            balanceArray.push({address: address, balance: result.balance});
-          }
-          // TODO 异步拿到的数据怎么排序？
-          if (balanceArray.length !== 0) {
-            balanceArray.sort(function (a, b) {
-              return (b.balance - a.balance);
-            });
-          }
-          this.balance = balanceArray;
-          this.isloading = false;
-          // if (this.balance.length) {
-          //   this.formLabelAlign.from = this.balance[0]
-          //   this.formLabelAlign.balance = await intjs.getBalance(this.formLabelAlign.from.address)
-          // }
-        }
-      },
-
        selectFrom () {
-        if (this.formLabelAlign.from) {
-          this.balance.forEach(async(value) => {
-            if (value.address === this.formLabelAlign.from) {
-              this.balanceAndToken = [];
-              this.balanceAndToken.push({
-                name: 'INT',
-                balance: value.balance
-              });
-              let data = await intjs.getTokenBalance('INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq', this.formLabelAlign.from)
-              // this.balanceAndToken.push({
-              //   name: 'INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq',
-              //   balance: +data.balance
-              // });
-              // this.getTokenAccount();
-              this.balanceValue = value.balance / Math.pow(10,18);
-              this.from_address = value.address;
-            }
-          });
-        } else {
-          this.$message({
-            message: 'Please choose an address.',
-            type: 'warning'
-          });
-        }
-      },
-      selectToken (value) {
-        this.tokenName = value;
-      },
+         selectFromAction(this)
+       },
       sendTransaction() {
-        if (this.formLabelAlign.from === '') {
-          this.$message.error('Please choose From address.');
-        } else if (this.formLabelAlign.to === '') {
-          this.$message.error('Please choose To address.');
-        } else if (Number(this.formLabelAlign.amount) === 0) {
-          this.$message.error('The number of amount should not be 0.');
-        } else if (+this.formLabelAlign.fee < 200*Math.pow(10,9)) {
-          this.$message.error('Txfee is too slow.');
-        } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {
-          this.$message.error('Txfee is too high.');
-        } else if ( ((+this.formLabelAlign.amount + +this.txfee)*Math.pow(10,18)) > +this.balanceValue*Math.pow(10,18)) {
-          this.$message.error('Balance is not enough.');
-        } else {
-          this.centerDialogVisible = true;
-        }
+        checkTransaction(this)
       },
       cancelTransaction() {
         this.centerDialogVisible = false;
@@ -345,7 +249,7 @@
         } else {
           setImmediate(async() => {
             let params = {
-              from: this.from_address,
+              from: this.formLabelAlign.from,
               method: '',
               value: 0,
               limit: '50000',
@@ -353,14 +257,13 @@
               input: {},
               password: this.password
             }
-            if (this.tokenName === 'INT') {
               params.method = 'transferTo';
               params.input = {to: this.formLabelAlign.to};
               params.value = this.formLabelAlign.amount*Math.pow(10,18);
-            } else {
-              params.method = 'transferTokenTo';
-              params.input = {to: this.formLabelAlign.to, tokenid: 'INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq', amount: this.formLabelAlign.amount*Math.pow(10,18)};
-            }
+            // else {
+            //   params.method = 'transferTokenTo';
+            //   params.input = {to: this.formLabelAlign.to, tokenid: 'INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq', amount: this.formLabelAlign.amount*Math.pow(10,18)};
+            // }
               let result = await intjs.sendTransaction(params);
               console.log('--rrrsend---', result)
               if (result.err) {
@@ -377,15 +280,7 @@
 
         }
       },
-    },
-    mounted() {
-      if (this.$route.query.address) {
-        this.formLabelAlign.to = this.$route.query.address
-      }
-      this.init();
-      this.sendActiveIndex()
     }
-
   };
 </script>
 

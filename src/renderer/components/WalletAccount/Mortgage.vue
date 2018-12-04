@@ -4,13 +4,12 @@
             <i class="mortgage-icon icon-common"></i>
             <span class="item-text">Mortgage</span>
         </div>
-
         <div class="item-content">
             <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign" class="transactionForm">
                 <el-form-item label="ACCOUNT">
-                    <el-select v-model="formLabelAlign.account" placeholder="" @change="selectAccount" style="display: block;">
+                    <el-select v-model="formLabelAlign.from" placeholder="" @change="selectAccount" style="display: block;">
                         <el-option
-                            v-for="(item, index) in balance"
+                            v-for="(item, index) in accountList"
                             :key="index"
                             :label="'Account' + ++index + '-' + item.address"
                             :value="item.address">
@@ -78,7 +77,7 @@
                 </div>
                 <div>
                     <span>From:</span>
-                    <span>{{formLabelAlign.account}}</span>
+                    <span>{{formLabelAlign.from}}</span>
                 </div>
                 <div>
                     You are about to execute a function of mortgage. This might involve transfer
@@ -123,7 +122,7 @@
 
 <script>
   import Intjs from 'intjs';
-
+  import { sendActiveIndex, init, selectFromAction2 } from './common/index';
   const intjs = new Intjs('localhost', 8555);
   /* eslint-disable */
   export default {
@@ -131,7 +130,7 @@
     data() {
       return {
         fileName: [],
-        balance: [],
+        accountList: [],
         checkedFrom: '',
         checked: false,
         isSelected: true,
@@ -140,10 +139,10 @@
         password: '',
         balanceValue: '',
         slideMin: 0,
-        slideMax: 100,
+        slideMax: 2000 * Math.pow(10, 9),
         isloading: false,
         formLabelAlign: {
-          account: '',
+          from: '',
           votes: 0.00,
           amount: 0.00,
           balance: 0.00,
@@ -153,14 +152,24 @@
     },
     computed: {
       txfee () {
-        let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
-        if (this.checked) {
-          this.formLabelAlign.amount = this.balanceValue - x;
-        } else {
-          this.formLabelAlign.amount = this.formLabelAlign.amount;
+        if(this.formLabelAlign.fee > 20) {
+          let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
+          if (this.checked) {
+            this.formLabelAlign.amount = this.formLabelAlign.balance - x;
+          } else {
+            this.formLabelAlign.amount = this.formLabelAlign.amount;
+          }
+          return x;
         }
-        return x;
       }
+    },
+    watch: {
+      // formLabelAlign:{
+      //   fee(oldval, newval) {
+      //     console.log('*******', oldval, newval)
+      //   }
+      // }
+
     },
     methods: {
       checkNumber(e) {
@@ -168,9 +177,6 @@
           e.preventDefault()
           alert('Please input numbers only.')
         }
-      },
-      sendActiveIndex () {
-        this.$emit('listenToActive', 2)
       },
       sendEverything () {
         if (!this.checked) {
@@ -182,60 +188,39 @@
       /**
        * 初始化
        * */
-      async init () {
-        this.isloading = true;
-        let files = await intjs.getAccounts();
-        this.formLabelAlign.fee = await intjs.getPrice();
-        // this.slideMin = 0;
-        this.slideMax = 2000 * Math.pow(10, 9);
-        if (files.err) {
-          this.$message.error('Reading keystore file error.');
-        } else {
-          this.fileName = files;
-          let balanceArray = [];
-          this.fileName.forEach(async (value) => {
-            let address = value;
-            let result = await intjs.getBalance(address);
-            balanceArray.push({address: address, balance: result.balance });
-          });
-          // TODO 异步拿到的数据怎么排序？
-          if (balanceArray.length !== 0) {
-            balanceArray.sort(function (a, b) {
-              console.log(b.balance - a.balance);
-              return (b.balance - a.balance);
-            });
-          }
-          this.balance = balanceArray;
-          this.isloading = false;
-        }
-      },
+      // async init () {
+      //   this.isloading = true;
+      //   let files = await intjs.getAccounts();
+      //   this.formLabelAlign.fee = await intjs.getPrice();
+      //   // this.slideMin = 0;
+      //   this.slideMax = 2000 * Math.pow(10, 9);
+      //   if (files.err) {
+      //     this.$message.error('Reading keystore file error.');
+      //   } else {
+      //     this.fileName = files;
+      //     let balanceArray = [];
+      //     this.fileName.forEach(async (value) => {
+      //       let address = value;
+      //       let result = await intjs.getBalance(address);
+      //       balanceArray.push({address: address, balance: result.balance });
+      //     });
+      //     if (balanceArray.length !== 0) {
+      //       balanceArray.sort(function (a, b) {
+      //         console.log(b.balance - a.balance);
+      //         return (b.balance - a.balance);
+      //       });
+      //     }
+      //     this.balance = balanceArray;
+      //     this.isloading = false;
+      //   }
+      // },
 
       selectAccount() {
-        if (this.formLabelAlign.account) {
-          this.balance.forEach((value) => {
-            if (value.address === this.formLabelAlign.account) {
-              this.formLabelAlign.balance = (value.balance / Math.pow(10,18)).toFixed(2);
-              this.balanceValue = value.balance / Math.pow(10,18);
-            }
-          });
-          setImmediate(async () => {
-            let result = await intjs.getStake(this.formLabelAlign.account);
-            if (result.err) {
-              this.$message.error('Error in obtaining votes');
-            } else {
-              this.formLabelAlign.votes = (result.stake / Math.pow(10,18)).toFixed(2);
-            }
-          });
-        } else {
-          this.$message({
-            message: 'Please choose an address.',
-            type: 'warning'
-          });
-        }
+        selectFromAction2(this)
       },
 
       sendTransaction() {
-        if (this.formLabelAlign.account === '') {
+        if (this.formLabelAlign.from === '') {
           this.$message.error('Please choose Account address.');
         } else if (Number(this.formLabelAlign.amount) === 0) {
           this.$message.error('The number of votes should not be 0.');
@@ -243,7 +228,7 @@
             this.$message.error('Txfee is too slow.');
         } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {
             this.$message.error('Txfee is too high.');
-        } else if (((+this.formLabelAlign.amount + this.txfee)*Math.pow(10,18)) > +this.balanceValue * Math.pow(10, 18)) {
+        } else if (((+this.formLabelAlign.amount + this.txfee)*Math.pow(10,18)) > +this.formLabelAlign.balance * Math.pow(10, 18)) {
           this.$message.error('Balance is not enough.');
         } else {
           this.centerDialogVisible = true;
@@ -269,7 +254,7 @@
               price: this.formLabelAlign.fee,
               input: {amount: this.formLabelAlign.amount*Math.pow(10,18)},
               password: this.password,
-              from: this.formLabelAlign.account
+              from: this.formLabelAlign.from
             }
               let result = await intjs.sendTransaction(params);
               console.log('===rr mortgage---', result)
@@ -288,8 +273,8 @@
       },
     },
     mounted() {
-      this.init();
-      this.sendActiveIndex();
+       init(this);
+       sendActiveIndex(this, 2);
     },
   };
 </script>

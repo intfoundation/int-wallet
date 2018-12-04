@@ -125,7 +125,7 @@
 
 <script>
   import Intjs from 'intjs';
-
+  import { sendActiveIndex } from './common/index';
   const intjs = new Intjs('localhost', 8555);
   /* eslint-disable */
   export default {
@@ -155,6 +155,7 @@
     },
     computed: {
       txfee () {
+        console.log('---fee---', this.formLabelAlign.fee, this.slideMax)
         let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
         if (this.checked) {
           this.formLabelAlign.amount = this.balanceValue - x;
@@ -170,9 +171,6 @@
           e.preventDefault()
           alert('Please input numbers only.')
         }
-      },
-      sendActiveIndex () {
-        this.$emit('listenToActive', 3)
       },
       sendEverything () {
         if (!this.checked) {
@@ -293,8 +291,9 @@
     },
     mounted() {
       this.init();
-      this.sendActiveIndex();
-    },
+      sendActiveIndex(this, 3);
+    }
+
   };
 </script>
 
