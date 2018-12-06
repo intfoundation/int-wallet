@@ -62,7 +62,7 @@
 
 
                 <el-row>
-                    <el-col :span="8" style="margin-top: 40px;">
+                    <el-col :span="10" style="margin-top: 40px;">
                         <span class="title" style="font-size: 16px;">TOTAL</span>
                         <p><span class="total-value">{{checked ? formLabelAlign.balance : ((+formLabelAlign.amount + +txfee))}}</span> INT</p>
                     </el-col>

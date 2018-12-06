@@ -60,7 +60,7 @@
     "axios": "^0.18.0",
     "clipboard": "^2.0.1",
     "element-ui": "^2.4.6",
-    "intjs": "^1.8.51",
+    "intjs": "^1.8.55",
     "moment": "^2.22.2",
     "msgpack-lite": "^0.1.26",
     "qrcode": "^1.3.0",

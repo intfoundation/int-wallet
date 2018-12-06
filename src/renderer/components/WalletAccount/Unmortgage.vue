@@ -54,7 +54,7 @@
                 </el-row>
 
                 <el-row>
-                    <el-col :span="8" style="margin-top: 40px;">
+                    <el-col :span="10" style="margin-top: 40px;">
                         <span class="title">TOTAL</span>
                         <p style="font-size: 16px;">Votes: <span class="total-value" style="margin-left: 15px;">{{formLabelAlign.votes}}</span></p>
                         <p style="font-size: 16px;">TxFee: <span class="total-value" style="margin-left: 15px;">{{+txfee}}</span> INT</p>

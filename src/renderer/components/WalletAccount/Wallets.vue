@@ -153,6 +153,7 @@
   /* eslint-disable */
   import Intjs from 'intjs';
   import moment from 'moment';
+  import { mapState } from 'vuex';
   // import { ipcRenderer } from 'electron';
   //
   // let mode = ipcRenderer.sendSync('mode', '');
@@ -164,6 +165,7 @@
     name: 'wallets',
     data() {
       return {
+        accountList: [],
         fileName: [],
         balanceList: [],
         searchTx: '',
@@ -207,6 +209,22 @@
         }
       },
     },
+    // computed: mapState({
+    //   accountList: state => state.Counter.accountList
+    // }),
+     async mounted() {
+      let result = await this.$store.dispatch('getAccountList', this)
+      this.accountList = result
+      this.getBalance()
+      this.getHashDetail()
+      // setTimeout(() => {
+      //   this.getAddress();
+      //   this.init();
+      // }, 4000)
+      setInterval( () => {
+        this.getBalance()
+      }, 10000)
+    },
     methods: {
       openTxDetail(transobj) {
         this.transactionVisible = true;
@@ -237,29 +255,31 @@
       /**
        * 初始化
        * */
-      async init () {
-        this.isloading = true
-        let files = await intjs.getAccounts();
-        if (files.length === 0) {
-          this.isHaveAccount = true;
-          this.isloading = false;
-        } else {
-          this.fileName = files;
-          for (let i in this.fileName) {
-            let address = this.fileName[i];
-            await this.getTransactionHash(address);
-          }
+      // async init () {
+      //   let files = await intjs.getAccounts();
+      //   if (files.err) {
+      //     this.isloading = false;
+      //     this.$message({
+      //       message: 'Reading keystore file error.',
+      //       type: 'error'
+      //     });
+      //   } else if (files.length === 0) {
+      //     this.isHaveAccount = true;
+      //     this.isloading = false;
+      //   } else {
+      //     this.fileName = files;
+      //   }
+      // },
+      async getHashDetail () {
+        for (let i in this.accountList) {
+          let address = this.accountList[i];
+          await this.getTransactionHash(address);
         }
       },
-      async getAddress() {
-        let files = await intjs.getAccounts();
-        if (files.length === 0) {
-          this.isHaveAccount = true;
-        } else {
-          this.fileName = files;
-          let balanceArray = [];
-          for (let i in this.fileName) {
-            let address = this.fileName[i];
+      async getBalance() {
+        let balanceArray = [];
+          for (let i in this.accountList) {
+            let address = this.accountList[i];
             let result = await intjs.getBalance(address);
             if (+result.balance > 10000 * Math.pow(10, 18)) {
               result.balance = parseFloat(+result.balance / Math.pow(10, 18)).toExponential(5)
@@ -268,9 +288,7 @@
             }
             balanceArray.push({address: address, balance: result.balance});
           }
-          this.balanceList = balanceArray;
-          this.isloading = false;
-        }
+        this.balanceList = balanceArray;
       },
       // 弹出创建账户的弹框
       pop () {
@@ -303,10 +321,11 @@
         this.carefulVisible = true;
       },
       async carefulConfirm() {
-        await this.createWallet(this.firstPassword);
-        await this.init();
         this.carefulVisible = false;
         this.visible = false
+        await this.createWallet(this.firstPassword);
+        let result = await this.$store.dispatch('getAccountList', this);
+        this.accountList = result
       },
 
       /**
@@ -350,18 +369,8 @@
           return false;
         }
       },
-      },
-    mounted() {
-      this.init();
-      this.getAddress();
-      // setTimeout(() => {
-      //   this.getAddress();
-      //   this.init();
-      // }, 4000)
-      setInterval( () => {
-        this.getAddress()
-      }, 10000)
-    }
+      }
+
   };
 </script>
 

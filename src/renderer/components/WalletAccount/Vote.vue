@@ -66,7 +66,7 @@
                 </el-row>
 
                 <el-row>
-                    <el-col :span="8" style="margin-top: 40px;">
+                    <el-col :span="10" style="margin-top: 40px;">
                         <span class="title">TOTAL</span>
                         <p style="font-size: 16px;">Votes: <span class="total-value" style="margin-left: 15px;">{{formLabelAlign.votes}}</span></p>
                         <p style="font-size: 16px;">TxFee: <span class="total-value" style="margin-left: 15px;">{{+txfee}}</span> INT</p>
@@ -149,7 +149,7 @@
         password: '',
         balanceValue: '',
         slideMin: 0,
-        slideMax: 100,
+        slideMax: 2000 * Math.pow(10, 9),
         isloading: false,
         formLabelAlign: {
           account: '',
@@ -168,16 +168,19 @@
         return x;
       }
     },
+    mounted() {
+      this.init();
+      sendActiveIndex(this, 4);
+    },
     methods: {
       /**
        * 初始化
        * */
       async init () {
         this.isloading = true;
-        let files = await intjs.getAccounts();
-        this.formLabelAlign.fee = await intjs.getPrice();
-        // this.slideMin = 0;
-        this.slideMax = 2000 * Math.pow(10, 9);
+        let files = await this.$store.dispatch('getAccountList', this);
+        let price = await this.$store.dispatch('getPrice', this);
+        this.formLabelAlign.fee = price;
         if (files.err) {
           this.$message.error('Reading keystore file error');
         } else {
@@ -188,13 +191,6 @@
             let result = await intjs.getBalance(address);
             balanceArray.push({address: address, balance: result.balance });
           });
-          // TODO 异步拿到的数据怎么排序？
-          if (balanceArray.length !== 0) {
-            balanceArray.sort(function (a, b) {
-              console.log(b.balance - a.balance);
-              return (b.balance - a.balance);
-            });
-          }
           this.balance = balanceArray;
         }
         this.getAllCandidates();
@@ -203,34 +199,20 @@
       /***
        * 获取所有候选节点及票数
        */
-      getAllCandidates() {
-        setImmediate(async () => {
-          let candidates = await intjs.getCandidates();
-          let voteResult = await intjs.getVote();
-          this.isloading = false;
-          if (candidates.err) {
-            this.$message.error('Error in obtaining candidate nodes.');
-          } else if (candidates.length !== 0) {
-            for (let i = 0; i < candidates.length; i++) {
-              this.candidates.push({address: candidates[i], votes: 0});
+      async getAllCandidates() {
+        let voteResult = await intjs.getVote();
+        this.isloading = false;
+        if (voteResult.err) {
+            this.$message.error('Error in obtaining node votes.');
+          } else if (voteResult.length !== 0) {
+            for(let i in voteResult) {
+              voteResult[i].vote = +voteResult[i].vote.toString() / Math.pow(10, 18)
+              this.candidates.push({
+                address: voteResult[i].address,
+                votes: voteResult[i].vote
+              })
             }
           }
-
-          if (voteResult.err) {
-            this.$message.error('Error in obtaining node votes.');
-          } else if (voteResult.vote.size !== 0) {
-            this.candidates.forEach( (value) => {
-              if (voteResult.vote.has(value.address)) {
-                value.votes = voteResult.vote.get(value.address).toString();
-                value.votes = +value.votes / Math.pow(10, 18);
-              }
-            });
-          }
-
-          this.candidates.sort((a, b) => {
-            return (b.votes - a.votes);
-          });
-        });
       },
 
       selectFrom () {
@@ -320,11 +302,7 @@
           });
         }
       }
-    },
-    mounted() {
-      this.init();
-      sendActiveIndex(this, 4);
-    },
+    }
   };
 </script>
 
