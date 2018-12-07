@@ -21,7 +21,7 @@
                     <el-input v-model="formLabelAlign.votes" readonly></el-input>
                 </el-form-item>
                 <el-form-item label="AMOUNT">
-                    <el-input v-model="formLabelAlign.amount" @keypress.native="checkNumber($event)">{{formLabelAlign.amount}}</el-input>
+                    <el-input v-model="formLabelAlign.amount">{{formLabelAlign.amount}}</el-input>
                 </el-form-item>
                 <el-form-item label="BALANCE">
                     <el-input class="balance" v-model="formLabelAlign.balance" readonly>{{(formLabelAlign.balance / Math.pow(10, 18)).toFixed(2)}}</el-input>
@@ -155,7 +155,6 @@
     },
     computed: {
       txfee () {
-        console.log('---fee---', this.formLabelAlign.fee, this.slideMax)
         let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
         if (this.checked) {
           this.formLabelAlign.amount = this.balanceValue - x;
@@ -166,12 +165,6 @@
       }
     },
     methods: {
-      checkNumber(e) {
-        if ( e.keyCode < 48 || e.keyCode > 57) {
-          e.preventDefault()
-          alert('Please input numbers only.')
-        }
-      },
       sendEverything () {
         if (!this.checked) {
           this.formLabelAlign.amount = this.formLabelAlign.votes;
@@ -267,9 +260,9 @@
             let amount = (this.formLabelAlign.amount * Math.pow(10,18)).toString()
             let params = {
               method: 'unmortgage',
-              value: 0,
+              value: '0',
               limit: '50000',
-              price: this.formLabelAlign.fee,
+              price: this.formLabelAlign.fee.toString(),
               input: {amount: amount},
               password: this.password,
               from: this.formLabelAlign.account

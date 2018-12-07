@@ -238,11 +238,12 @@
               method: 'mortgage',
               value: amount,
               limit: '50000',
-              price: this.formLabelAlign.fee,
+              price: this.formLabelAlign.fee.toString(),
               input: {amount: amount},
               password: this.password,
               from: this.formLabelAlign.from
             }
+            console.log('---params---', params)
               let result = await intjs.sendTransaction(params);
               console.log('===rr mortgage---', result)
               if (result.err) {

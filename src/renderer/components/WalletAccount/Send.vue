@@ -24,7 +24,7 @@
                 </el-form-item>
 
                 <el-form-item label="AMOUNT">
-                    <el-input v-model="formLabelAlign.amount" placeholder="0.0" :readonly="checked" @keypress.native="checkNumber($event)"></el-input>
+                    <el-input v-model="formLabelAlign.amount" placeholder="0.0" :readonly="checked"></el-input>
                 </el-form-item>
 
                 <el-form-item label="BALANCE">
@@ -185,12 +185,6 @@
       }
     },
     methods: {
-      checkNumber(e) {
-        if ( e.keyCode < 48 || e.keyCode > 57) {
-          e.preventDefault()
-          alert('Please input numbers only.')
-        }
-      },
       // async getTokenBalance () {
       //   let that = this;
       //   let result = await intjs.getTokenBalance('INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq', that.address);
@@ -254,7 +248,7 @@
               method: '',
               value: 0,
               limit: '50000',
-              price: this.formLabelAlign.fee,
+              price: this.formLabelAlign.fee.toString(),
               input: {},
               password: this.password
             }
