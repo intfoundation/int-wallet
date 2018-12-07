@@ -20,7 +20,7 @@
                     <el-input v-model="formLabelAlign.votes" readonly></el-input>
                 </el-form-item>
                 <el-form-item label="AMOUNT">
-                    <el-input v-model="formLabelAlign.amount" @keypress.native="checkNumber($event)"></el-input>
+                    <el-input v-model="formLabelAlign.amount"></el-input>
                 </el-form-item>
                 <el-form-item label="BALANCE">
                     <el-input class="balance" v-model="formLabelAlign.balance" readonly>{{formLabelAlign.balance}}</el-input>
@@ -31,7 +31,7 @@
                 </template>
 
                 <el-row class="want-to-send">
-                    <el-col :span="7">
+                    <el-col>
                         You want to mortgage <span style="font-size: 16px;color: #3c31d7;">{{formLabelAlign.amount}}</span> votes.
                     </el-col>
                 </el-row>
@@ -53,7 +53,7 @@
                 </el-row>
 
                 <el-row>
-                    <el-col :span="10" style="margin-top: 40px;">
+                    <el-col style="margin-top: 40px;">
                         <span class="title">TOTAL</span>
                         <p style="font-size: 16px;">Votes: <span class="total-value" style="margin-left: 15px;">{{formLabelAlign.amount}}</span></p>
                         <p style="font-size: 16px;">TxFee: <span class="total-value" style="margin-left: 15px;">{{txfee}}</span> INT</p>
@@ -164,12 +164,6 @@
       }
     },
     methods: {
-      checkNumber(e) {
-        if ( e.keyCode < 48 || e.keyCode > 57) {
-          e.preventDefault()
-          alert('Please input numbers only.')
-        }
-      },
       sendEverything () {
         if (!this.checked) {
           this.formLabelAlign.amount = this.balanceValue - this.txfee;
@@ -238,13 +232,14 @@
         } else if (this.password.length < 9) {
           this.$message.error('Password length must be greater than or equal to 9.');
         } else {
+          let amount = (this.formLabelAlign.amount*Math.pow(10, 18)).toString()
           setImmediate(async() => {
             let params = {
               method: 'mortgage',
-              value: this.formLabelAlign.amount*Math.pow(10, 18),
+              value: amount,
               limit: '50000',
               price: this.formLabelAlign.fee,
-              input: {amount: this.formLabelAlign.amount*Math.pow(10,18)},
+              input: {amount: amount},
               password: this.password,
               from: this.formLabelAlign.from
             }

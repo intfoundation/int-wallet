@@ -38,7 +38,7 @@
 
 
                 <el-row class="want-to-send">
-                    <el-col :span="6">
+                    <el-col>
                         You want to send <span style="font-size: 16px;color: #3c31d7;">{{formLabelAlign.amount}}</span> INT.
                     </el-col>
                 </el-row>
@@ -62,7 +62,7 @@
 
 
                 <el-row>
-                    <el-col :span="10" style="margin-top: 40px;">
+                    <el-col style="margin-top: 40px;">
                         <span class="title" style="font-size: 16px;">TOTAL</span>
                         <p><span class="total-value">{{checked ? formLabelAlign.balance : ((+formLabelAlign.amount + +txfee))}}</span> INT</p>
                     </el-col>
@@ -247,6 +247,7 @@
         } else if (this.password.length < 9) {
           this.$message.error('Password length must be greater than or equal to 9.');
         } else {
+          let amount = (this.formLabelAlign.amount*Math.pow(10,18)).toString()
           setImmediate(async() => {
             let params = {
               from: this.formLabelAlign.from,
@@ -259,7 +260,7 @@
             }
               params.method = 'transferTo';
               params.input = {to: this.formLabelAlign.to};
-              params.value = this.formLabelAlign.amount*Math.pow(10,18);
+              params.value = amount;
             // else {
             //   params.method = 'transferTokenTo';
             //   params.input = {to: this.formLabelAlign.to, tokenid: 'INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq', amount: this.formLabelAlign.amount*Math.pow(10,18)};

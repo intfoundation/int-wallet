@@ -32,7 +32,7 @@
                 </template>
 
                 <el-row class="want-to-send">
-                    <el-col :span="7">
+                    <el-col>
                         You want to unmortgage <span style="font-size: 16px;color: #3c31d7;">{{formLabelAlign.amount}}</span> votes.
                     </el-col>
                 </el-row>
@@ -54,7 +54,7 @@
                 </el-row>
 
                 <el-row>
-                    <el-col :span="10" style="margin-top: 40px;">
+                    <el-col style="margin-top: 40px;">
                         <span class="title">TOTAL</span>
                         <p style="font-size: 16px;">Votes: <span class="total-value" style="margin-left: 15px;">{{formLabelAlign.votes}}</span></p>
                         <p style="font-size: 16px;">TxFee: <span class="total-value" style="margin-left: 15px;">{{+txfee}}</span> INT</p>
@@ -264,12 +264,13 @@
           this.$message.error('Password length must be greater than or equal to 9.');
         } else {
           setImmediate(async() => {
+            let amount = (this.formLabelAlign.amount * Math.pow(10,18)).toString()
             let params = {
               method: 'unmortgage',
               value: 0,
               limit: '50000',
               price: this.formLabelAlign.fee,
-              input: {amount: this.formLabelAlign.amount * Math.pow(10,18)},
+              input: {amount: amount},
               password: this.password,
               from: this.formLabelAlign.account
             }
