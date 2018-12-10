@@ -9,12 +9,12 @@
             <div class="transactionForm">
                 <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign" style="overflow: hidden">
                     <el-form-item label="FROM">
-                        <el-select v-model="formLabelAlign.account" placeholder="" @change="selectFrom" style="display: block;">
+                        <el-select v-model="formLabelAlign.from" placeholder="" @change="selectFrom" style="display: block;">
                             <el-option
-                                    v-for="(item, index) in balance"
+                                    v-for="(item, index) in accountList"
                                     :key="index"
-                                    :label="'Account' + ++index + '-' + item.address"
-                                    :value="item.address">
+                                    :label="'Account' + ++index + '-' + item"
+                                    :value="item">
                             </el-option>
                         </el-select>
                     </el-form-item>
@@ -68,8 +68,15 @@
                 <el-row>
                     <el-col style="margin-top: 40px;">
                         <span class="title">TOTAL</span>
-                        <p style="font-size: 16px;">Votes: <span class="total-value" style="margin-left: 15px;">{{formLabelAlign.votes}}</span></p>
-                        <p style="font-size: 16px;">TxFee: <span class="total-value" style="margin-left: 15px;">{{+txfee}}</span> INT</p>
+                        <p style="font-size: 16px;">
+                            <span>Votes: </span>
+                            <span class="total-value">{{formLabelAlign.votes}}</span>
+                        </p>
+                        <p style="font-size: 16px;">
+                            <span>TxFee: </span>
+                            <span class="total-value">{{+txfee}}</span>
+                            <span class="unit">&nbsp;INT</span>
+                        </p>
                     </el-col>
                 </el-row>
                 <el-button  class="send-btn" @click="sendTransaction"><span>SEND</span></el-button>
@@ -93,7 +100,7 @@
                 </div>
                 <div>
                     <span>From:</span>
-                    <span>{{formLabelAlign.account}}</span>
+                    <span>{{formLabelAlign.from}}</span>
                 </div>
                 <div>
                     You are about to execute a function on a contract. This might involve transfer
@@ -133,12 +140,14 @@
 <script>
   import Intjs from 'intjs';
   import { sendActiveIndex } from './common/index';
+  import store from '../../utils/storage';
   const intjs = new Intjs('localhost', 8555);
   /* eslint-disable */
   export default {
     name: 'vote',
     data() {
       return {
+        accountList:[],
         fileName: [],
         balance: [],
         checkedFrom: '',
@@ -152,7 +161,7 @@
         slideMax: 2000 * Math.pow(10, 9),
         isloading: false,
         formLabelAlign: {
-          account: '',
+          from: '',
           votes: 0.00,
           // amount: 0.00,
           balance: 0.00,
@@ -168,34 +177,25 @@
         return x;
       }
     },
-    mounted() {
-      this.init();
+    created () {
+      this.getAddress();
       sendActiveIndex(this, 4);
+      this.getAllCandidates();
+    },
+    async mounted () {
+      let price = await this.$store.dispatch('getPrice')
+      if (price.err) {
+        this.formLabelAlign.fee = 200000000000;
+      } else {
+        this.formLabelAlign.fee = price
+      }
     },
     methods: {
-      /**
-       * 初始化
-       * */
-      async init () {
-        this.isloading = true;
-        let files = await this.$store.dispatch('getAccountList', this);
-        let price = await this.$store.dispatch('getPrice', this);
-        this.formLabelAlign.fee = price;
-        if (files.err) {
-          this.$message.error('Reading keystore file error');
-        } else {
-          this.fileName = files;
-          let balanceArray = [];
-          this.fileName.forEach(async (value) => {
-            let address = value;
-            let result = await intjs.getBalance(address);
-            balanceArray.push({address: address, balance: result.balance });
-          });
-          this.balance = balanceArray;
-        }
-        this.getAllCandidates();
+      getAddress () {
+        let storage = store.get('accountList')
+        storage = JSON.parse(storage)
+        this.accountList = storage
       },
-
       /***
        * 获取所有候选节点及票数
        */
@@ -216,28 +216,7 @@
       },
 
       selectFrom () {
-        if (this.formLabelAlign.account) {
-          this.balance.forEach((value) => {
-            if (value.address === this.formLabelAlign.account) {
-              this.formLabelAlign.balance = (value.balance / Math.pow(10,18)).toFixed(2);
-              this.balanceValue = value.balance / Math.pow(10,18);
-            }
-          });
-          setImmediate(async () => {
-            let result = await intjs.getStake(this.formLabelAlign.account);
-            if (result.err) {
-              this.$message.error('Error in obtaining votes.');
-              return;
-            } else {
-              this.formLabelAlign.votes = (result.stake / Math.pow(10,18)).toFixed(2);
-            }
-          });
-        } else {
-          this.$message({
-            message: 'Please choose an address.',
-            type: 'warning'
-          });
-        }
+        this.$store.dispatch('selectFromAction', {that: this, isStake: true})
       },
 
       sendTransaction() {
@@ -264,35 +243,16 @@
       },
 
       submitTransaction() {
-        if (this.password === '') {
-          this.$message.error('Please input the password.');
-        } else if (this.password.length < 9) {
-          this.$message.error('Password length must be greater than or equal to 9.');
-        } else {
-          setImmediate(async() => {
-            let params = {
-              method: 'vote',
-              value: 0,
-              limit: '50000',
-              price: this.formLabelAlign.fee,
-              input: {candidates: this.multipleSelection},
-              password: this.password,
-              from: this.formLabelAlign.account
-            }
-            let result = await intjs.sendTransaction(params);
-            console.log('---re vote---', result)
-              if (result.err) {
-                this.centerDialogVisible = false;
-                this.$message.error('Vote failed');
-              } else {
-                this.centerDialogVisible = false;
-                this.$message({
-                  message: `Vote successfully，hash:${result.hash}`,
-                  type: 'success'
-                });
-              }
-          });
+        let params = {
+          method: 'vote',
+          value: '0',
+          limit: '50000',
+          price: this.formLabelAlign.fee.toString(),
+          input: {candidates: this.multipleSelection},
+          password: this.password,
+          from: this.formLabelAlign.from
         }
+        this.$store.dispatch('sendTransaction', {that: this, params: params, type: 'vote'})
       },
 
       handleSelectionChange(val) {
@@ -334,6 +294,14 @@
                 display: inline-block;
                 font-weight: 500;
                 margin-bottom: 20px;
+            }
+            .total-value {
+                margin-left: 15px;
+                vertical-align: middle;
+            }
+            .unit {
+                font-size: 15px;
+                vertical-align: -3px;
             }
         }
         .candidates {

@@ -13,8 +13,8 @@
                         <el-option
                             v-for="(item, index) in accountList"
                             :key="index"
-                            :label="'Account' + ++index + '-' + item.address"
-                            :value="item.address">
+                            :label="'Account' + ++index + '-' + item"
+                            :value="item">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -131,8 +131,9 @@
 
 <script>
   /* eslint-disable */
+  import store from '../../utils/storage'
   import Intjs from 'intjs';
-  import { sendActiveIndex, init, selectFromAction, checkTransaction } from './common/index';
+  import { sendActiveIndex } from './common/index';
   const intjs = new Intjs('localhost', 8555);
   export default {
     name: 'send',
@@ -163,11 +164,19 @@
         },
       };
     },
-    mounted() {
+    created () {
+      this.getAddress()
+    },
+    async mounted() {
       if (this.$route.query.address) {
         this.formLabelAlign.to = this.$route.query.address
       }
-      init(this);
+      let price = await this.$store.dispatch('getPrice')
+      if (price.err) {
+        this.formLabelAlign.fee = 200000000000;
+      } else {
+        this.formLabelAlign.fee = price
+      }
       sendActiveIndex(this, 1)
     },
 
@@ -185,11 +194,11 @@
       }
     },
     methods: {
-      // async getTokenBalance () {
-      //   let that = this;
-      //   let result = await intjs.getTokenBalance('INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq', that.address);
-      //   that.tokenBalance = +result.balance / Math.pow(10, 18);
-      // },
+      getAddress () {
+        let storage = store.get('accountList')
+        storage = JSON.parse(storage)
+        this.accountList = storage
+      },
       sendEverything () {
         if (!this.checked) {
           this.formLabelAlign.amount = this.formLabelAlign.balance - this.txfee;
@@ -197,83 +206,42 @@
           this.formLabelAlign.amount = 0;
         }
       },
-      // getTokenAccount() {
-      //   const that = this;
-      //   axios.get('https://explorer.intchain.io/api/wallet/walletList', {
-      //     params: {
-      //       source: 'wallet',
-      //       pageSize: that.pageSize,
-      //       address: that.formLabelAlign.from,
-      //     },
-      //   })
-      //     .then((res) => {
-      //       const result = res.data;
-      //       if (result.status === 'success') {
-      //         console.log('+++++***((((((', result);
-      //         let tokenlist = result.data.tokenList;
-      //         if (tokenlist.length != 0) {
-      //           tokenlist.forEach(function(item){
-      //             that.balanceAndToken.push({
-      //               name: item.coin,
-      //               balance: item.balance
-      //             })
-      //           })
-      //         }
-      //       }
-      //     })
-      //     .catch(error => {
-      //       console.log(error);
-      //     });
-      // },
-       selectFrom () {
-         selectFromAction(this)
-       },
+      selectFrom () {
+        this.$store.dispatch('selectFromAction', {that: this, isStake: false})
+      },
       sendTransaction() {
-        checkTransaction(this)
+        if (this.formLabelAlign.from === '') {
+          this.$message.error('Please choose From address.');
+        } else if (this.formLabelAlign.to === '') {
+          this.$message.error('Please choose To address.');
+        } else if (Number(this.formLabelAlign.amount) === 0) {
+          this.$message.error('The number of amount should not be 0.');
+        } else if (+this.formLabelAlign.fee < 200*Math.pow(10,9)) {
+          this.$message.error('Txfee is too slow.');
+        } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {
+          this.$message.error('Txfee is too high.');
+        } else if ( ((+this.formLabelAlign.amount + +this.txfee)*Math.pow(10,18)) > +this.formLabelAlign.balance*Math.pow(10,18)) {
+          this.$message.error('Balance is not enough.');
+        } else {
+          this.centerDialogVisible = true;
+        }
       },
       cancelTransaction() {
         this.centerDialogVisible = false;
         this.$message.error('Transaction cancel');
       },
       submitTransaction() {
-        if (this.password === '') {
-          this.$message.error('Please input the password.');
-        } else if (this.password.length < 9) {
-          this.$message.error('Password length must be greater than or equal to 9.');
-        } else {
-          let amount = (this.formLabelAlign.amount*Math.pow(10,18)).toString()
-          setImmediate(async() => {
-            let params = {
-              from: this.formLabelAlign.from,
-              method: '',
-              value: 0,
-              limit: '50000',
-              price: this.formLabelAlign.fee.toString(),
-              input: {},
-              password: this.password
-            }
-              params.method = 'transferTo';
-              params.input = {to: this.formLabelAlign.to};
-              params.value = amount;
-            // else {
-            //   params.method = 'transferTokenTo';
-            //   params.input = {to: this.formLabelAlign.to, tokenid: 'INT1NXXTMLqmDf4vf7KcNYzvxr36LCL4oTZvq', amount: this.formLabelAlign.amount*Math.pow(10,18)};
-            // }
-              let result = await intjs.sendTransaction(params);
-              console.log('--rrrsend---', result)
-              if (result.err) {
-                this.centerDialogVisible = false;
-                this.$message.error('Transaction failed');
-              } else {
-                this.centerDialogVisible = false;
-                this.$message({
-                  message: `Transaction successfully，hash:${result.hash}`,
-                  type: 'success'
-                });
-              }
-          });
-
+        let amount = (this.formLabelAlign.amount*Math.pow(10, 18)).toString()
+        let params = {
+          from: this.formLabelAlign.from,
+          method: 'transferTo',
+          value: amount,
+          limit: '50000',
+          price: this.formLabelAlign.fee.toString(),
+          input: {to: this.formLabelAlign.to},
+          password: this.password
         }
+        this.$store.dispatch('sendTransaction', {that: this, params: params, type: 'Transaction'})
       },
     }
   };

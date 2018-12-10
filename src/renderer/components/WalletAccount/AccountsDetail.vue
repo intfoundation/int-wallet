@@ -28,7 +28,7 @@
             <div class="function">
                 <router-link :to="{path: '/send', query: {address: address} }" tag="span">
                     <i class="transfer icon-common"></i>
-                    <span>Transfer INT & Tokens</span>
+                    <span>Transfer INT</span>
                 </router-link>
 
 

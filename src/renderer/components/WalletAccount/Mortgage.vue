@@ -11,8 +11,8 @@
                         <el-option
                             v-for="(item, index) in accountList"
                             :key="index"
-                            :label="'Account' + ++index + '-' + item.address"
-                            :value="item.address">
+                            :label="'Account' + ++index + '-' + item"
+                            :value="item">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -55,8 +55,15 @@
                 <el-row>
                     <el-col style="margin-top: 40px;">
                         <span class="title">TOTAL</span>
-                        <p style="font-size: 16px;">Votes: <span class="total-value" style="margin-left: 15px;">{{formLabelAlign.amount}}</span></p>
-                        <p style="font-size: 16px;">TxFee: <span class="total-value" style="margin-left: 15px;">{{txfee}}</span> INT</p>
+                        <p style="font-size: 16px;">
+                            <span>Votes: </span>
+                            <span class="total-value">{{formLabelAlign.amount}}</span>
+                        </p>
+                        <p style="font-size: 16px;">
+                            <span>TxFee: </span>
+                            <span class="total-value">{{txfee}}</span>
+                            <span class="unit">&nbsp;INT</span>
+                        </p>
                     </el-col>
                 </el-row>
 
@@ -96,11 +103,6 @@
                     <span>{{formLabelAlign.fee}}</span>
                 </div>
 
-                <!--<div class="stripe-item">-->
-                <!--<span>Gas price</span>-->
-                <!--<span>0.002 INT per mllin gas</span>-->
-                <!--</div>-->
-
                 <div style="text-align: center">
                     <el-input
                         type="password"
@@ -121,9 +123,10 @@
 </template>
 
 <script>
-  import Intjs from 'intjs';
-  import { sendActiveIndex, init, selectFromAction2 } from './common/index';
-  const intjs = new Intjs('localhost', 8555);
+  // import Intjs from 'intjs';
+  import { sendActiveIndex } from './common/index';
+  import store from '../../utils/storage';
+  // const intjs = new Intjs('localhost', 8555);
   /* eslint-disable */
   export default {
     name: 'mortgage',
@@ -163,7 +166,24 @@
         }
       }
     },
+    created () {
+      this.getAddress();
+      sendActiveIndex(this, 2);
+    },
+    async mounted () {
+      let price = await this.$store.dispatch('getPrice')
+      if (price.err) {
+        this.formLabelAlign.fee = 200000000000;
+      } else {
+        this.formLabelAlign.fee = price
+      }
+    },
     methods: {
+      getAddress () {
+        let storage = store.get('accountList')
+        storage = JSON.parse(storage)
+        this.accountList = storage
+      },
       sendEverything () {
         if (!this.checked) {
           this.formLabelAlign.amount = this.balanceValue - this.txfee;
@@ -171,38 +191,9 @@
           this.formLabelAlign.amount = 0;
         }
       },
-      /**
-       * 初始化
-       * */
-      // async init () {
-      //   this.isloading = true;
-      //   let files = await intjs.getAccounts();
-      //   this.formLabelAlign.fee = await intjs.getPrice();
-      //   // this.slideMin = 0;
-      //   this.slideMax = 2000 * Math.pow(10, 9);
-      //   if (files.err) {
-      //     this.$message.error('Reading keystore file error.');
-      //   } else {
-      //     this.fileName = files;
-      //     let balanceArray = [];
-      //     this.fileName.forEach(async (value) => {
-      //       let address = value;
-      //       let result = await intjs.getBalance(address);
-      //       balanceArray.push({address: address, balance: result.balance });
-      //     });
-      //     if (balanceArray.length !== 0) {
-      //       balanceArray.sort(function (a, b) {
-      //         console.log(b.balance - a.balance);
-      //         return (b.balance - a.balance);
-      //       });
-      //     }
-      //     this.balance = balanceArray;
-      //     this.isloading = false;
-      //   }
-      // },
 
       selectAccount() {
-        selectFromAction2(this)
+        this.$store.dispatch('selectFromAction', {that: this, isStake: true})
       },
 
       sendTransaction() {
@@ -227,43 +218,19 @@
       },
 
       submitTransaction() {
-        if (this.password === '') {
-          this.$message.error('Please input the password.');
-        } else if (this.password.length < 9) {
-          this.$message.error('Password length must be greater than or equal to 9.');
-        } else {
-          let amount = (this.formLabelAlign.amount*Math.pow(10, 18)).toString()
-          setImmediate(async() => {
-            let params = {
-              method: 'mortgage',
-              value: amount,
-              limit: '50000',
-              price: this.formLabelAlign.fee.toString(),
-              input: {amount: amount},
-              password: this.password,
-              from: this.formLabelAlign.from
-            }
-            console.log('---params---', params)
-              let result = await intjs.sendTransaction(params);
-              console.log('===rr mortgage---', result)
-              if (result.err) {
-                this.centerDialogVisible = false;
-                this.$message.error('Mortgage failed');
-              } else {
-                this.centerDialogVisible = false;
-                this.$message({
-                  message: `Mortgage successfully，hash:${result.hash}`,
-                  type: 'success'
-                });
-              }
-          });
-        }
+        let amount = (this.formLabelAlign.amount*Math.pow(10, 18)).toString()
+        let params = {
+          method: 'mortgage',
+          value: amount,
+          limit: '50000',
+          price: this.formLabelAlign.fee.toString(),
+          input: {amount: amount},
+          password: this.password,
+          from: this.formLabelAlign.from
+       }
+        this.$store.dispatch('sendTransaction', {that: this, params: params, type: 'mortgage'})
       },
-    },
-    mounted() {
-       init(this);
-       sendActiveIndex(this, 2);
-    },
+    }
   };
 </script>
 
@@ -292,6 +259,14 @@
                 display: inline-block;
                 font-weight: 500;
                 margin-bottom: 20px;
+            }
+            .total-value {
+                margin-left: 15px;
+                vertical-align: middle;
+            }
+            .unit {
+                font-size: 15px;
+                vertical-align: -3px;
             }
         }
         .el-dialog {

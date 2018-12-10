@@ -151,6 +151,7 @@
 
 <script>
   /* eslint-disable */
+
   import Intjs from 'intjs';
   import moment from 'moment';
   import { mapState } from 'vuex';
@@ -178,7 +179,6 @@
         firstPassword: '',
         secondPassword: '',
         passwordError: false,
-        isHaveAccount: false,
         isMask: false,
         showClose: false,
         isloading: false,
@@ -209,9 +209,9 @@
         }
       },
     },
-    // computed: mapState({
-    //   accountList: state => state.Counter.accountList
-    // }),
+    computed: mapState({
+      isHaveAccount: state => state.Counter.isHaveAccount
+    }),
      async mounted() {
       let result = await this.$store.dispatch('getAccountList', this)
       this.accountList = result
@@ -252,24 +252,6 @@
         this.secondPassword = '';
       },
 
-      /**
-       * 初始化
-       * */
-      // async init () {
-      //   let files = await intjs.getAccounts();
-      //   if (files.err) {
-      //     this.isloading = false;
-      //     this.$message({
-      //       message: 'Reading keystore file error.',
-      //       type: 'error'
-      //     });
-      //   } else if (files.length === 0) {
-      //     this.isHaveAccount = true;
-      //     this.isloading = false;
-      //   } else {
-      //     this.fileName = files;
-      //   }
-      // },
       async getHashDetail () {
         for (let i in this.accountList) {
           let address = this.accountList[i];
@@ -289,6 +271,7 @@
             balanceArray.push({address: address, balance: result.balance});
           }
         this.balanceList = balanceArray;
+        this.isloading = false;
       },
       // 弹出创建账户的弹框
       pop () {
@@ -370,7 +353,6 @@
         }
       },
       }
-
   };
 </script>
 
