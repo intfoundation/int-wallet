@@ -206,7 +206,8 @@
             this.$message.error('Error in obtaining node votes.');
           } else if (voteResult.length !== 0) {
             for(let i in voteResult) {
-              voteResult[i].vote = +voteResult[i].vote.toString() / Math.pow(10, 18)
+              console.log('voteResult[i].vote', voteResult[i].vote.toString())
+              voteResult[i].vote = +(voteResult[i].vote.toString()) / Math.pow(10, 18)
               this.candidates.push({
                 address: voteResult[i].address,
                 votes: voteResult[i].vote
