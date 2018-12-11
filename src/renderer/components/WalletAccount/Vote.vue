@@ -111,7 +111,7 @@
             <div class="stripe">
                 <div class="stripe-item">
                     <span>Gas limit</span>
-                    <span>50000</span>
+                    <span>200000</span>
                 </div>
 
                 <div class="stripe-item">
@@ -173,7 +173,7 @@
     },
     computed: {
       txfee () {
-        let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
+        let x = (this.formLabelAlign.fee * 200000) / Math.pow(10, 18);
         return x;
       }
     },
@@ -247,7 +247,7 @@
         let params = {
           method: 'vote',
           value: '0',
-          limit: '50000',
+          limit: '200000',
           price: this.formLabelAlign.fee.toString(),
           input: {candidates: this.multipleSelection},
           password: this.password,
