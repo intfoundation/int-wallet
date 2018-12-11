@@ -158,7 +158,7 @@
       txfee () {
         let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
         if (this.checked) {
-          this.formLabelAlign.amount = this.balanceValue - x;
+          this.formLabelAlign.amount = this.formLabelAlign.votes;
         } else {
           this.formLabelAlign.amount = this.formLabelAlign.amount;
         }
@@ -206,7 +206,7 @@
           this.$message.error('Txfee is too high.');
         } else if (((+this.formLabelAlign.amount)*Math.pow(10,18)) > +this.formLabelAlign.votes * Math.pow(10, 18)) {
           this.$message.error('Votes are not enough.');
-        } else if(this.txfee > this.balanceValue) {
+        } else if(this.txfee > this.formLabelAlign.balance) {
           this.$message.error('Balance is not enough.');
         } else {
           this.centerDialogVisible = true;
