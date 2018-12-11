@@ -230,7 +230,6 @@
         this.transactionVisible = true;
         this.transDetail.hash = transobj.tx.hash;
         this.transDetail.time = moment(new Date(transobj.block.timestamp * 1000)).format("dddd, MMMM Do YYYY, h:mm:ss a");
-        console.log('---', transobj)
         this.transDetail.value = transobj.tx.value;
         this.transDetail.from = transobj.tx.caller;
         this.transDetail.to = transobj.tx.input.to;
@@ -348,6 +347,10 @@
             }
             this.txList.push(result);
           }
+          this.txList.sort((a, b) => {
+            // 从晚到早时间排序
+            return new Date(b.block.timestamp) - new Date(a.block.timestamp);
+          })
         } else {
           return false;
         }

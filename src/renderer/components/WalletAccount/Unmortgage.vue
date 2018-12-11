@@ -176,7 +176,6 @@
       } else {
         this.formLabelAlign.fee = price
       }
-      console.log('---price--', this.formLabelAlign.fee)
     },
     methods: {
       getAddress () {
