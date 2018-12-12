@@ -157,8 +157,6 @@
       return {
         search: '',
         accountList:[],
-        fileName: [],
-        balance: [],
         checkedFrom: '',
         checked: false,
         isSelected: true,
@@ -169,8 +167,6 @@
         slideMin: 0,
         slideMax: 2000 * Math.pow(10, 9),
         isloading: false,
-        selectLength: [],
-        newSelectLength: 0,
         formLabelAlign: {
           from: '',
           votes: 0.00,
