@@ -59,7 +59,7 @@
                         </div>
                         <!--右侧-->
                         <div style="display: inline-block;padding-left: 20px;">
-                            <div class="bold-text">Send</div>
+                            <div class="bold-text">{{item.tx.method}}</div>
                             <div style="color: #999;font-size: 13px;margin-top: 8px;">
                                 <span class="spe-caller">{{item.tx.caller}}</span>
                                 <i class="arrow-right icon-common" style="vertical-align: top;"></i>
@@ -187,13 +187,6 @@
           let result = await intjs.getBalance(address);
           this.balance = +result.balance / Math.pow(10, 18);
           let txInformation = await intjs.chainClient.getTransactionByAddress({address});
-          // if (txInformation.err === 0) {
-          //   txInformation.txs.forEach(async(item) => {
-          //     let result = await intjs.getTransactionReceipt(item.txhash);
-          //     this.txList.push(result)
-          //   })
-          // }
-
           if (txInformation.err === 0) {
             let arr = txInformation.txs;
             for (let i in arr) {
@@ -212,37 +205,41 @@
               }
               this.txList.push(result);
             }
+            this.txList.sort((a, b) => {
+              // 从晚到早时间排序
+              return new Date(b.block.timestamp) - new Date(a.block.timestamp);
+            })
           } else {
             return false;
           }
         },
-        getTokenAccount (){
-          const that = this;
-          axios.get('https://explorer.intchain.io/api/wallet/walletList', {
-            params: {
-              source: 'wallet',
-              pageSize: that.pageSize,
-              address: that.address,
-            },
-          })
-            .then((res) => {
-              const result = res.data;
-              if (result.status === 'success') {
-                let tokenlist = result.data.tokenList;
-                if (tokenlist.length != 0) {
-                  tokenlist.forEach(function(item){
-                    that.balanceAndToken.push({
-                      name: item.coin,
-                      balance: item.balance
-                    })
-                  })
-                }
-              }
-            })
-            .catch(error => {
-              console.log(error);
-            });
-        },
+        // getTokenAccount (){
+        //   const that = this;
+        //   axios.get('https://explorer.intchain.io/api/wallet/walletList', {
+        //     params: {
+        //       source: 'wallet',
+        //       pageSize: that.pageSize,
+        //       address: that.address,
+        //     },
+        //   })
+        //     .then((res) => {
+        //       const result = res.data;
+        //       if (result.status === 'success') {
+        //         let tokenlist = result.data.tokenList;
+        //         if (tokenlist.length != 0) {
+        //           tokenlist.forEach(function(item){
+        //             that.balanceAndToken.push({
+        //               name: item.coin,
+        //               balance: item.balance
+        //             })
+        //           })
+        //         }
+        //       }
+        //     })
+        //     .catch(error => {
+        //       console.log(error);
+        //     });
+        // },
         // async getTokenBalance () {
         //   let that = this;
         //   let result = await intjs.getTokenBalance('INT1CGgVhaSx67hYrxb7qCZBj6TU5W9W3CFFf', that.address);
@@ -252,7 +249,7 @@
           this.transactionVisible = true;
           this.transDetail.hash = transobj.tx.hash;
           this.transDetail.time = moment(new Date(transobj.block.timestamp * 1000)).format("dddd, MMMM Do YYYY, h:mm:ss a");
-          this.transDetail.value = (transobj.tx.value / Math.pow(10, 18)).toFixed(4);
+          this.transDetail.value = transobj.tx.value;
           this.transDetail.from = transobj.tx.caller;
           this.transDetail.to = transobj.tx.input.to;
           this.transDetail.cost = +transobj.receipt.cost / Math.pow(10, 18);
