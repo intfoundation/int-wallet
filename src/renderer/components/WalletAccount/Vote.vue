@@ -4,7 +4,6 @@
             <i class="vote-icon icon-common"></i>
             <span class="item-text">Vote</span>
         </div>
-
         <div class="item-content">
             <div class="transactionForm">
                 <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign" style="overflow: hidden">
@@ -26,11 +25,20 @@
                     </el-form-item>
 
                 </el-form>
-                <template>
-                    <div class="title" style="margin-top: 25px;">Candidates</div>
-                </template>
+                    <div style="margin: 25px 0;">Candidates</div>
+                    <div>
+                        <input placeholder="Search by address"
+                               class="search"
+                               v-model="search"/>
+                        <span style="margin-left: 20px;">Number of selected nodes: </span>
+                            <span style="color: #3C31D7; font-size: 16px;">
+                                <span style="margin-left: 15px;" id="selected"></span>
+                                <span>{{ candidates.length }}</span>
+                            </span>
+                    </div>
+
                 <el-table
-                        :data="candidates"
+                        :data="candidates.filter(data => !search || data.address.toLowerCase().indexOf(search.toLowerCase()) > -1 )"
                         tooltip-effect="dark"
                         style="width: 100%"
                         @selection-change="handleSelectionChange">
@@ -147,6 +155,7 @@
     name: 'vote',
     data() {
       return {
+        search: '',
         accountList:[],
         fileName: [],
         balance: [],
@@ -160,6 +169,8 @@
         slideMin: 0,
         slideMax: 2000 * Math.pow(10, 9),
         isloading: false,
+        selectLength: [],
+        newSelectLength: 0,
         formLabelAlign: {
           from: '',
           votes: 0.00,
@@ -169,6 +180,7 @@
         },
         candidates: [],
         multipleSelection: [],
+        count: 0
       };
     },
     computed: {
@@ -177,12 +189,14 @@
         return x;
       }
     },
+
     created () {
       this.getAddress();
       sendActiveIndex(this, 4);
       this.getAllCandidates();
     },
     async mounted () {
+      document.getElementById('selected').innerHTML = 0 + ' ' + '/'
       let price = await this.$store.dispatch('getPrice')
       if (price.err) {
         this.formLabelAlign.fee = 200000000000;
@@ -255,8 +269,8 @@
         }
         this.$store.dispatch('sendTransaction', {that: this, params: params, type: 'vote'})
       },
-
       handleSelectionChange(val) {
+        document.getElementById('selected').innerHTML = val.length + ' ' + '/'
         if (val.length !== 0) {
           val.forEach((value) => {
             this.multipleSelection.push(value.address);
@@ -289,6 +303,18 @@
             .el-select {
                 width: 100%;
             }
+        }
+        .search {
+            width: 330px;
+            height: 38px;
+            border-radius: 3px;
+            border: 1px solid #ebeef5;
+            margin-bottom: 20px;
+            padding-left: 10px;
+            outline: none;
+        }
+        .el-table {
+            border: 1px solid #ebeef5;
         }
         .el-row {
             .title {
