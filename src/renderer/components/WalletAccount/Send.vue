@@ -1,5 +1,5 @@
 <template>
-    <div class="send" v-loading="isloading">
+    <div class="send" v-loading="isloading" id="send">
         <div class="item-title">
             <i class="send-icon icon-common"></i>
             <span class="item-text">Send</span>
@@ -198,6 +198,7 @@
         let storage = store.get('accountList')
         storage = JSON.parse(storage)
         this.accountList = storage
+        console.log('---accountlist---', this.accountList)
       },
       sendEverything () {
         if (!this.checked) {
@@ -230,7 +231,8 @@
         this.centerDialogVisible = false;
         this.$message.error('Transaction cancel');
       },
-      submitTransaction() {
+
+      async submitTransaction() {
         let amount = (this.formLabelAlign.amount*Math.pow(10, 18)).toString()
         let params = {
           from: this.formLabelAlign.from,
@@ -241,7 +243,18 @@
           input: {to: this.formLabelAlign.to},
           password: this.password
         }
-        this.$store.dispatch('sendTransaction', {that: this, params: params, type: 'Transaction'})
+        await this.$store.dispatch('sendTransaction', {that: this, params: params, type: 'Transaction'})
+        this.formLabelAlign.from = ''
+        this.formLabelAlign.to = ''
+        this.formLabelAlign.balance = ''
+        this.formLabelAlign.amount = 0
+        this.password = ''
+        let price = await this.$store.dispatch('getPrice', {that: this})
+        if (price.err) {
+          this.formLabelAlign.fee = 200000000000;
+        } else {
+          this.formLabelAlign.fee = price
+        }
       },
     }
   };

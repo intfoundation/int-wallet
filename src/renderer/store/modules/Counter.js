@@ -11,7 +11,6 @@ const state = {
 const mutations = {
   GET_ACCOUNTLIST (state, files) {
     state.accountList = files
-    console.log('---accountList---', state.accountList)
   },
   HAVE_ACCOUNT (state) {
     state.isHaveAccount = true
@@ -93,7 +92,7 @@ const actions = {
         console.log(`---${type}--result---`, result)
         if (result.err) {
           that.centerDialogVisible = false;
-          that.$message.error('${type} failed');
+          that.$message.error(`${type} failed`);
         } else {
           that.centerDialogVisible = false;
           that.$message({

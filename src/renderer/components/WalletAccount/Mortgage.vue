@@ -20,7 +20,7 @@
                     <el-input v-model="formLabelAlign.votes" readonly></el-input>
                 </el-form-item>
                 <el-form-item label="AMOUNT">
-                    <el-input v-model="formLabelAlign.amount"></el-input>
+                    <el-input v-model="formLabelAlign.amount" :readonly="checked"></el-input>
                 </el-form-item>
                 <el-form-item label="BALANCE">
                     <el-input class="balance" v-model="formLabelAlign.balance" readonly>{{formLabelAlign.balance}}</el-input>
@@ -217,7 +217,7 @@
         this.$message.error('Mortgage cancel');
       },
 
-      submitTransaction() {
+      async submitTransaction() {
         let amount = (this.formLabelAlign.amount*Math.pow(10, 18)).toString()
         let params = {
           method: 'mortgage',
@@ -228,7 +228,18 @@
           password: this.password,
           from: this.formLabelAlign.from
        }
-        this.$store.dispatch('sendTransaction', {that: this, params: params, type: 'mortgage'})
+        await this.$store.dispatch('sendTransaction', {that: this, params: params, type: 'mortgage'})
+        this.formLabelAlign.from = ''
+        this.formLabelAlign.votes = ''
+        this.formLabelAlign.balance = ''
+        this.formLabelAlign.amount = 0
+        this.password = ''
+        let price = await this.$store.dispatch('getPrice', {that: this})
+        if (price.err) {
+          this.formLabelAlign.fee = 200000000000;
+        } else {
+          this.formLabelAlign.fee = price
+        }
       },
     }
   };

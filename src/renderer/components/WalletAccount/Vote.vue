@@ -89,10 +89,7 @@
                 </el-row>
                 <el-button  class="send-btn" @click="sendTransaction"><span>SEND</span></el-button>
             </div>
-
-
         </div>
-
 
         <el-dialog
                 title="vote"
@@ -216,7 +213,6 @@
             this.$message.error('Error in obtaining node votes.');
           } else if (voteResult.length !== 0) {
             for(let i in voteResult) {
-              console.log('voteResult[i].vote', voteResult[i].vote.toString())
               voteResult[i].vote = +(voteResult[i].vote.toString()) / Math.pow(10, 18)
               this.candidates.push({
                 address: voteResult[i].address,
@@ -253,7 +249,7 @@
         this.$message.error('Vote cancel');
       },
 
-      submitTransaction() {
+      async submitTransaction() {
         let params = {
           method: 'vote',
           value: '0',
@@ -263,7 +259,17 @@
           password: this.password,
           from: this.formLabelAlign.from
         }
-        this.$store.dispatch('sendTransaction', {that: this, params: params, type: 'vote'})
+        await this.$store.dispatch('sendTransaction', {that: this, params: params, type: 'vote'})
+        this.formLabelAlign.from = ''
+        this.formLabelAlign.votes = ''
+        this.formLabelAlign.balance = ''
+        this.password = ''
+        let price = await this.$store.dispatch('getPrice', {that: this})
+        if (price.err) {
+          this.formLabelAlign.fee = 200000000000;
+        } else {
+          this.formLabelAlign.fee = price
+        }
       },
       handleSelectionChange(val) {
         document.getElementById('selected').innerHTML = val.length + ' ' + '/'
@@ -311,6 +317,8 @@
         }
         .el-table {
             border: 1px solid #ebeef5;
+            height: 500px;
+            overflow: scroll;
         }
         .el-row {
             .title {
