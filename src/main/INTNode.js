@@ -13,6 +13,8 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 
+import { logger } from './logger';
+
 const STATES = {
     STARTING: 0,
     STARTED: 1,
@@ -64,7 +66,7 @@ export class INTNode extends EventEmitter {
         }
 
         this.state = STATES.STOPPING;
-        console.info(`Stopping existing node: ${this._node}`);
+        logger.info(`Stopping existing node`);
 
         this._node.stdout.removeAllListeners('data');
         this._node.stderr.removeAllListeners('data');
@@ -84,7 +86,7 @@ export class INTNode extends EventEmitter {
             clearTimeout(killTimer);
             this._node = null;
             this.state = STATES.STOPPED;
-            console.info(`Previous node has been stopped`);
+            logger.info(`Previous node has been stopped`);
         });
     }
 
@@ -92,7 +94,7 @@ export class INTNode extends EventEmitter {
         try {
             this.stop();
         } catch(err) {
-            console.error(`Stop node error ${err}`);
+            logger.error(`Stop node error ${err}`);
         }
 
         this._startNode(network);
@@ -102,7 +104,7 @@ export class INTNode extends EventEmitter {
         this._network = network;
 
         if (this._network === 'test') {
-            console.info('Node will connect the test network');
+            logger.info('Node will connect the test network');
             dialog.showMessageBox({
                 type: 'info',
                 buttons: ['OK'],
@@ -114,7 +116,7 @@ export class INTNode extends EventEmitter {
         }
 
         if (this._network === 'main') {
-            console.info('Node will connect the main network');
+            logger.info('Node will connect the main network');
             dialog.showMessageBox({
                     type: 'info',
                     buttons: ['OK'],
@@ -130,9 +132,9 @@ export class INTNode extends EventEmitter {
 
         try {
             this._startProcess(this._network);
-            console.info(`Start process with network ${this._network}`);
+            logger.info(`Start process with network ${this._network}`);
         } catch(err) {
-            console.error(`Start process error ${err}`);
+            logger.error(`Start process error ${err}`);
         }
     }
 
@@ -151,11 +153,13 @@ export class INTNode extends EventEmitter {
 
         this._node = proc;
         this.state = STATES.STARTED;
+        logger.info(`Spawn process started with network ${network}`);
 
         proc.once('error', error => {
             if (this.state === STATES.STARTING) {
                 this.state = STATES.ERROR;
             }
+            logger.error(`Spawn error ${error}`);
         });
 
         proc.stdout.on('data', data => {
@@ -199,10 +203,10 @@ export class INTNode extends EventEmitter {
             let data = fs.readFileSync(filePath, 'utf-8');
             let network = JSON.parse(data);
             this._network = network.network;
-            console.info(`Get user data ${data}`);
+            logger.info(`Get user data ${data}`);
         } catch(err) {
             this._network = DEFAULT_NETWORK;
-            console.error(`Get user data error ${err}`);
+            logger.error(`Get user data error ${err}`);
         }
     }
 
@@ -213,9 +217,9 @@ export class INTNode extends EventEmitter {
 
         try{
             fs.writeFileSync(filePath, wd);
-            console.info(`Set user data ${wd}`);
+            logger.info(`Set user data ${wd}`);
         } catch(err) {
-            console.error(`Set user data error ${err}`);
+            logger.error(`Set user data error ${err}`);
         }
     }
 
