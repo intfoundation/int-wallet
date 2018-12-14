@@ -59,6 +59,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "clipboard": "^2.0.1",
+    "electron-rebuild": "^1.8.2",
     "element-ui": "^2.4.6",
     "intjs": "^1.8.55",
     "moment": "^2.22.2",
@@ -69,7 +70,8 @@
     "vue-clipboard2": "^0.2.1",
     "vue-electron": "^1.0.6",
     "vue-router": "^3.0.1",
-    "vuex": "^3.0.1"
+    "vuex": "^3.0.1",
+    "electron": "^2.0.8"
   },
   "devDependencies": {
     "ajv": "^6.5.0",
@@ -90,7 +92,6 @@
     "css-loader": "^0.28.11",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "electron": "^2.0.8",
     "electron-builder": "^20.28.3",
     "electron-debug": "^1.5.0",
     "electron-devtools-installer": "^2.2.4",

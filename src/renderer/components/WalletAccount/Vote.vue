@@ -37,26 +37,34 @@
                             </span>
                     </div>
 
-                <el-table
-                        :data="candidates.filter(data => !search || data.address.toLowerCase().indexOf(search.toLowerCase()) > -1 )"
-                        tooltip-effect="dark"
-                        style="width: 100%"
-                        @selection-change="handleSelectionChange">
-                    <el-table-column
-                            type="selection"
-                            width="55">
-                    </el-table-column>
-                    <el-table-column
-                            label="Address"
-                            width="500">
-                        <template slot-scope="scope">{{ scope.row.address }}</template>
-                    </el-table-column>
-                    <el-table-column
-                            prop="votes"
-                            label="Votes"
-                            show-overflow-tooltip>
-                    </el-table-column>
-                </el-table>
+                <!--<el-table-->
+                        <!--:data="candidates.filter(data => !search || data.address.toLowerCase().indexOf(search.toLowerCase()) > -1 )"-->
+                        <!--tooltip-effect="dark"-->
+                        <!--style="width: 100%"-->
+                        <!--@click="aaa">-->
+                    <!--<el-table-column-->
+                            <!--type="selection"-->
+                            <!--width="55">-->
+                    <!--</el-table-column>-->
+                    <!--<el-table-column-->
+                            <!--label="Address"-->
+                            <!--width="500">-->
+                        <!--<template slot-scope="scope">{{ scope.row.address }}</template>-->
+                    <!--</el-table-column>-->
+                    <!--<el-table-column-->
+                            <!--prop="votes"-->
+                            <!--label="Votes"-->
+                            <!--show-overflow-tooltip>-->
+                    <!--</el-table-column>-->
+                <!--</el-table>-->
+                <div id="table">
+                    <div v-for="item in candidates" style="margin-top: 20px" :key="index">
+                        <!--<input type="checkbox" @click="jnjn" :value="checkValue" ref="input" id="input">-->
+                        <el-checkbox v-model="index"></el-checkbox>
+                        <span style="margin-left: 50px;display: inline-block;width: 500px">{{item.address}}</span>
+                        <span>{{item.votes}}</span>
+                    </div>
+                </div>
                 <el-row style="margin-top: 40px;">
                     <el-col  class="fee">
                         <span class="title">SELECT FEE</span>
@@ -152,6 +160,7 @@
     name: 'vote',
     data() {
       return {
+        // checkValue: false,
         search: '',
         accountList:[],
         checkedFrom: '',
@@ -198,6 +207,34 @@
       }
     },
     methods: {
+      // jnjn () {
+      //   this.checkValue = !this.checkValue;
+      //   var checkboxs = this.$refs['input'];
+      //   console.log('--checkbox---', checkboxs)
+      //   var num=0;
+      //   for(var i=0;i<this.candidates.length;i++){
+      //     if(checkboxs[i].getAttribute('value')){
+      //       console.log('111')
+      //       num++;
+      //     }
+      //   }
+      //   alert(num);
+
+
+
+
+
+
+        // let count = 0
+        // this.checkValue = !this.checkValue
+        // for (let i in this.candidates) {
+        //   let ischecked = this.$refs['input'][i].getAttribute('value')
+        //   console.log('--ischecked---', ischecked)
+        //   if (!ischecked) {
+        //     count++;
+        //   }
+        // }
+      // },
       getAddress () {
         let storage = store.get('accountList')
         storage = JSON.parse(storage)
@@ -271,14 +308,15 @@
           this.formLabelAlign.fee = price
         }
       },
-      handleSelectionChange(val) {
-        document.getElementById('selected').innerHTML = val.length + ' ' + '/'
-        if (val.length !== 0) {
-          val.forEach((value) => {
-            this.multipleSelection.push(value.address);
-          });
-        }
-      }
+      // handleSelectionChange(val) {
+      //   document.getElementById('selected').innerHTML = val.length + ' ' + '/'
+      //   if (val.length !== 0) {
+      //     val.forEach((value) => {
+      //       console.log('1111')
+      //       this.multipleSelection.push(value.address);
+      //     });
+      //   }
+      // }
     }
   };
 </script>
@@ -314,6 +352,9 @@
             margin-bottom: 20px;
             padding-left: 10px;
             outline: none;
+        }
+        .el-table::before {
+            height: 0px;
         }
         .el-table {
             border: 1px solid #ebeef5;

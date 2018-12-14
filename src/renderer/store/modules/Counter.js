@@ -14,13 +14,39 @@ const mutations = {
   },
   HAVE_ACCOUNT (state) {
     state.isHaveAccount = true
+  },
+  FIRST_OPEN (state) {
+    state.firstOpen = false
   }
 };
 
 const actions = {
+  switchFirstOpen ({ commit }) {
+    // commit('FIRST_OPEN')
+    store.setSession('firstOpen', false)
+  },
   async getAccountList ({ commit }, that) {
     try {
-      that.isloading = true;
+      // that.isloading = true;
+      let files = await intjs.getAccounts();
+      if (files.err) { // 这里报的err应该是和catch里抓出来的不一样
+        // that.$message({
+        //   message: 'Please check out your connection first.',
+        //   type: 'warning'
+        // });
+      } else if (files.length === 0) {
+        commit('HAVE_ACCOUNT')
+      } else {
+        commit('GET_ACCOUNTLIST', files)
+        store.set('accountList', files)
+        return files;
+      }
+    } catch (err) {
+      throw new Error(err)
+    }
+  },
+  async getAccountListWithoutLoading ({ commit }, that) {
+    try {
       let files = await intjs.getAccounts();
       if (files.err) { // 这里报的err应该是和catch里抓出来的不一样
         that.$message({

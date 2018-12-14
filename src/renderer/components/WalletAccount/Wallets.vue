@@ -20,6 +20,7 @@
             <div>Accounts {{index + 1}}</div>
             <div v-if="item.balance">{{ item.balance }}<span style="font-size: 14px;"> INT</span></div>
             <div v-else>0.00</div>
+
             <div class="account-address">{{item.address}}</div>
           </router-link>
         </div>
@@ -30,7 +31,6 @@
         <div class="transaction">
           <div>Transaction record</div>
           <div class="no-transaction" v-if="txList.length === 0">No transaction record.</div>
-
           <!--交易记录-->
           <div v-if="txList.length > 0">
             <!--每一条交易记录-->
@@ -155,6 +155,7 @@
   import Intjs from 'intjs';
   import moment from 'moment';
   import { mapState } from 'vuex';
+  import store from '../../utils/storage'
   // import { ipcRenderer } from 'electron';
   //
   // let mode = ipcRenderer.sendSync('mode', '');
@@ -166,16 +167,15 @@
     name: 'wallets',
     data() {
       return {
+        txArr: [],
         accountList: [],
-        fileName: [],
         balanceList: [],
-        searchTx: '',
+        // firstOpen: true,
         visible: false,
         showPassword1: false,
         showPassword2: false,
         carefulVisible: false,
         transactionVisible: false,
-        card: [],
         firstPassword: '',
         secondPassword: '',
         passwordError: false,
@@ -212,20 +212,30 @@
     computed: mapState({
       isHaveAccount: state => state.Counter.isHaveAccount
     }),
-     async mounted() {
+    async mounted() {
       let result = await this.$store.dispatch('getAccountList', this)
-      this.accountList = result
-      this.getBalance()
-      this.getHashDetail()
-      // setTimeout(() => {
-      //   this.getAddress();
-      //   this.init();
-      // }, 4000)
-      setInterval( () => {
+        this.accountList = result
         this.getBalance()
-      }, 10000)
+        this.getHashDetail()
+        let h = store.getSession('firstOpen')
+        if (!h) {
+          this.isloading = false;
+          setTimeout(async () => {
+            this.init()
+          }, 5500)
+        }
+      this.$store.dispatch('switchFirstOpen')
+      setInterval( () => {
+          this.getBalance()
+        }, 10000)
     },
     methods: {
+      async init () {
+        let result = await this.$store.dispatch('getAccountListWithoutLoading', this)
+        this.accountList = result
+        this.getBalance()
+        this.getHashDetail()
+      },
       openTxDetail(transobj) {
         this.transactionVisible = true;
         this.transDetail.hash = transobj.tx.hash;
@@ -252,6 +262,7 @@
       },
 
       async getHashDetail () {
+        this.txList = [];
         for (let i in this.accountList) {
           let address = this.accountList[i];
           await this.getTransactionHash(address);
@@ -262,15 +273,19 @@
           for (let i in this.accountList) {
             let address = this.accountList[i];
             let result = await intjs.getBalance(address);
-            if (+result.balance > 10000 * Math.pow(10, 18)) {
-              result.balance = parseFloat(+result.balance / Math.pow(10, 18)).toExponential(5)
+            if (result.err) {
+              result.balance = 0
             } else {
-              result.balance = (+result.balance / Math.pow(10, 18)).toFixed(2)
+              if (+result.balance > 10000 * Math.pow(10, 18)) {
+                result.balance = parseFloat(+result.balance / Math.pow(10, 18)).toExponential(5)
+              } else {
+                result.balance = (+result.balance / Math.pow(10, 18)).toFixed(2)
+              }
             }
             balanceArray.push({address: address, balance: result.balance});
           }
         this.balanceList = balanceArray;
-        this.isloading = false;
+        // this.isloading = false;
       },
       // 弹出创建账户的弹框
       pop () {
