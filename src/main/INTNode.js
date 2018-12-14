@@ -198,17 +198,18 @@ export class INTNode extends EventEmitter {
     }
 
     getBinPath() {
+        let binPath = {};
         if (os.platform() === 'win32') {
             let userPath = this.getUserPath();
             let intcli = path.join(userPath, '../', 'npm\\node_modules\\int-cli\\src\\tool\\int-cli.js');
-            let binPath = {};
             binPath.node = 'C:\\Program Files\\nodejs\\node.exe';
             binPath.intcli = intcli;
+
             return binPath;
         } else if (os.platform() === 'darwin') {
-            let binPath = {};
             binPath.node = '/usr/local/bin/node';
             binPath.intcli = '/usr/local/bin/int-cli';
+
             return binPath;
         }
     }
