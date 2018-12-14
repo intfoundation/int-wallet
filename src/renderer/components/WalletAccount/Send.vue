@@ -248,6 +248,7 @@
         this.formLabelAlign.to = ''
         this.formLabelAlign.balance = ''
         this.formLabelAlign.amount = 0
+        this.checked = false
         this.password = ''
         let price = await this.$store.dispatch('getPrice', {that: this})
         if (price.err) {
