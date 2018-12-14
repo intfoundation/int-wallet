@@ -169,7 +169,7 @@
     },
     async mounted() {
       if (this.$route.query.address) {
-        this.formLabelAlign.to = this.$route.query.address
+        this.formLabelAlign.from = this.$route.query.address
       }
       let price = await this.$store.dispatch('getPrice')
       if (price.err) {

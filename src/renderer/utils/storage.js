@@ -1,6 +1,7 @@
 /* eslint-disable */
 
 const localStorage = window.localStorage
+const sessionStorage = window.sessionStorage
 
 let store = {
   set (key, value) {
@@ -28,6 +29,25 @@ let store = {
 
   clear () {
     localStorage.clear()
+  },
+
+  setSession (key, value) {
+    try {
+      let value2 = JSON.stringify(value)
+      sessionStorage.setItem(key, value2)
+    } catch (err) {
+      console.log(err)
+    }
+  },
+
+  getSession (key) {
+    try {
+      let value = sessionStorage.getItem(key)
+      return value
+    } catch (err) {
+      console.log(err)
+      return null
+    }
   }
 }
 
