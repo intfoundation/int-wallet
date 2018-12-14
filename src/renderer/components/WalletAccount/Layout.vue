@@ -97,7 +97,11 @@
         ],
         totalBalance: 0,
         fileName: [],
-        h: 0
+        h: 0,
+        formLabelAlign: {
+          balance: 0.00,
+          votes: 0.00
+        }
       };
     },
     mounted() {
@@ -134,6 +138,13 @@
           });
         }
       },
+
+      // async init2 () {
+      //   this.h = 0;
+      //   await this.$store.dispatch('selectFromAction', {that: this, isStake: true})
+      //   this.h += Number(result.balance);
+      //   this.totalBalance = this.h;
+      // },
 
       async getBlockHeight() {
         this.height = await intjs.getBlockNumber()

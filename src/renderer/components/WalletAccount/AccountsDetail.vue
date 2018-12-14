@@ -100,6 +100,10 @@
             </div>
             <div class="second-detail">
                 <div>
+                    <span>Type:</span>
+                    <span>{{ transDetail.method }}</span>
+                </div>
+                <div>
                     <span>Amount:</span>
                     <span>{{ transDetail.value }}</span>
                 </div>
@@ -146,7 +150,8 @@
             value: '',
             from: '',
             to: '',
-            cost: ''
+            cost: '',
+            method: ''
           },
         };
       },
@@ -194,13 +199,13 @@
               result.tx.value = +result.tx.value / Math.pow(10, 18);
               if (result.tx.value.toString().split('.')[1]) {
                 if (result.tx.value.toString().split('.')[1].length > 4) {
-                  result.tx.value = '-' + result.tx.value.toFixed(4);
+                  result.tx.value = result.tx.value.toFixed(4);
                 }
               } else {
                 if (result.tx.value === 0) {
                   result.tx.value = result.tx.value
                 } else {
-                  result.tx.value = '-' + result.tx.value.toString()
+                  result.tx.value = result.tx.value.toString()
                 }
               }
               this.txList.push(result);
@@ -253,6 +258,7 @@
           this.transDetail.from = transobj.tx.caller;
           this.transDetail.to = transobj.tx.input.to;
           this.transDetail.cost = +transobj.receipt.cost / Math.pow(10, 18);
+          this.transDetail.method = transobj.tx.method
         }
       }
     };

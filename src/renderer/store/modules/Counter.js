@@ -86,7 +86,11 @@ const actions = {
       for (let value of that.accountList) {
         if (value === that.formLabelAlign.from) {
           let result = await intjs.getBalance(value);
-          that.formLabelAlign.balance = +result.balance / Math.pow(10, 18)
+          if (result.err) {
+            that.$message.error('Error in getting account balance');
+          } else {
+            that.formLabelAlign.balance = +result.balance / Math.pow(10, 18)
+          }
           if (isStake) {
             let stake = await intjs.getStake(that.formLabelAlign.from);
             if (stake.err) {

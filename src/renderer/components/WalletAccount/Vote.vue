@@ -32,38 +32,40 @@
                                v-model="search"/>
                         <span style="margin-left: 20px;">Number of selected nodes: </span>
                             <span style="color: #3C31D7; font-size: 16px;">
-                                <span style="margin-left: 15px;" id="selected"></span>
+                                <span style="margin-left: 15px;" id="selected">{{multipleSelection.length}} / </span>
                                 <span>{{ candidates.length }}</span>
                             </span>
                     </div>
 
-                <!--<el-table-->
-                        <!--:data="candidates.filter(data => !search || data.address.toLowerCase().indexOf(search.toLowerCase()) > -1 )"-->
-                        <!--tooltip-effect="dark"-->
-                        <!--style="width: 100%"-->
-                        <!--@click="aaa">-->
-                    <!--<el-table-column-->
-                            <!--type="selection"-->
-                            <!--width="55">-->
-                    <!--</el-table-column>-->
-                    <!--<el-table-column-->
-                            <!--label="Address"-->
-                            <!--width="500">-->
-                        <!--<template slot-scope="scope">{{ scope.row.address }}</template>-->
-                    <!--</el-table-column>-->
-                    <!--<el-table-column-->
-                            <!--prop="votes"-->
-                            <!--label="Votes"-->
-                            <!--show-overflow-tooltip>-->
-                    <!--</el-table-column>-->
-                <!--</el-table>-->
                 <div id="table">
-                    <div v-for="item in candidates" style="margin-top: 20px" :key="index">
-                        <!--<input type="checkbox" @click="jnjn" :value="checkValue" ref="input" id="input">-->
-                        <el-checkbox v-model="index"></el-checkbox>
-                        <span style="margin-left: 50px;display: inline-block;width: 500px">{{item.address}}</span>
-                        <span>{{item.votes}}</span>
-                    </div>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Candidates</th>
+                            <th>Votes</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="(item, index) in filterData" :key="index">
+                            <td>
+                                <input type="checkbox" :value="item.address" v-model="multipleSelection">
+                            </td>
+                            <td>{{item.address}}</td>
+                            <td>{{item.votes}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <!--<div>-->
+                        <!--<input type="checkbox" style="display: none">-->
+                        <!--<span class="nodes">Candidates</span>-->
+                        <!--<span>Votes</span>-->
+                    <!--</div>-->
+                    <!--<div v-for="(item, index) in filterData" :key="index" class="candidate-row">-->
+                        <!--<input type="checkbox" :value="item.address" v-model="multipleSelection">-->
+                        <!--<span style="margin-left: 50px;display: inline-block;width: 500px">{{item.address}}</span>-->
+                        <!--<span>{{item.votes}}</span>-->
+                    <!--</div>-->
                 </div>
                 <el-row style="margin-top: 40px;">
                     <el-col  class="fee">
@@ -160,7 +162,6 @@
     name: 'vote',
     data() {
       return {
-        // checkValue: false,
         search: '',
         accountList:[],
         checkedFrom: '',
@@ -189,16 +190,18 @@
       txfee () {
         let x = (this.formLabelAlign.fee * 200000) / Math.pow(10, 18);
         return x;
+      },
+      filterData () {
+        return this.candidates.filter(data => !this.search || data.address.toLowerCase().indexOf(this.search.toLowerCase()) > -1)
       }
     },
-
     created () {
       this.getAddress();
       sendActiveIndex(this, 4);
       this.getAllCandidates();
     },
     async mounted () {
-      document.getElementById('selected').innerHTML = 0 + ' ' + '/'
+      // document.getElementById('selected').innerHTML = 0 + ' ' + '/'
       let price = await this.$store.dispatch('getPrice')
       if (price.err) {
         this.formLabelAlign.fee = 200000000000;
@@ -207,34 +210,6 @@
       }
     },
     methods: {
-      // jnjn () {
-      //   this.checkValue = !this.checkValue;
-      //   var checkboxs = this.$refs['input'];
-      //   console.log('--checkbox---', checkboxs)
-      //   var num=0;
-      //   for(var i=0;i<this.candidates.length;i++){
-      //     if(checkboxs[i].getAttribute('value')){
-      //       console.log('111')
-      //       num++;
-      //     }
-      //   }
-      //   alert(num);
-
-
-
-
-
-
-        // let count = 0
-        // this.checkValue = !this.checkValue
-        // for (let i in this.candidates) {
-        //   let ischecked = this.$refs['input'][i].getAttribute('value')
-        //   console.log('--ischecked---', ischecked)
-        //   if (!ischecked) {
-        //     count++;
-        //   }
-        // }
-      // },
       getAddress () {
         let storage = store.get('accountList')
         storage = JSON.parse(storage)
@@ -301,6 +276,7 @@
         this.formLabelAlign.votes = ''
         this.formLabelAlign.balance = ''
         this.password = ''
+        this.multipleSelection = []
         let price = await this.$store.dispatch('getPrice', {that: this})
         if (price.err) {
           this.formLabelAlign.fee = 200000000000;
@@ -308,15 +284,6 @@
           this.formLabelAlign.fee = price
         }
       },
-      // handleSelectionChange(val) {
-      //   document.getElementById('selected').innerHTML = val.length + ' ' + '/'
-      //   if (val.length !== 0) {
-      //     val.forEach((value) => {
-      //       console.log('1111')
-      //       this.multipleSelection.push(value.address);
-      //     });
-      //   }
-      // }
     }
   };
 </script>
@@ -329,9 +296,6 @@
             width: 18px;
             height: 18px;
             background-image: url("../../assets/images/vote.png");
-            & > span {
-
-            }
         }
         .want-to-send {
             margin-top: 20px!important;
@@ -376,6 +340,34 @@
                 vertical-align: -3px;
             }
         }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr {
+            height: 40px;
+            width: 100%;
+        }
+        tbody tr td {
+            text-align: center;
+        }
+        /*#table {*/
+            /*.candidate-row {*/
+                /*border-bottom: 1px solid #ebeef5;*/
+                /*margin-top: 20px;*/
+                /*padding-bottom: 10px;*/
+                /*.nodes {*/
+                    /*margin-left: 50px;*/
+                    /*display: inline-block;*/
+                    /*width: 500px*/
+                /*}*/
+            /*}*/
+        /*}*/
         .candidates {
             margin-bottom: 10px;
         }
@@ -403,4 +395,5 @@
             }
         }
     }
+
 </style>
