@@ -12,7 +12,6 @@ const { spawn, execFile} = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-// const intcli = require('int-cli').run;
 
 import { logger } from './logger';
 
