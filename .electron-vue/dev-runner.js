@@ -149,8 +149,8 @@ function greeting () {
   const cols = process.stdout.columns
   let text = ''
 
-  if (cols > 104) text = 'electron-vue'
-  else if (cols > 76) text = 'electron-|vue'
+  if (cols > 104) text = 'int-wallet'
+  else if (cols > 76) text = 'int-|wallet'
   else text = false
 
   if (text) {
@@ -159,7 +159,7 @@ function greeting () {
       font: 'simple3d',
       space: false
     })
-  } else console.log(chalk.yellow.bold('\n  electron-vue'))
+  } else console.log(chalk.yellow.bold('\n  int-wallet'))
   console.log(chalk.blue('  getting ready...') + '\n')
 }
 

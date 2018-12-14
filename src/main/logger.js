@@ -14,6 +14,9 @@ import * as path from 'path';
 require('winston-daily-rotate-file');
 
 const userPath = app.getPath('userData');
+// const homePath = app.getPath('home');
+
+// console.log(homePath);
 
 const myLogFormatter = function (options) {
     const timestamp = options.timestamp();

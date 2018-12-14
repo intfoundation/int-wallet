@@ -8,10 +8,11 @@
 /* eslint-disable */
 import { app, dialog, ipcMain } from 'electron';
 const EventEmitter = require('events').EventEmitter;
-const { spawn} = require('child_process');
+const { spawn, execFile} = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+// const intcli = require('int-cli').run;
 
 import { logger } from './logger';
 
@@ -39,6 +40,7 @@ export class INTNode extends EventEmitter {
         this._network = null;
         this._node = null;
         this._isOwnNode = null;
+        this._startCMD = null;
     }
 
     get network() {
@@ -52,8 +54,12 @@ export class INTNode extends EventEmitter {
     init() {
         this._network = DEFAULT_NETWORK;
 
+        this._startCMD = this.getBinPath();
+        logger.info(`INT Node init, cmd ${JSON.stringify(this._startCMD)}`);
+
         this.getUserData();
         this.start(this._network);
+
     }
 
     restart(network) {
@@ -131,8 +137,8 @@ export class INTNode extends EventEmitter {
         this.state = STATES.STARTING;
 
         try {
-            this._startProcess(this._network);
             logger.info(`Start process with network ${this._network}`);
+            this._startProcess(this._network);
         } catch(err) {
             logger.error(`Start process error ${err}`);
         }
@@ -140,6 +146,8 @@ export class INTNode extends EventEmitter {
 
     _startProcess(network) {
         let args = [];
+
+        args.push(this._startCMD.intcli);
 
         if (network === 'main') {
             args.push('--main');
@@ -149,7 +157,12 @@ export class INTNode extends EventEmitter {
             args.push('--test');
         }
 
-        const proc = spawn('int-cli', args);
+        // logger.info(`Start process environment ${JSON.stringify(process.env)}`);
+
+        logger.info(`Process will be started, spawn cmd ${JSON.stringify(this._startCMD)}`);
+        logger.info(`Process will be started, spawn args ${JSON.stringify(args)}`);
+
+        const proc = spawn(this._startCMD.node, args);
 
         this._node = proc;
         this.state = STATES.STARTED;
@@ -184,15 +197,21 @@ export class INTNode extends EventEmitter {
 
     }
 
-    // getBinPath() {
-    //     if (os.platform() === 'win32') {
-    //         return '/usr/local/bin/int-cli';
-    //     }
-    //
-    //     if (os.platform() === 'darwin') {
-    //         return '/usr/local/bin/int-cli';
-    //     }
-    // }
+    getBinPath() {
+        if (os.platform() === 'win32') {
+            let userPath = this.getUserPath();
+            let intcli = path.join(userPath, '../', 'npm\\node_modules\\int-cli\\src\\tool\\int-cli.js');
+            let binPath = {};
+            binPath.node = 'C:\\Program Files\\nodejs\\node.exe';
+            binPath.intcli = intcli;
+            return binPath;
+        } else if (os.platform() === 'darwin') {
+            let binPath = {};
+            binPath.node = '/usr/local/bin/node';
+            binPath.intcli = '/usr/local/bin/int-cli';
+            return binPath;
+        }
+    }
 
     getUserData() {
         let userPath = app.getPath('userData');
