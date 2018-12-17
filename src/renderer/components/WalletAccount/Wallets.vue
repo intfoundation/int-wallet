@@ -104,7 +104,7 @@
             </div>
             <div class="notice-item" v-if="passwordError">
               <i class="notice icon-common"></i>
-              <span>Password entry error</span>
+              <span>password doesn't match</span>
             </div>
             <span slot="footer" class="dialog-footer">
               <el-row>

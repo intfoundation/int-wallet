@@ -226,12 +226,16 @@
           } else if (voteResult.length !== 0) {
             for(let i in voteResult) {
               voteResult[i].vote = +(voteResult[i].vote.toString()) / Math.pow(10, 18)
+              voteResult[i].vote = parseInt(voteResult[i].vote)
               this.candidates.push({
                 address: voteResult[i].address,
                 votes: voteResult[i].vote
               })
             }
           }
+        this.candidates.sort((a, b) => {
+          return b.votes - a.votes
+        })
       },
 
       selectFrom () {

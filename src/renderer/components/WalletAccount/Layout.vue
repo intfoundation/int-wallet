@@ -20,6 +20,7 @@
                       <!--<span>A Minite since last block</span>-->
                   <!--</span>-->
               </div>
+              <span class="balance" style="margin-left: 20px">Votes: {{totalVotes}}</span>
               <span class="balance">Balance: {{ (totalBalance / Math.pow(10, 18)).toFixed(2) }} INT</span>
           </div>
         </el-header>
@@ -97,6 +98,8 @@
         ],
         totalBalance: 0,
         fileName: [],
+        totalVotes: 0,
+        g: 0,
         h: 0,
         formLabelAlign: {
           balance: 0.00,
@@ -122,6 +125,7 @@
       },
       async init () {
         this.h = 0;
+        this.g = 0;
         let files = await intjs.getAccounts();
         if (files.err) {
         } else {
@@ -129,22 +133,22 @@
           this.fileName.forEach(async (value) => {
             let address = value;
             let result = await intjs.getBalance(address);
+            let data = await intjs.getStake(address);
             if (!result.balance) {
               this.totalBalance = 0;
             } else {
               this.h += Number(result.balance);
               this.totalBalance = this.h;
             }
+            if (data.err) {
+              this.totalVotes = 0
+            } else {
+              this.g += +data.stake
+              this.totalVotes = parseInt(this.g / Math.pow(10, 18))
+            }
           });
         }
       },
-
-      // async init2 () {
-      //   this.h = 0;
-      //   await this.$store.dispatch('selectFromAction', {that: this, isStake: true})
-      //   this.h += Number(result.balance);
-      //   this.totalBalance = this.h;
-      // },
 
       async getBlockHeight() {
         this.height = await intjs.getBlockNumber()
