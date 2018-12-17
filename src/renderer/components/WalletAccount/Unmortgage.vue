@@ -58,7 +58,7 @@
                         <span class="title">TOTAL</span>
                         <p style="font-size: 16px;">
                             <span>Votes: </span>
-                            <span class="total-value">{{formLabelAlign.votes}}</span>
+                            <span class="total-value">{{formLabelAlign.amount}}</span>
                         </p>
                         <p style="font-size: 16px;">
                             <span>TxFee: </span>
@@ -158,9 +158,10 @@
       txfee () {
         let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
         if (this.checked) {
-          this.formLabelAlign.amount = this.formLabelAlign.votes;
+          this.formLabelAlign.amount = +this.formLabelAlign.votes;
         } else {
-          this.formLabelAlign.amount = this.formLabelAlign.amount;
+          this.formLabelAlign.amount = +this.formLabelAlign.amount;
+          // debugger
         }
         return x;
       }
@@ -197,8 +198,10 @@
       sendTransaction() {
         if (this.formLabelAlign.from === '') {
           this.$message.error('Please choose Account address.');
-        } else if (Number(this.formLabelAlign.amount) === 0) {
-          this.$message.error('The number of votes should not be 0.');
+        } else if(typeof this.formLabelAlign.amount !== 'number') {
+          this.$message.error('The input of amount should be number.');
+        }else if (Number(this.formLabelAlign.amount) <= 0) {
+          this.$message.error('The number of votes should be greater than 0.');
         } else if (+this.formLabelAlign.fee < 200*Math.pow(10,9)) {
           this.$message.error('Txfee is too slow.');
         } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {

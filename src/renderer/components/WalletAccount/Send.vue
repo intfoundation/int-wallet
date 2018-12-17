@@ -64,7 +64,7 @@
                 <el-row>
                     <el-col style="margin-top: 40px;">
                         <span class="title" style="font-size: 16px;">TOTAL</span>
-                        <p><span class="total-value">{{checked ? formLabelAlign.balance : ((+formLabelAlign.amount + +txfee))}}</span> INT</p>
+                        <p><span class="total-value">{{ totalINT }}</span> INT</p>
                     </el-col>
                 </el-row>
                 <el-button @click="sendTransaction" class="send-btn"><span>SEND</span></el-button>
@@ -185,11 +185,16 @@
         if (this.formLabelAlign.fee > 20) {
           let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
           if (this.checked) {
-            this.formLabelAlign.amount = this.formLabelAlign.balance - x;
+            this.formLabelAlign.amount = +this.formLabelAlign.balance - x;
           } else {
-            this.formLabelAlign.amount = this.formLabelAlign.amount;
+            this.formLabelAlign.amount = +this.formLabelAlign.amount;
           }
           return x;
+        }
+      },
+      totalINT () {
+        if (+this.formLabelAlign.amount >= 0) {
+          return this.checked ? this.formLabelAlign.balance : (+this.formLabelAlign.amount + +this.txfee)
         }
       }
     },
@@ -215,8 +220,10 @@
           this.$message.error('Please choose From address.');
         } else if (this.formLabelAlign.to === '') {
           this.$message.error('Please choose To address.');
-        } else if (Number(this.formLabelAlign.amount) === 0) {
-          this.$message.error('The number of amount should not be 0.');
+        } else if(typeof this.formLabelAlign.amount !== 'number') {
+          this.$message.error('The input of amount should be number.');
+        }else if (Number(this.formLabelAlign.amount) <= 0) {
+          this.$message.error('The number of amount should greater than 0.');
         } else if (+this.formLabelAlign.fee < 200*Math.pow(10,9)) {
           this.$message.error('Txfee is too slow.');
         } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {

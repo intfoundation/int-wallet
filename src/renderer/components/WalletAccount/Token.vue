@@ -90,9 +90,6 @@
         },
       };
     },
-    components: {
-
-    },
     methods: {
       /* eslint-disable */
       /**
