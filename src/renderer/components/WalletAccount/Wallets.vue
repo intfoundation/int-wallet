@@ -155,7 +155,7 @@
                 <!--<div class="el-upload__tip" slot="tip">Move INT wallet file here to import</div>-->
             <!--</el-upload>-->
             <div class="upload">
-                <label for="fileUpload" class="label-file" v-show="!hasKeystore">Drop INT wallet file here</label>
+                <label for="fileUpload" class="label-file" v-show="!hasKeystore">Click to import  INT wallet file</label>
                 <input type="file" id="fileUpload" name="file" v-show="false" @change="fileUpload">
 
 
@@ -323,6 +323,11 @@
             setInterval(() => {
                 this.getBalance()
             }, 10000)
+
+            document.addEventListener('drop', (event) => {
+                console.log('dropped');
+                event.preventDefault();
+            });
         },
         methods: {
             async init() {
@@ -481,8 +486,6 @@
                             message: 'Parse keystore error, please select correct keystore file.'
                         });
                     }
-
-
                 }
             },
 
@@ -858,10 +861,11 @@
         margin: 0 auto;
         .label-file {
             display: inline-block;
-            width: 350px;
-            height: 180px;
-            line-height: 180px;
+            width: 250px;
+            height: 60px;
+            line-height: 60px;
             border: 2px dashed #2BA4FD;
+            border-radius: 5px;
             color: #2BA4FD;
         }
     }
