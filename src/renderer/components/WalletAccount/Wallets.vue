@@ -193,7 +193,7 @@
             <span slot="footer" class="dialog-footer">
               <el-row>
                 <el-col :span="12"><el-button @click="close" class="btn1">Cancel</el-button></el-col>
-                <el-col :span="12"><el-button @click="addAccount" class="btn2"
+                <el-col :span="12"><el-button @click="importAccount" class="btn2"
                                               :disabled="passwordError">Confirm</el-button></el-col>
               </el-row>
             </span>
@@ -342,8 +342,12 @@
                 this.transDetail.method = transobj.tx.method
             },
             some() {
+                this.visibleA = false;
+                this.visibleB = false;
                 this.firstPassword = '';
                 this.secondPassword = '';
+                this.hasKeystore = false;
+
             },
             switchEye1() {
                 this.showPassword1 = !this.showPassword1;
@@ -353,8 +357,10 @@
             },
             close() {
                 this.visibleA = false;
+                this.visibleB = false;
                 this.firstPassword = '';
                 this.secondPassword = '';
+                this.hasKeystore = false;
             },
 
             async getHashDetail() {
@@ -417,7 +423,7 @@
             },
             async carefulConfirm() {
                 this.carefulVisible = false;
-                this.visible = false
+                this.visibleA = false;
                 await this.createWallet(this.firstPassword);
                 let result = await this.$store.dispatch('getAccountList', this);
                 this.accountList = result
@@ -426,23 +432,38 @@
             /**
              * 生成 keystore
              * */
-            async createWallet(password) {
-                let result = await intjs.newAccount(password);
-                if (result.err) {
-                    this.$message({
-                        type: 'error',
-                        message: 'Account creation failed'
-                    });
+            async createWallet(password, privateKey) {
+                let result = await intjs.newAccount(password, privateKey);
+
+                if (privateKey) {
+                    if (result.err) {
+                        this.$message({
+                            type: 'error',
+                            message: 'Import account failed'
+                        });
+                    } else {
+                        this.$message({
+                            type: 'success',
+                            message: ' Import account success，address： ' + result,
+                        });
+                    }
                 } else {
-                    this.$message({
-                        type: 'success',
-                        message: ' Account creation success，address： ' + result,
-                    });
+                    if (result.err) {
+                        this.$message({
+                            type: 'error',
+                            message: 'Account creation failed'
+                        });
+                    } else {
+                        this.$message({
+                            type: 'success',
+                            message: ' Account creation success，address： ' + result,
+                        });
+                    }
                 }
             },
 
             /**
-             * 导入 keystore
+             * 上传 keystore
              * */
             fileUpload() {
                 let that = this;
@@ -450,7 +471,7 @@
                 let reader = new FileReader();
                 reader.readAsText(this.file);
                 reader.onload = function() {
-                    // console.log(this.result);
+                    console.log(this.result);
                     try {
                         that.keystore = JSON.parse(this.result);
                         that.hasKeystore = true;
@@ -469,6 +490,43 @@
              * 导入 keystore
              * */
             async importAccount() {
+                let reg = /[\S]{9,}/;
+                if (!this.firstPassword || !this.secondPassword) {
+                    this.$message({
+                        type: 'error',
+                        message: 'Please input password'
+                    });
+                    return;
+                }
+                if (this.firstPassword != this.secondPassword) {
+                    this.passwordError = true;
+                    return;
+                }
+                if (!reg.test(this.firstPassword)) {
+                    this.$message({
+                        type: 'error',
+                        message: 'password should not contain space.'
+                    });
+                    return;
+                }
+
+                try {
+                    let kr = intjs.decrypt(this.keystore, this.firstPassword);
+
+                    let pk = kr.privateKey;
+
+                    await this.createWallet(this.firstPassword, pk);
+                    let result = await this.$store.dispatch('getAccountList', this);
+                    this.accountList = result;
+                    this.visibleB = false;
+
+                }catch(e) {
+                    this.$message({
+                        type: 'error',
+                        message: `${e}`
+                    });
+                    this.visibleB = false;
+                }
 
             },
 
