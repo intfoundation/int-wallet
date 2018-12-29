@@ -108,16 +108,13 @@
       };
     },
     mounted() {
-      this.getBlockHeight()
-      this.init()
-      // setTimeout(() => {
-      //   this.getBlockHeight()
-      //   this.init()
-      // }, 4000)
+      setTimeout(() => {
+          this.getBlockHeight()
+          this.init()
+      }, 10000)
       setInterval( () => {
         this.getBlockHeight()
-        this.init()
-      }, 10000)
+      }, 30000)
     },
     methods: {
       seeActiveIndex (data) {

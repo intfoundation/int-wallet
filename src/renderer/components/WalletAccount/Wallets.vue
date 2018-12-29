@@ -245,10 +245,6 @@
     import moment from 'moment';
     import {mapState} from 'vuex';
     import store from '../../utils/storage'
-    // import { ipcRenderer } from 'electron';
-    //
-    // let mode = ipcRenderer.sendSync('mode', '');
-    // console.log('----mode----', mode);
 
     const intjs = new Intjs('localhost', 8555);
 
@@ -311,23 +307,17 @@
             let result = await this.$store.dispatch('getAccountList', this)
             this.accountList = result
             this.getBalance()
-            this.getHashDetail()
             let h = store.getSession('firstOpen')
             if (!h) {
                 this.isloading = false;
                 setTimeout(async () => {
                     this.init()
-                }, 5500)
+                }, 15000)
             }
             this.$store.dispatch('switchFirstOpen')
-            setInterval(() => {
-                this.getBalance()
-            }, 10000)
-
-            document.addEventListener('drop', (event) => {
-                console.log('dropped');
-                event.preventDefault();
-            });
+            // setTimeout(() => {
+            //     this.getBalance()
+            // }, 60000)
         },
         methods: {
             async init() {
@@ -476,7 +466,6 @@
                 let reader = new FileReader();
                 reader.readAsText(this.file);
                 reader.onload = function() {
-                    console.log(this.result);
                     try {
                         that.keystore = JSON.parse(this.result);
                         that.hasKeystore = true;
