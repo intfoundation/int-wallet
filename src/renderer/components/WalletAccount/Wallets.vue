@@ -313,11 +313,12 @@
                 setTimeout(async () => {
                     this.init()
                 }, 15000)
+            } else {
+                setTimeout(() => {
+                    this.getBalance()
+                }, 30000)
             }
             this.$store.dispatch('switchFirstOpen')
-            // setTimeout(() => {
-            //     this.getBalance()
-            // }, 60000)
         },
         methods: {
             async init() {
