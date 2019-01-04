@@ -158,10 +158,9 @@
       txfee () {
         let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
         if (this.checked) {
-          this.formLabelAlign.amount = +this.formLabelAlign.votes;
+          this.formLabelAlign.amount = this.formLabelAlign.votes;
         } else {
-          this.formLabelAlign.amount = +this.formLabelAlign.amount;
-          // debugger
+          this.formLabelAlign.amount = this.formLabelAlign.amount;
         }
         return x;
       }
@@ -198,8 +197,8 @@
       sendTransaction() {
         if (this.formLabelAlign.from === '') {
           this.$message.error('Please choose Account address.');
-        } else if(typeof this.formLabelAlign.amount !== 'number') {
-          this.$message.error('The input of amount should be number.');
+        } else if (!Number(this.formLabelAlign.amount)) {
+          this.$message.error('Amount is not valid');
         }else if (Number(this.formLabelAlign.amount) <= 0) {
           this.$message.error('The number of votes should be greater than 0.');
         } else if (+this.formLabelAlign.fee < 200*Math.pow(10,9)) {

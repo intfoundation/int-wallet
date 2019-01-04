@@ -159,7 +159,7 @@
           from: '',
           to: '',
           amount: 0,
-          balance: '',
+          balance: 0.00,
           fee: 20,
         },
       };
@@ -187,7 +187,7 @@
           if (this.checked) {
             this.formLabelAlign.amount = +this.formLabelAlign.balance - x;
           } else {
-            this.formLabelAlign.amount = +this.formLabelAlign.amount;
+            this.formLabelAlign.amount = this.formLabelAlign.amount;
           }
           return x;
         }
@@ -220,8 +220,8 @@
           this.$message.error('Please choose From address.');
         } else if (this.formLabelAlign.to === '') {
           this.$message.error('Please choose To address.');
-        } else if(typeof this.formLabelAlign.amount !== 'number') {
-          this.$message.error('The input of amount should be number.');
+        } else if(!Number(this.formLabelAlign.amount)) {
+          this.$message.error('Amount is not valid.');
         }else if (Number(this.formLabelAlign.amount) <= 0) {
           this.$message.error('The number of amount should greater than 0.');
         } else if (+this.formLabelAlign.fee < 200*Math.pow(10,9)) {

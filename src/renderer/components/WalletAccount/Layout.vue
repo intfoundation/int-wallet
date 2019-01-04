@@ -112,7 +112,7 @@
       setTimeout(() => {
           this.getBlockHeight()
           this.init()
-      }, 10000)
+      }, 5500)
       setInterval( () => {
         this.getBlockHeight()
       }, 30000)

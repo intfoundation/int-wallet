@@ -307,16 +307,16 @@
             let result = await this.$store.dispatch('getAccountList', this)
             this.accountList = result
             this.getBalance()
+            this.getHashDetail()
             let h = store.getSession('firstOpen')
+            console.log('---h---', h)
             if (!h) {
-                this.isloading = false;
-                setTimeout(async () => {
-                    this.init()
-                }, 15000)
-            } else {
-                setTimeout(() => {
-                    this.getBalance()
-                }, 30000)
+              // 这里只有打开钱包才会走一次，所以15秒不合适
+              console.log('111')
+              this.isloading = false;
+              setTimeout(async () => {
+                this.init()
+              }, 5500)
             }
             this.$store.dispatch('switchFirstOpen')
         },
@@ -343,7 +343,6 @@
                 this.firstPassword = '';
                 this.secondPassword = '';
                 this.hasKeystore = false;
-
             },
             switchEye1() {
                 this.showPassword1 = !this.showPassword1;
@@ -396,7 +395,7 @@
              * 创建帐户
              * */
             addAccount() {
-                let reg = /[\S]{9,}/;
+                let reg = /(^\S*)[\S]{9,}(\S*$)/;
                 if (!this.firstPassword || !this.secondPassword) {
                     this.$message({
                         type: 'error',
@@ -423,6 +422,7 @@
                 await this.createWallet(this.firstPassword);
                 let result = await this.$store.dispatch('getAccountList', this);
                 this.accountList = result
+                await this.getBalance()
             },
 
             /**
@@ -505,14 +505,12 @@
 
                 try {
                     let kr = intjs.decrypt(this.keystore, this.firstPassword);
-
                     let pk = kr.privateKey;
-
                     await this.createWallet(this.firstPassword, pk);
                     let result = await this.$store.dispatch('getAccountList', this);
                     this.accountList = result;
+                    await this.getBalance()
                     this.visibleB = false;
-
                 }catch(e) {
                     this.$message({
                         type: 'error',
