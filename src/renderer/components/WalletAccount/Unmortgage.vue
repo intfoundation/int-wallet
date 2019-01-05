@@ -121,11 +121,11 @@
               </el-row>
             </span>
         </el-dialog>
-
     </div>
 </template>
 
 <script>
+  import { BigNumber } from 'bignumber.js';
   import { sendActiveIndex } from './common/index';
   import store from '../../utils/storage';
   /* eslint-disable */
@@ -220,7 +220,9 @@
       },
 
       async submitTransaction() {
-        let amount = (this.formLabelAlign.amount*Math.pow(10, 18)).toString()
+        let bigNAmount = new BigNumber(this.formLabelAlign.amount)
+        let s = new BigNumber(Math.pow(10, 18))
+        let amount = bigNAmount.times(s).toString()
         let params = {
           method: 'unmortgage',
           value: '0',
@@ -230,18 +232,20 @@
           password: this.password,
           from: this.formLabelAlign.from
         }
-        await this.$store.dispatch('sendTransaction', {that: this, params: params, type: 'unmortgage'})
-        this.formLabelAlign.from = ''
-        this.formLabelAlign.votes = ''
-        this.formLabelAlign.balance = ''
-        this.formLabelAlign.amount = 0
-        this.checked = false
-        this.password = ''
-        let price = await this.$store.dispatch('getPrice', {that: this})
-        if (price.err) {
-          this.formLabelAlign.fee = 200000000000;
-        } else {
-          this.formLabelAlign.fee = price
+        let status = await this.$store.dispatch('sendTransaction', {that: this, params: params, type: 'unmortgage'})
+        if (status) {
+          this.formLabelAlign.from = ''
+          this.formLabelAlign.votes = ''
+          this.formLabelAlign.balance = ''
+          this.formLabelAlign.amount = 0
+          this.checked = false
+          this.password = ''
+          let price = await this.$store.dispatch('getPrice', {that: this})
+          if (price.err) {
+            this.formLabelAlign.fee = 200000000000;
+          } else {
+            this.formLabelAlign.fee = price
+          }
         }
       }
     }

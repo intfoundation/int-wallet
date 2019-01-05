@@ -104,7 +104,7 @@ const actions = {
       });
     }
   },
-  sendTransaction({ commit }, data) {
+  async sendTransaction({ commit }, data) {
     let that = data.that
     let params = data.params
     let type = data.type
@@ -113,20 +113,28 @@ const actions = {
     } else if (that.password.length < 9) {
       that.$message.error('Password length must be greater than or equal to 9.');
     } else {
-      setImmediate(async() => {
         let result = await intjs.sendTransaction(params);
         console.log(`---${type}--result---`, result)
         if (result.err) {
-          that.centerDialogVisible = false;
-          that.$message.error(`${type} failed`);
+          console.log('9999')
+          if (result.err === 'KEYSTORE_ERROR') {
+            that.$message.error(`password error`)
+            console.log('00000')
+            return false
+            console.log('222')
+          } else {
+            that.$message.error(`${type} failed`);
+            that.centerDialogVisible = false;
+            return true
+          }
         } else {
           that.centerDialogVisible = false;
           that.$message({
             message: `${type} successfully，hash:${result.hash}`,
             type: 'success'
           });
+          return true
         }
-      });
     }
   }
 };

@@ -305,17 +305,19 @@
           password: this.password,
           from: this.formLabelAlign.from
         }
-        await this.$store.dispatch('sendTransaction', {that: this, params: params, type: 'vote'})
-        this.formLabelAlign.from = ''
-        this.formLabelAlign.votes = ''
-        this.formLabelAlign.balance = ''
-        this.password = ''
-        this.multipleSelection = []
-        let price = await this.$store.dispatch('getPrice', {that: this})
-        if (price.err) {
-          this.formLabelAlign.fee = 200000000000;
-        } else {
-          this.formLabelAlign.fee = price
+        let status = await this.$store.dispatch('sendTransaction', {that: this, params: params, type: 'vote'})
+        if (status) {
+          this.formLabelAlign.from = ''
+          this.formLabelAlign.votes = ''
+          this.formLabelAlign.balance = ''
+          this.password = ''
+          this.multipleSelection = []
+          let price = await this.$store.dispatch('getPrice', {that: this})
+          if (price.err) {
+            this.formLabelAlign.fee = 200000000000;
+          } else {
+            this.formLabelAlign.fee = price
+          }
         }
       },
     }
