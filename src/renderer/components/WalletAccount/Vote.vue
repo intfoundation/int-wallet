@@ -220,11 +220,14 @@
        */
       async getAllCandidates() {
         let voteResult = await intjs.getVote();
+        let candidateResult = await intjs.getCandidates()
         this.isloading = false;
+        let node = []
         if (voteResult.err) {
             this.$message.error('Error in obtaining node votes.');
           } else if (voteResult.length !== 0) {
             for(let i in voteResult) {
+              node.push(voteResult[i].address)
               voteResult[i].vote = +(voteResult[i].vote.toString()) / Math.pow(10, 18)
               voteResult[i].vote = parseInt(voteResult[i].vote)
               this.candidates.push({
@@ -233,9 +236,36 @@
               })
             }
           }
+        let candidates2 = this.selectDiffElement(candidateResult, node)
+        for (let i in candidates2) {
+          this.candidates.push({
+            address: candidates2[i],
+            votes: 0
+          })
+        }
+
         this.candidates.sort((a, b) => {
           return b.votes - a.votes
         })
+      },
+
+      selectDiffElement (array, array2) {
+        var arr3 = [];
+        for(var key in array) {
+          var stra = array[key];
+          var count = 0;
+          for(var j = 0; j < array2.length; j++) {
+            var strb = array2[j];
+            if(stra == strb) {
+              count++;
+            }
+          }
+          if(count === 0) {
+            //表示数组1的这个值没有重复的，放到arr3列表中
+            arr3.push(stra);
+          }
+        }
+        return arr3;
       },
 
       selectFrom () {

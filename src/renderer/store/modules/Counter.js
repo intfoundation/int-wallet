@@ -23,7 +23,6 @@ const actions = {
   },
   async getAccountList ({ commit }, that) {
     try {
-      console.log('--111---22')
       // that.isloading = true;
       let files = await intjs.getAccounts();
       if (files.err) { // 这里报的err应该是和catch里抓出来的不一样
