@@ -171,6 +171,12 @@
     async mounted() {
       if (this.$route.query.address) {
         this.formLabelAlign.from = this.$route.query.address
+        let result = await intjs.getBalance(this.formLabelAlign.from)
+        if (result.err) {
+          that.$message.error('Error in getting account balance');
+        } else {
+          this.formLabelAlign.balance = +result.balance / Math.pow(10, 18)
+        }
       }
       let price = await this.$store.dispatch('getPrice')
       if (price.err) {
@@ -220,12 +226,15 @@
       selectFrom () {
         this.$store.dispatch('selectFromAction', {that: this, isStake: false})
       },
-      sendTransaction() {
+      async sendTransaction() {
+        let status = await this.isValidAddress(this.formLabelAlign.to)
         if (this.formLabelAlign.from === '') {
           this.$message.error('Please choose From address.');
         } else if (this.formLabelAlign.to === '') {
           this.$message.error('Please choose To address.');
-        } else if(!Number(this.formLabelAlign.amount)) {
+        } else if (!status) {
+          this.$message.error('Invalid Address.');
+        }else if(!Number(this.formLabelAlign.amount)) {
           this.$message.error('Amount is not valid.');
         }else if (Number(this.formLabelAlign.amount) <= 0) {
           this.$message.error('The number of amount should greater than 0.');
@@ -242,6 +251,11 @@
       cancelTransaction() {
         this.centerDialogVisible = false;
         this.$message.error('Transaction cancel');
+      },
+
+       isValidAddress (address) {
+        let status = intjs.isValidAddress(address)
+        return status
       },
 
       async submitTransaction() {
