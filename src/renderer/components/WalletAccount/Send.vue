@@ -131,6 +131,7 @@
 
 <script>
   /* eslint-disable */
+  import { BigNumber } from 'bignumber.js';
   import store from '../../utils/storage'
   import Intjs from 'intjs';
   import { sendActiveIndex } from './common/index';
@@ -184,8 +185,10 @@
       txfee () {
         if (this.formLabelAlign.fee > 20) {
           let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
+          let bigNX = new BigNumber(x)
           if (this.checked) {
-            this.formLabelAlign.amount = +this.formLabelAlign.balance - x;
+            let bigNBalance = new BigNumber(this.formLabelAlign.balance)
+            this.formLabelAlign.amount = bigNBalance.minus(bigNX).toString()
           } else {
             this.formLabelAlign.amount = this.formLabelAlign.amount;
           }
@@ -207,7 +210,9 @@
       },
       sendEverything () {
         if (!this.checked) {
-          this.formLabelAlign.amount = this.formLabelAlign.balance - this.txfee;
+          let bigNBalance = new BigNumber(this.formLabelAlign.balance )
+          let bigNTxfee = new BigNumber(this.txfee)
+          this.formLabelAlign.amount = bigNBalance.minus(bigNTxfee).toString()
         } else {
           this.formLabelAlign.amount = 0;
         }

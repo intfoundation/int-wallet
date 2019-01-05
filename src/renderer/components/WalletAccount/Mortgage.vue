@@ -124,6 +124,7 @@
 
 <script>
   // import Intjs from 'intjs';
+  import { BigNumber } from 'bignumber.js';
   import { sendActiveIndex } from './common/index';
   import store from '../../utils/storage';
   // const intjs = new Intjs('localhost', 8555);
@@ -157,10 +158,15 @@
       txfee () {
         if(this.formLabelAlign.fee > 20) {
           let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
+          let bigNX = new BigNumber(x)
           if (this.checked) {
-            this.formLabelAlign.amount = this.formLabelAlign.balance - x;
+            let bigNBalance = new BigNumber(this.formLabelAlign.balance)
+            this.formLabelAlign.amount = bigNBalance.minus(bigNX).toString()
           } else {
-            this.formLabelAlign.amount = this.formLabelAlign.amount;
+            // console.log('---amount2----', new BigNumber(this.formLabelAlign.amount))
+            // this.formLabelAlign.amount = new BigNumber(this.formLabelAlign.amount).toString();
+            // console.log('---amount1----', this.formLabelAlign.amount)
+            this.formLabelAlign.amount = this.formLabelAlign.amount
           }
           return x;
         }
@@ -186,7 +192,10 @@
       },
       sendEverything () {
         if (!this.checked) {
-          this.formLabelAlign.amount = this.balanceValue - this.txfee;
+          let bigNBalanceValue = new BigNumber(this.balanceValue)
+          let bigNTxfee = new BigNumber(this.txfee)
+          this.formLabelAlign.amount = bigNBalanceValue.minus(bigNTxfee).toString()
+          // this.formLabelAlign.amount = this.balanceValue - this.txfee;
         } else {
           this.formLabelAlign.amount = 0;
         }
