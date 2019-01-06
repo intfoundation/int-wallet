@@ -227,18 +227,19 @@
         this.$store.dispatch('selectFromAction', {that: this, isStake: false})
       },
       async sendTransaction() {
-        let status = await this.isValidAddress(this.formLabelAlign.to)
         if (this.formLabelAlign.from === '') {
           this.$message.error('Please choose From address.');
         } else if (this.formLabelAlign.to === '') {
           this.$message.error('Please choose To address.');
-        } else if (!status) {
+        }
+        let status = await this.isValidAddress(this.formLabelAlign.to)
+        if (!status) {
           this.$message.error('Invalid Address.');
         }else if(!Number(this.formLabelAlign.amount)) {
           this.$message.error('Amount is not valid.');
         }else if (Number(this.formLabelAlign.amount) <= 0) {
           this.$message.error('The number of amount should greater than 0.');
-        } else if (this.formLabelAlign.amount.split('.')[1].length > 18) {
+        } else if (this.formLabelAlign.amount.split('.')[1] !== undefined && this.formLabelAlign.amount.split('.')[1].length > 18) {
           this.$message.error('More than 18 decimal places.');
         } else if (+this.formLabelAlign.fee < 200*Math.pow(10,9)) {
           this.$message.error('Txfee is too slow.');
