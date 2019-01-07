@@ -47,9 +47,10 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr v-for="(item, index) in filterData" :key="index">
+                        <tr v-for="(item, index) in filterData" :key="index" @click="switchChecked(index)">
                             <td>
-                                <input type="checkbox" :value="item.address" v-model="multipleSelection">
+                                <!--<input type="checkbox" :value="item.address" v-model="multipleSelection">-->
+                                <span :class="{'circle': multipleSelection.indexOf(item.address)<0,'checkedCircle':  multipleSelection.indexOf(item.address)>=0}"></span>
                             </td>
                             <td>{{item.address}}</td>
                             <td>{{item.votes}}</td>
@@ -165,7 +166,6 @@
         search: '',
         accountList:[],
         checkedFrom: '',
-        checked: false,
         isSelected: true,
         labelPosition: 'top',
         centerDialogVisible: false,
@@ -208,8 +208,17 @@
       } else {
         this.formLabelAlign.fee = price;
       }
+
     },
     methods: {
+      switchChecked (index) {
+       let idx = this.multipleSelection.indexOf(this.candidates[index].address)
+        if(idx>=0){
+          this.multipleSelection.splice(idx,1)
+        }else {
+          this.multipleSelection.push(this.candidates[index].address)
+        }
+      },
       getAddress () {
         let storage = store.get('accountList')
         storage = JSON.parse(storage)
@@ -279,6 +288,8 @@
           this.$message.error('Remaining votes is 0, please mortgage first.');
         } else if (this.multipleSelection.length === 0) {
           this.$message.error('Please choose at least 1 candidate node.');
+        } else if (this.multipleSelection.length > 20) {
+          this.$message.error('You can select up to 20 nodes.');
         } else if (+this.formLabelAlign.fee < 200*Math.pow(10,9)) {
           this.$message.error('Txfee is too slow.');
         } else if (+this.formLabelAlign.fee > 2000*Math.pow(10,9)) {
@@ -379,6 +390,20 @@
         table {
             border-collapse: collapse;
             width: 100%;
+            .circle {
+                width: 14px;
+                height: 14px;
+                border: 1px solid rgba(204, 204, 204, 1);
+                border-radius: 50%;
+                display: inline-block;
+            }
+            .checkedCircle {
+                background-image: url("../../assets/images/choose.png");
+                display: inline-block;
+                width: 14px;
+                height: 14px;
+                background-size: cover;
+            }
         }
 
         th, td {

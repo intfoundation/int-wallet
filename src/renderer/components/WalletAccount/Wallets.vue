@@ -523,7 +523,6 @@
 
             async getTransactionHash(address) {
                 let txInformation = await intjs.chainClient.getTransactionByAddress({address});
-                console.log('----txInformation----', txInformation)
                 if (txInformation.err === 0) {
                     let arr = txInformation.txs;
                     for (let i in arr) {
@@ -546,7 +545,6 @@
                         // 从晚到早时间排序
                         return new Date(b.block.timestamp) - new Date(a.block.timestamp);
                     })
-                  console.log('---txList---', this.txList)
                 } else {
                     return false;
                 }
