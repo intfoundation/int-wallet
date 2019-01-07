@@ -37,10 +37,10 @@
                     <span>Copy address</span>
                 </span>
 
-                <a @click="openQR">
+                <span @click="openQR">
                     <i class="show-qr icon-common"></i>
                     <span>Show QR-Code</span>
-                </a>
+                </span>
             </div>
 
             <!--交易记录-->

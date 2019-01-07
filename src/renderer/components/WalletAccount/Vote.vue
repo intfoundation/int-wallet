@@ -79,7 +79,7 @@
                     </el-col>
                     <el-col :span="11" style="float: right;">
                         <div class="declare1">This is the most amount of money that might be used to process this transaction. Your transaction will be mined</div>
-                        <div class="declare2">probably within 30 seconds.</div>
+                        <div class="declare2">probably within 10 seconds.</div>
                     </el-col>
                 </el-row>
 
@@ -131,7 +131,7 @@
 
                 <div class="stripe-item">
                     <span>Gas price</span>
-                    <span>{{formLabelAlign.fee}}</span>
+                    <span>{{formLabelAlign.fee / Math.pow(10, 18) + ' ' + 'INT'}}</span>
                 </div>
 
                 <div style="text-align: center">
@@ -206,7 +206,7 @@
       if (price.err) {
         this.formLabelAlign.fee = 200000000000;
       } else {
-        this.formLabelAlign.fee = price
+        this.formLabelAlign.fee = price;
       }
     },
     methods: {
