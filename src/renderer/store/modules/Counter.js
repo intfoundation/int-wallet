@@ -116,12 +116,9 @@ const actions = {
         let result = await intjs.sendTransaction(params);
         console.log(`---${type}--result---`, result)
         if (result.err) {
-          console.log('9999')
           if (result.err === 'KEYSTORE_ERROR') {
             that.$message.error(`password error`)
-            console.log('00000')
             return false
-            console.log('222')
           } else {
             that.$message.error(`${type} failed`);
             that.centerDialogVisible = false;

@@ -212,7 +212,7 @@
           this.$message.error('Amount is not valid');
         } else if (Number(this.formLabelAlign.amount) <= 0) {
           this.$message.error('The number of votes should be greater than 0.');
-        } else if (this.formLabelAlign.amount.split('.')[1].length > 18) {
+        } else if (this.formLabelAlign.amount.split('.')[1] !== undefined && this.formLabelAlign.amount.split('.')[1].length > 18) {
           this.$message.error('More than 18 decimal places.');
         } else if (+this.formLabelAlign.fee < 200*Math.pow(10,9)) {
           this.$message.error('Txfee is too slow.');
