@@ -40,7 +40,7 @@
                     <el-col  class="fee">
                         <span class="title">SELECT FEE</span>
                         <p><b>{{txfee}}</b> INT</p>
-                        <el-slider v-model="formLabelAlign.fee" :min="slideMin" :max="slideMax"></el-slider>
+                        <el-slider v-model="formLabelAlign.fee" :min="slideMin" :max="slideMax" :step="200 * Math.pow(10, 9)"></el-slider>
                         <div>
                             <span>CHEAPER</span>
                             <span style="float: right;">FASTER</span>
@@ -142,7 +142,7 @@
         centerDialogVisible: false,
         password: '',
         balanceValue: '',
-        slideMin: 0,
+        slideMin: 200 * Math.pow(10, 9),
         slideMax: 2000 * Math.pow(10, 9),
         isloading: false,
         formLabelAlign: {
