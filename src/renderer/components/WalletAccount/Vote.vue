@@ -47,7 +47,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr v-for="(item, index) in filterData" :key="index" @click="switchChecked(index)">
+                        <tr v-for="(item, index) in filterData" :key="index" @click="switchChecked(index)" style="cursor: pointer;">
                             <td>
                                 <!--<input type="checkbox" :value="item.address" v-model="multipleSelection">-->
                                 <span :class="{'circle': multipleSelection.indexOf(item.address)<0,'checkedCircle':  multipleSelection.indexOf(item.address)>=0}"></span>

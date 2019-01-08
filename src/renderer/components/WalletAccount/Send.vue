@@ -203,7 +203,10 @@
       },
       totalINT () {
         if (+this.formLabelAlign.amount >= 0) {
-          return this.checked ? this.formLabelAlign.balance : (+this.formLabelAlign.amount + +this.txfee)
+          var bigNAmount = new BigNumber(this.formLabelAlign.amount)
+          let bigNTxfee = new BigNumber(this.txfee)
+          let total = bigNAmount.plus(bigNTxfee).toString()
+          return this.checked ? this.formLabelAlign.balance : total
         }
       }
     },

@@ -163,9 +163,6 @@
             let bigNBalance = new BigNumber(this.formLabelAlign.balance)
             this.formLabelAlign.amount = bigNBalance.minus(bigNX).toString()
           } else {
-            // console.log('---amount2----', new BigNumber(this.formLabelAlign.amount))
-            // this.formLabelAlign.amount = new BigNumber(this.formLabelAlign.amount).toString();
-            // console.log('---amount1----', this.formLabelAlign.amount)
             this.formLabelAlign.amount = this.formLabelAlign.amount
           }
           return x;

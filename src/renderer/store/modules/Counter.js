@@ -92,7 +92,7 @@ const actions = {
             if (stake.err) {
               that.$message.error('Error in obtaining votes');
             } else {
-              that.formLabelAlign.votes = (stake.stake / Math.pow(10,18)).toFixed(2);
+              that.formLabelAlign.votes = stake.stake / Math.pow(10,18);
             }
           }
         }
