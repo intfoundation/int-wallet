@@ -259,7 +259,7 @@
         border-radius: 5px;
         background-color: #fff;
         .unmortgage-icon {
-            width: 18px;
+            width: 20px;
             height: 18px;
             background-image: url("../../assets/images/unmortgage.png");
         }
