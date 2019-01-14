@@ -178,11 +178,11 @@
           this.formLabelAlign.balance = +result.balance / Math.pow(10, 18)
         }
       }
-      let price = await this.$store.dispatch('getPrice')
+      let price = await this.$store.dispatch('getPrice', {that: this})
       if (price.err) {
         this.formLabelAlign.fee = 200000000000;
       } else {
-        this.formLabelAlign.fee = price
+        this.formLabelAlign.fee = Number(price);
       }
       sendActiveIndex(this, 1)
     },
@@ -289,7 +289,7 @@
           if (price.err) {
             this.formLabelAlign.fee = 200000000000;
           } else {
-            this.formLabelAlign.fee = price
+            this.formLabelAlign.fee = Number(price)
           }
         }
       },

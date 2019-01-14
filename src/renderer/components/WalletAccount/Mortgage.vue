@@ -174,11 +174,11 @@
       sendActiveIndex(this, 2);
     },
     async mounted () {
-      let price = await this.$store.dispatch('getPrice')
+      let price = await this.$store.dispatch('getPrice', {that: this})
       if (price.err) {
         this.formLabelAlign.fee = 200000000000;
       } else {
-        this.formLabelAlign.fee = price
+        this.formLabelAlign.fee = Number(price)
       }
     },
     methods: {
@@ -252,7 +252,7 @@
           if (price.err) {
             this.formLabelAlign.fee = 200000000000;
           } else {
-            this.formLabelAlign.fee = price
+            this.formLabelAlign.fee = Number(price)
           }
         }
       },

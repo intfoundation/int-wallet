@@ -217,6 +217,10 @@
                     <span>Amount:</span>
                     <span>{{ transDetail.value }}</span>
                 </div>
+                <div v-if="transDetail.votes">
+                    <span>Votes:</span>
+                    <span>{{ transDetail.votes}}</span>
+                </div>
                 <div>
                     <span>From:</span>
                     <span>{{ transDetail.from }}</span>
@@ -276,7 +280,8 @@
                     from: '',
                     to: '',
                     cost: '',
-                    method: ''
+                    method: '',
+                    votes: ''
                 },
                 keystoreLoaded: false,
                 file: Blob,
@@ -304,19 +309,19 @@
             isHaveAccount: state => state.Counter.isHaveAccount
         }),
         async mounted() {
-            let result = await this.$store.dispatch('getAccountList', this)
-            this.accountList = result
-            this.getBalance()
-            this.getHashDetail()
             let h = store.getSession('firstOpen')
-            console.log('---h---', h)
             if (!h) {
               // 这里只有打开钱包才会走一次，所以15秒不合适
-              console.log('111')
-              this.isloading = false;
+              this.isloading = true;
               setTimeout(async () => {
                 this.init()
-              }, 5500)
+                this.isloading = false;
+              }, 6000)
+            } else {
+              let result = await this.$store.dispatch('getAccountList', this)
+              this.accountList = result
+              this.getBalance()
+              this.getHashDetail()
             }
             this.$store.dispatch('switchFirstOpen')
         },
@@ -336,6 +341,9 @@
                 this.transDetail.to = transobj.tx.input.to;
                 this.transDetail.cost = +transobj.receipt.cost / Math.pow(10, 18);
                 this.transDetail.method = transobj.tx.method
+                if (transobj.tx.input) {
+                  this.transDetail.votes = transobj.tx.input.amount / Math.pow(10, 18)
+                }
             },
             some() {
                 this.visibleA = false;
