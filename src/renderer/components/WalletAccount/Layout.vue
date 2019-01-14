@@ -108,7 +108,8 @@
       };
     },
     mounted() {
-      this.getBlockHeight()
+      this.getBlockHeight();
+      this.init();
       setTimeout(() => {
           this.getBlockHeight()
           this.init()

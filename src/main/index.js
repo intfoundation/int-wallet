@@ -44,7 +44,7 @@ function createWindow() {
     mainWindow = null;
   });
 
-  // INTNODE.init();
+  INTNODE.init();
   // ipcMain.on('mode', (event, arg) => {
   //     event.returnValue = INTNODE.network;
   // });
@@ -105,11 +105,11 @@ let register = function () {
     });
 
     globalShortcut.register('Alt+CommandOrControl+1', () => {
-        // INTNODE.restart('main');
+        INTNODE.restart('main');
     });
 
     globalShortcut.register('Alt+CommandOrControl+2', () => {
-        // INTNODE.restart('test');
+        INTNODE.restart('test');
     });
 };
 
