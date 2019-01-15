@@ -100,7 +100,7 @@
 
                 <div class="stripe-item">
                     <span>Gas price</span>
-                    <span>{{formLabelAlign.fee / Math.pow(10, 18) + ' ' + 'INT'}}</span>
+                    <span>{{gasPrice}}</span>
                 </div>
 
                 <div style="text-align: center">
@@ -157,16 +157,19 @@
     computed: {
       txfee () {
         if(this.formLabelAlign.fee > 20) {
-          let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
-          let bigNX = new BigNumber(x)
+          let w = new BigNumber(this.formLabelAlign.fee).times(50000).dividedBy(Math.pow(10, 18)).toString()
+          let bigNX = w
           if (this.checked) {
             let bigNBalance = new BigNumber(this.formLabelAlign.balance)
             this.formLabelAlign.amount = bigNBalance.minus(bigNX).toString()
           } else {
             this.formLabelAlign.amount = this.formLabelAlign.amount
           }
-          return x;
+          return w;
         }
+      },
+      gasPrice () {
+        return new BigNumber(this.formLabelAlign.fee).dividedBy(Math.pow(10, 18)).toString() + ' ' + 'INT'
       }
     },
     created () {

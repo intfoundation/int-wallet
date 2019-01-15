@@ -217,7 +217,7 @@
                     <span>Amount:</span>
                     <span>{{ transDetail.value }}</span>
                 </div>
-                <div v-if="transDetail.votes">
+                <div v-if="transDetail.method === 'mortgage' || transDetail.method === 'unmortgage'">
                     <span>Votes:</span>
                     <span>{{ transDetail.votes}}</span>
                 </div>
@@ -244,7 +244,7 @@
 
 <script>
     /* eslint-disable */
-
+    import { BigNumber } from 'bignumber.js';
     import Intjs from 'intjs';
     import moment from 'moment';
     import {mapState} from 'vuex';
@@ -339,10 +339,12 @@
                 this.transDetail.value = transobj.tx.value;
                 this.transDetail.from = transobj.tx.caller;
                 this.transDetail.to = transobj.tx.input.to;
-                this.transDetail.cost = +transobj.receipt.cost / Math.pow(10, 18);
-                this.transDetail.method = transobj.tx.method
-                if (transobj.tx.input) {
-                  this.transDetail.votes = transobj.tx.input.amount / Math.pow(10, 18)
+                let cost = new BigNumber(transobj.receipt.cost).dividedBy(Math.pow(10, 18)).toString();
+                this.transDetail.cost = cost;
+                this.transDetail.method = transobj.tx.method;
+                if (transobj.tx.input.amount) {
+                  let votes = new BigNumber(transobj.tx.input.amount).dividedBy(Math.pow(10, 18)).toString();
+                  this.transDetail.votes = votes;
                 }
             },
             some() {
@@ -381,10 +383,12 @@
                     if (result.err) {
                         result.balance = 0
                     } else {
+                        let s = new BigNumber(result.balance)
                         if (+result.balance > 10000 * Math.pow(10, 18)) {
-                            result.balance = parseFloat(+result.balance / Math.pow(10, 18)).toExponential(5)
+                            let h = s.dividedBy(Math.pow(10, 18)).toExponential(5)
+                            result.balance = h
                         } else {
-                            result.balance = (+result.balance / Math.pow(10, 18)).toFixed(2)
+                            result.balance = s.dividedBy(Math.pow(10, 18)).toFixed(2)
                         }
                     }
                     balanceArray.push({address: address, balance: result.balance});
@@ -535,13 +539,14 @@
                     let arr = txInformation.txs;
                     for (let i in arr) {
                         let result = await intjs.getTransactionReceipt(arr[i].txhash);
-                        result.tx.value = +result.tx.value / Math.pow(10, 18);
+                        let s = new BigNumber(result.tx.value)
+                        result.tx.value = s.dividedBy(Math.pow(10, 18)).toString();
                         if (result.tx.value.toString().split('.')[1]) {
                             if (result.tx.value.toString().split('.')[1].length > 4) {
-                                result.tx.value = result.tx.value.toFixed(4);
+                                result.tx.value = new BigNumber(result.tx.value).toFixed(4).toString();
                             }
                         } else {
-                            if (result.tx.value === 0) {
+                            if (+result.tx.value === 0) {
                                 result.tx.value = result.tx.value
                             } else {
                                 result.tx.value = result.tx.value.toString()

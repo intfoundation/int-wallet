@@ -24,7 +24,7 @@
                     <el-input v-model="formLabelAlign.amount" :readonly="checked">{{formLabelAlign.amount}}</el-input>
                 </el-form-item>
                 <el-form-item label="BALANCE">
-                    <el-input class="balance" v-model="formLabelAlign.balance" readonly>{{(formLabelAlign.balance / Math.pow(10, 18)).toFixed(2)}}</el-input>
+                    <el-input class="balance" v-model="formLabelAlign.balance" readonly></el-input>
                 </el-form-item>
                 <template>
                     <!-- `checked` 为 true 或 false -->
@@ -103,7 +103,7 @@
 
                 <div class="stripe-item">
                     <span>Gas price</span>
-                    <span>{{formLabelAlign.fee / Math.pow(10, 18) + ' ' + 'INT'}}</span>
+                    <span>{{gasPrice}}</span>
                 </div>
 
                 <div style="text-align: center">
@@ -156,13 +156,16 @@
     },
     computed: {
       txfee () {
-        let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
+        let w = new BigNumber(this.formLabelAlign.fee).times(50000).dividedBy(Math.pow(10, 18)).toString()
         if (this.checked) {
           this.formLabelAlign.amount = this.formLabelAlign.votes;
         } else {
           this.formLabelAlign.amount = this.formLabelAlign.amount;
         }
-        return x;
+        return w;
+      },
+      gasPrice () {
+        return new BigNumber(this.formLabelAlign.fee).dividedBy(Math.pow(10, 18)).toString() + ' ' + 'INT'
       }
     },
     created () {

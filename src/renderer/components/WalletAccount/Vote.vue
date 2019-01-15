@@ -132,7 +132,7 @@
 
                 <div class="stripe-item">
                     <span>Gas price</span>
-                    <span>{{formLabelAlign.fee / Math.pow(10, 18) + ' ' + 'INT'}}</span>
+                    <span>{{gasPrice}}</span>
                 </div>
 
                 <div style="text-align: center">
@@ -154,6 +154,7 @@
 </template>
 
 <script>
+  import { BigNumber } from 'bignumber.js';
   import Intjs from 'intjs';
   import { sendActiveIndex } from './common/index';
   import store from '../../utils/storage';
@@ -188,11 +189,14 @@
     },
     computed: {
       txfee () {
-        let x = (this.formLabelAlign.fee * 200000) / Math.pow(10, 18);
-        return x;
+        let w = new BigNumber(this.formLabelAlign.fee).times(200000).dividedBy(Math.pow(10, 18)).toString()
+        return w;
       },
       filterData () {
         return this.candidates.filter(data => !this.search || data.address.toLowerCase().indexOf(this.search.toLowerCase()) > -1)
+      },
+      gasPrice () {
+        return new BigNumber(this.formLabelAlign.fee).dividedBy(Math.pow(10, 18)).toString() + ' ' + 'INT'
       }
     },
     created () {

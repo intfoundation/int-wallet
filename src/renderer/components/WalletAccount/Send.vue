@@ -107,7 +107,7 @@
 
                 <div class="stripe-item">
                     <span>Gas price</span>
-                    <span>{{formLabelAlign.fee / Math.pow(10, 18) + ' ' + 'INT'}}</span>
+                    <span>{{gasPrice}}</span>
                 </div>
 
                 <div style="text-align: center">
@@ -175,7 +175,8 @@
         if (result.err) {
           that.$message.error('Error in getting account balance');
         } else {
-          this.formLabelAlign.balance = +result.balance / Math.pow(10, 18)
+          new BigNumber(esult.balance).dividedBy(Math.pow(10, 18)).toString()
+          this.formLabelAlign.balance = new BigNumber(esult.balance).dividedBy(Math.pow(10, 18)).toString()
         }
       }
       let price = await this.$store.dispatch('getPrice', {that: this})
@@ -190,15 +191,15 @@
     computed: {
       txfee () {
         if (this.formLabelAlign.fee > 20) {
-          let x = (this.formLabelAlign.fee * 50000) / Math.pow(10, 18);
-          let bigNX = new BigNumber(x)
+          let w = new BigNumber(this.formLabelAlign.fee).times(50000).dividedBy(Math.pow(10, 18)).toString()
+          let bigNX = w;
           if (this.checked) {
             let bigNBalance = new BigNumber(this.formLabelAlign.balance)
             this.formLabelAlign.amount = bigNBalance.minus(bigNX).toString()
           } else {
             this.formLabelAlign.amount = this.formLabelAlign.amount;
           }
-          return x;
+          return w;
         }
       },
       totalINT () {
@@ -208,6 +209,9 @@
           let total = bigNAmount.plus(bigNTxfee).toString()
           return this.checked ? this.formLabelAlign.balance : total
         }
+      },
+      gasPrice () {
+        return new BigNumber(this.formLabelAlign.fee).dividedBy(Math.pow(10, 18)).toString() + ' ' + 'INT'
       }
     },
     methods: {
