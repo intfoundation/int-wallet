@@ -1,4 +1,5 @@
 /* eslint-disable */
+import { BigNumber } from 'bignumber.js';
 import store from '../../utils/storage'
 import Intjs from 'intjs';
 const intjs = new Intjs('localhost', 8555);
@@ -85,14 +86,14 @@ const actions = {
           if (result.err) {
             that.$message.error('Error in getting account balance');
           } else {
-            that.formLabelAlign.balance = +result.balance / Math.pow(10, 18)
+            that.formLabelAlign.balance = new BigNumber(result.balance).dividedBy(Math.pow(10, 18)).toString()
           }
           if (isStake) {
             let stake = await intjs.getStake(that.formLabelAlign.from);
             if (stake.err) {
               that.$message.error('Error in obtaining votes');
             } else {
-              that.formLabelAlign.votes = stake.stake / Math.pow(10,18);
+              that.formLabelAlign.votes = new BigNumber(stake.stake).dividedBy(Math.pow(10, 18)).toString()
             }
           }
         }
