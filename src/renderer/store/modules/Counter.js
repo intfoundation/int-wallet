@@ -116,7 +116,7 @@ const actions = {
         let result = await intjs.sendTransaction(params);
         console.log(`---${type}--result---`, result)
         if (result.err) {
-          if (result.err === 'KEYSTORE_ERROR') {
+          if (result.err === 10041) {
             that.$message.error(`password error`)
             return false
           } else {
