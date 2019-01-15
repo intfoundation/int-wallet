@@ -129,8 +129,8 @@
 
 <script>
   /* eslint-disable */
+  import { BigNumber } from 'bignumber.js';
   import Intjs from 'intjs';
-  import axios from 'axios';
   import QRCode from 'qrcode';
   import moment from 'moment';
   const intjs = new Intjs('localhost', 8555);
@@ -190,7 +190,9 @@
         },
         async getTransactionHash(address) {
           let result = await intjs.getBalance(address);
-          this.balance = +result.balance / Math.pow(10, 18);
+          let h = new BigNumber(result.balance);
+          let g = h.dividedBy(Math.pow(10, 18)).toString();
+          this.balance = g;
           let txInformation = await intjs.chainClient.getTransactionByAddress({address});
           if (txInformation.err === 0) {
             let arr = txInformation.txs;

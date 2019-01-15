@@ -229,13 +229,13 @@
       selectFrom () {
         this.$store.dispatch('selectFromAction', {that: this, isStake: false})
       },
-       sendTransaction() {
+      sendTransaction() {
         if (this.formLabelAlign.from === '') {
           this.$message.error('Please choose From address.');
         } else if (this.formLabelAlign.to === '') {
           this.$message.error('Please choose To address.');
         }
-        let status =  this.isValidAddress(this.formLabelAlign.to)
+        let status = this.isValidAddress(this.formLabelAlign.to)
         if (!status) {
           this.$message.error('Invalid Address.');
         }else if(!Number(this.formLabelAlign.amount)) {
