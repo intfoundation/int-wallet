@@ -175,8 +175,7 @@
         if (result.err) {
           that.$message.error('Error in getting account balance');
         } else {
-          new BigNumber(esult.balance).dividedBy(Math.pow(10, 18)).toString()
-          this.formLabelAlign.balance = new BigNumber(esult.balance).dividedBy(Math.pow(10, 18)).toString()
+          this.formLabelAlign.balance = new BigNumber(result.balance).dividedBy(Math.pow(10, 18)).toString()
         }
       }
       let price = await this.$store.dispatch('getPrice', {that: this})
