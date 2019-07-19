@@ -156,7 +156,6 @@ export class INTNode extends EventEmitter {
             args.push('--test');
         }
 
-        // logger.info(`Start process environment ${JSON.stringify(process.env)}`);
 
         logger.info(`Process will be started, spawn cmd ${JSON.stringify(this._startCMD)}`);
         logger.info(`Process will be started, spawn args ${JSON.stringify(args)}`);
